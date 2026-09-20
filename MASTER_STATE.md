@@ -17,9 +17,9 @@ This file plus the actual GitHub HEAD are the source of truth for project contin
 
 ## Current phase
 
-**PHASE 1 — clean vanilla mapping confirmed; controlled native-Legendary POC next**
+**PHASE 1B — POC-001 built; awaiting in-game native-Legendary validation**
 
-No gameplay patch has been shipped yet.
+A test-only `data2.pak` has been built. Global gacha, Legendary Core, and Ascension are **not implemented yet**.
 
 ## Frozen project goals
 
@@ -105,6 +105,32 @@ Standard inspected human weapon-set presets use `OverrideWeaponDropDurabilityPar
 
 `weaponenhancmentcosts.scr` exposes costs per rarity/type but not the complete stat-growth or persistence model. `crafting_effects.scr` exposes native damage/durability/swing-speed effects that may be reusable for Ascension. Per-item persistent Ascension encoding is still unresolved.
 
+## POC-001 — Native Legendary Opportunity Axe
+
+Documentation: `patches/poc/POC_001_NATIVE_LEGENDARY.md`.
+
+Built test artifact: `data2.pak` (kept out of the public repo).
+
+SHA-256:
+
+`b707f6918c83dc5962dc24695c63b94244f1f9d77eec2af9be37fed9ceaa5659`
+
+POC behavior:
+
+- modifies only `dlc_ft_WPN_1HS_AXE_03_opportunity_r1` into an Orange/Legendary test instance;
+- uses `Slashing_1h_Affixes_Legendary_ft` and `Weapons_Random_Legendary_ft`;
+- gives four crafting slots and T3 Slash dismantle result;
+- temporarily makes `Enemy_Lottery_Weapons` deterministic to that test item;
+- raises only ordinary Biter weapon-lottery weight from `0.05` to `15.0` in its two existing branches to make testing practical;
+- does not yet alter global rarity/color sets, humans, Virals, containers, Core, or Ascension.
+
+Static checks before packaging:
+
+- PAK ZIP integrity passed;
+- brace counts match vanilla for all three modified files;
+- original CRLF line endings preserved;
+- no UTF-8 BOM introduced.
+
 ## Technical invariants
 
 - Do not commit original `data*.pak`, extracted vanilla archives, save files, or other copyrighted game dumps.
@@ -128,11 +154,12 @@ Standard inspected human weapon-set presets use `OverrideWeaponDropDurabilityPar
 - `tools/collect_baseline.ps1` can locally enumerate relevant paths from `data*.pak` without committing game archives.
 - `.gitignore` blocks PAKs, saves, extracted baselines, and local baseline output.
 - `docs/BASELINE_1.71E_MAPPING.md` records confirmed clean-baseline semantics without redistributing vanilla files.
+- `patches/poc/POC_001_NATIVE_LEGENDARY.md` records POC-001 behavior and test plan.
 
 ## Unknowns to resolve
 
-1. Whether a newly added mod-defined item with stable custom item name/UID persists safely in the save after the PAK is removed.
-2. Whether the engine permits a lower-rarity FT weapon family to be cloned into a native Orange variant cleanly without additional hidden registration beyond the mapped inventory/versioning mechanisms.
+1. Whether the existing lower-rarity FT item can behave as a true Orange/Legendary instance with the mapped item-level overrides at runtime.
+2. Whether rarity/affixes/crafting-slot state persist on the item after save/reload and after POC removal, or are recomputed from vanilla definitions.
 3. Exact per-item save fields available for Ascension level.
 4. Whether Legendary Core is best as a genuinely new inventory item or a safe reuse/extension of an existing item/action category.
 5. Which destructible props actually own loot tables versus visual-only destruction.
@@ -140,7 +167,7 @@ Standard inspected human weapon-set presets use `OverrideWeaponDropDurabilityPar
 
 ## Failed hypotheses
 
-None yet. Do not mark recolor-only as failed until tested; current mapping merely shows it would not satisfy the project’s native-affix requirement.
+None yet.
 
 ## Frozen-green systems
 
@@ -148,14 +175,16 @@ None yet. A system becomes frozen-green only after validator + in-game tests pas
 
 ## next_safe_action
 
-**Build the smallest controlled native-Legendary POC.**
+**Run POC-001 in-game on the TEST SAVE.**
 
-Use one known lower-rarity FT melee family (initial candidate: `WPN_1HS_axe_03_opportunity`) and create one true Orange/Legendary test instance that preserves the same visual/weapon identity but uses:
+Required order:
 
-- `Color_Orange`;
-- class-appropriate `*_Affixes_Legendary_ft`;
-- `Weapons_Random_Legendary_ft`;
-- stable unique item name/UID;
-- a deterministic or near-deterministic test loot route isolated from global balance.
+1. Install the exact POC-001 `data2.pak` identified by the SHA-256 above.
+2. Confirm the game boots and the test save loads.
+3. Kill/loot ordinary Biters until `Opportunity Axe` drops.
+4. Record whether it is Orange/Legendary and whether Legendary affixes / four crafting slots are actually present.
+5. Save, quit, reload with POC installed and re-check the same item.
+6. If steps 1–5 are green, back up that modified test save and perform the controlled uninstall persistence test.
+7. Record the exact persistence result before changing any global gacha/drop system.
 
-Do not yet change global gacha/drop balance. First prove native Legendary identity, pickup/drop/stash/save/reload behavior, then perform the copied-save uninstall persistence test. Only after that proof is green should the generator/global loot work begin.
+Do **not** proceed to global 30% Legendary gacha, Core, or Ascension until POC-001 runtime identity and persistence behavior are known.
