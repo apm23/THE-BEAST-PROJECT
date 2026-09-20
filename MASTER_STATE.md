@@ -15,7 +15,7 @@ This file plus actual GitHub HEAD are authoritative for continuation. Reconcile 
 
 ## Current phase
 
-**PHASE 1D — POC-001 is green; POC-002 persistent-upgrade probe is active. POC-002E is the current test artifact.**
+**PHASE 1D — POC-001 is green; POC-002 persistent-upgrade probe is active. A manual native Venom/Poison install test is now the current runtime path.**
 
 Global gacha, Legendary Core, full Ascension, and Manual Save Anywhere are not implemented yet.
 
@@ -95,7 +95,7 @@ POC-002D forced the outer Biter resource path and removed the practical `Empty` 
 
 Conclusion: stop increasing weights. The loose-Shock-via-Biter strategy is rejected. This is a delivery-path failure, not evidence that native Shock mods or their crafting effects are invalid.
 
-### Current iteration: POC-002E — generated Camp Axe with native StartupMod
+### POC-002E — generated Camp Axe with native StartupMod
 
 Local-only `data2.pak` SHA-256:
 `76cac0e401c0ca21f7639b71f957680d6a19fb53cb8089c51531f1610d840191`
@@ -104,12 +104,40 @@ POC-002E avoids loose weapon-mod loot entirely:
 
 - reuses the already-proven POC-001 deterministic Camp Axe weapon-lottery path;
 - keeps the test Camp Axe native Legendary with Legendary affix groups and four test sockets while installed;
-- adds native `StartupMod("ShockMod_Random_FT_T4_TIP")` to the newly generated test Camp Axe;
-- uses a vanilla-supported weapon-generation mechanism rather than trying to materialize a CraftPart directly from corpse resources;
-- keeps the old Camp Axe untouched; the persistence target is a **new Camp Axe generated while POC-002E is installed**;
-- installer recognizes and safely replaces known POC-001 / POC-002 / 002B / 002C / 002D hashes.
+- adds native `StartupMod("ShockMod_Random_FT_T4_TIP")` to a newly generated test Camp Axe;
+- uses a vanilla-supported weapon-generation mechanism rather than trying to materialize a CraftPart directly from corpse resources.
 
-Expected test: obtain a new Legendary Camp Axe with Shock T4 already installed, record stats, save/reload with POC present, then uninstall and inspect whether Shock UI/state and its damage/durability effects remain.
+POC-002E remains a valid fallback, but it is no longer required for the current persistence test because the user already owns native Poison/Venom and Freeze mods and can install them manually into the exposed test sockets.
+
+### Current runtime probe — manual Venom/Poison install
+
+User provided before/after screenshots for the same Legendary Camp Axe while the four test sockets were exposed.
+
+**Before installing Venom/Poison:**
+
+- rarity: **Legendary One-Handed Axe**;
+- damage: **131 Slashing Damage / 131 Base Damage**;
+- affixes: `+33% Damage (Melee Weapon Throw)`, `+6% Damage (Infected)`, `-7.5% Stamina Cost (Melee Weapons)`;
+- durability: **160/160**;
+- repairs remaining: **7/7**;
+- Tip, Shaft, Grip, and Charm sockets visible and empty.
+
+**Immediately after installing the user's Poison mod into Tip Socket:**
+
+- visible installed mod/effect: **Venom — Applies TOXIC on critical hits**;
+- damage: **137 Slashing Damage / 137 Base Damage**;
+- durability: **185/185**;
+- repairs remaining: **7/7** unchanged;
+- Legendary rarity and the three rolled affixes unchanged;
+- Shaft, Grip, and Charm sockets remain empty.
+
+Observed immediate deltas from the installed Poison/Venom mod:
+
+- damage: **131 -> 137** (`+6`, approximately `+4.58%` displayed base damage);
+- durability: **160 -> 185** (`+25`, `+15.625%`);
+- repairs: unchanged at **7/7**.
+
+This is the clean baseline for the persistence test. The relevant question is now whether the installed Venom state and/or its `+6` damage and `+25` durability survive save/reload and then survive removal of the mod package that exposes Tip/Shaft/Grip.
 
 ## Manual Save Anywhere
 
@@ -145,15 +173,17 @@ Collector V2 failed before extraction due a PowerShell path parsing bug. Collect
 
 ## next_safe_action
 
-**Run POC-002E on the TEST SAVE.**
+**Complete the manual Venom persistence test on the TEST SAVE.**
 
-1. Close the game and install POC-002E; installer may replace known older POC builds directly.
-2. Keep the old Camp Axe; the test target is a **new** Camp Axe generated after POC-002E installation.
-3. Kill/loot ordinary Biters until the new Legendary Camp Axe drops using the same proven POC-001 weapon-lottery path.
-4. Open Modify on the new axe and confirm Shock T4 is already installed via StartupMod.
-5. Record weapon damage, durability, rarity/affixes, visible mod state, and sockets.
-6. Save, quit, reload with POC-002E installed and re-check the same axe.
-7. If reload is green, close the game, uninstall POC-002E, reopen vanilla, and inspect the same axe.
-8. Record separately whether Shock mod UI/state, damage bonus, durability bonus, rarity and affixes persist.
-
-Do not proceed to full Ascension/Core/global gacha until this persistence result is known.
+1. With the Poison/Venom mod already installed in the Camp Axe Tip Socket, save and exit normally.
+2. Relaunch with the current POC/mod package still installed and inspect the same axe.
+3. PASS for reload stage if Venom is still installed and the weapon still shows **137 damage, 185/185 durability, 7/7 repairs**, unchanged Legendary rarity, and unchanged rolled affixes.
+4. If reload stage is green, close the game and uninstall the current POC/mod package.
+5. Relaunch vanilla 1.71E and inspect the exact same axe.
+6. Record separately whether:
+   - Venom UI/state remains visible;
+   - damage remains `137` or falls back to `131`;
+   - durability remains `185/185` or falls back to `160/160`;
+   - Tip/Shaft/Grip socket structure disappears as expected from POC-001;
+   - Legendary rarity, rolled affixes, and repairs remain intact.
+7. Do not proceed to full Ascension/Core/global gacha until this uninstall persistence result is known.
