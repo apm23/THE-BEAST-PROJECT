@@ -15,7 +15,7 @@ This file plus the actual GitHub HEAD are the source of truth for project contin
 
 ## Current phase
 
-**PHASE 0 — repository/bootstrap + vanilla mapping**
+**PHASE 0B — bootstrap complete; clean vanilla mapping next**
 
 No gameplay patch has been shipped yet.
 
@@ -65,8 +65,16 @@ No gameplay patch has been shipped yet.
 
 ## Confirmed artifacts
 
-- Repository created and accessible: `apm23/THE-BEAST-PROJECT`
-- README bootstrap committed.
+- Repository created and accessible: `apm23/THE-BEAST-PROJECT`.
+- `README.md` defines baseline and authority order.
+- `PROJECT_CONTRACT.md` freezes non-negotiable behavior and continuation protocol.
+- `FEATURE_SPEC.md` records the agreed feature set and initial tuning envelope.
+- `TEST_MATRIX.md` defines proof-of-concept, statistical, integrity, and uninstall/persistence tests.
+- `config/balance.json` contains project-authored initial probabilities, Core costs, and Ascension targets.
+- `tools/validate.py` statically validates probability/config bounds.
+- `.github/workflows/validate.yml` is present for GitHub Actions validation; no workflow run has been observed yet.
+- `tools/collect_baseline.ps1` can locally enumerate relevant paths from `data*.pak` without committing game archives.
+- `.gitignore` blocks PAKs, saves, extracted baselines, and local baseline output.
 - Clean baseline screenshot shows `VER. 1.71E`.
 - Clean save archive supplied for local testing/reference; one save file exists inside.
 
@@ -91,7 +99,7 @@ None yet. A system becomes frozen-green only after validator + in-game tests pas
 
 **Map the clean 1.71E vanilla data before altering gameplay.**
 
-Acquire a directory/file listing or locally extracted copies of only the relevant vanilla text definitions for:
+Run `tools/collect_baseline.ps1` against the clean local game install to generate `local_baseline/relevant_file_list.txt` and `baseline_summary.txt`, then inspect only the relevant paths for:
 
 - weapon inventory definitions
 - rarity/quality definitions
@@ -100,4 +108,4 @@ Acquire a directory/file listing or locally extracted copies of only the relevan
 - blueprint/crafting/upgrade definitions
 - item persistence/saveable attributes
 
-Then document exact 1.71E paths in this file and add the smallest patch for one controlled proof-of-concept weapon/loot source before attempting the full system.
+After exact 1.71E paths are confirmed, document them here and add the smallest patch for one controlled proof-of-concept weapon/loot source before attempting the full system.
