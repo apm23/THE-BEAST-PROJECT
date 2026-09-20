@@ -118,3 +118,20 @@ The system intentionally makes good weapons easier to obtain but does not guaran
 ## 18. Balance is config-driven
 
 All tunable probabilities, Core costs, and Ascension target multipliers should live in project-authored configuration wherever practical so balance changes do not require rewriting patch logic.
+
+## 19. Manual Save Anywhere
+
+Add a user-triggered manual-save action bound to a configurable hotkey/toggle so the player can request a save regardless of world position and without needing to be inside a safe zone.
+
+Requirements:
+
+- position-independent: normal world position must not block the save merely because the player is outside a safe zone;
+- invoke the game's native save pipeline where possible instead of writing save files directly;
+- preserve existing autosave behavior;
+- configurable hotkey, with the exact default key chosen after input-mapping feasibility is confirmed;
+- provide visible/audio feedback when a manual save request succeeds if the engine exposes a safe notification path;
+- avoid forcing a write during engine-unsafe transient states such as active loading, respawn/death transition, or other states proven to make the native save pipeline unavailable. This is a corruption-prevention guard, not a safe-zone restriction;
+- test in ordinary exploration, combat-adjacent situations, interiors, and after inventory/weapon changes;
+- verify that the resulting save reloads normally and does not break quest/checkpoint state.
+
+Technical implementation is pending mapping of 1.71E input hooks and the native save-request API.
