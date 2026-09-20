@@ -2,6 +2,7 @@
 game_original/
 extracted_original/
 private_baseline/
+local_baseline/
 local_game/
 vanilla_dump/
 *.pak
