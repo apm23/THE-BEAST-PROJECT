@@ -15,7 +15,7 @@ This file plus actual GitHub HEAD are authoritative for continuation. Reconcile 
 
 ## Current phase
 
-**PHASE 1E — POC-001 is green; POC-002 native installed-mod persistence is now strongly positive. Functional Toxic proc after uninstall remains to be checked.**
+**PHASE 1F — POC-001 and POC-002 are green. Native per-item installed-mod state, stat bonuses, visuals, and functional Toxic proc all survived save/reload and POC uninstall on the tested Camp Axe path.**
 
 Global gacha, Legendary Core, full Ascension, and Manual Save Anywhere are not implemented yet.
 
@@ -71,7 +71,7 @@ Frozen conclusion: rarity/affixes/damage/durability/repair count can persist per
 
 ## POC-002 — Persistent native installed-mod probe
 
-Goal: determine whether a native installed weapon mod and its stat effects persist across save/reload and uninstall even when the socket itself only exists while the POC definition is installed.
+Goal: determine whether a native installed weapon mod and its stat/effect state persist across save/reload and uninstall even when the socket itself only exists while the POC definition is installed.
 
 ### Rejected delivery iterations
 
@@ -114,7 +114,7 @@ The exact same axe still showed:
 - visible **Venom** entry and Toxic description;
 - same Legendary rarity and same rolled affixes.
 
-**After uninstalling the POC and loading vanilla 1.71E:** STRONG PASS for persisted installed-mod stats/state.
+**After uninstalling the POC and loading vanilla 1.71E:** PASS.
 
 Observed after uninstall:
 
@@ -124,19 +124,24 @@ Observed after uninstall:
 - repairs still **7/7**;
 - original three rolled affixes still present;
 - Tip/Shaft/Grip socket UI disappeared exactly as expected from POC-001; only vanilla **Charm Socket** remains;
-- the Venom hardware/model is still visibly attached to the axe and the green poison visual effect is still visible on the weapon model;
-- the side-panel Venom row is no longer shown because the Tip Socket itself is no longer exposed by the vanilla weapon definition.
+- the Venom hardware/model remained visibly attached to the axe and the green poison visual remained visible;
+- the side-panel Venom row was no longer shown because the Tip Socket itself is no longer exposed by the vanilla weapon definition.
 
-### POC-002 conclusion
+**Functional combat check after uninstall:** PASS.
 
-This is the strongest persistence result so far:
+While still fully vanilla after uninstall, the same Camp Axe continued to trigger the Toxic/Venom combat effect on infected. The user directly compared the observed effect against another weapon that natively has Toxic and reported the effect behaved the same.
 
-1. A native weapon mod installed on a per-item basis can survive save/reload.
-2. Its stat changes can survive removal of the mod package that exposed the socket: **+6 damage and +25 durability remained after uninstall**.
-3. The installed mod's visual attachment/effect also remained visible after uninstall even though the definition-added Tip Socket disappeared from the UI.
-4. Therefore the installed-mod state is serialized separately enough from the live weapon socket definition to remain on the item/save.
-5. This is a promising foundation for persistent Ascension, especially if native invisible/startup mods or persistent crafting effects can be used as per-item stage carriers.
-6. Do **not** yet claim that the Toxic combat proc itself remains functional after uninstall; that still needs an in-combat verification.
+### POC-002 conclusion — FROZEN GREEN
+
+POC-002 is now fully green for the tested Venom-on-Camp-Axe path:
+
+1. A native weapon mod installed on a per-item basis survives save/reload.
+2. Its stat changes survive removal of the mod package that exposed the socket: **+6 damage and +25 durability remained after uninstall**.
+3. The installed mod's visual attachment/effect remains on the item after uninstall even though the definition-added Tip Socket disappears from the UI.
+4. The actual Toxic combat proc remains functional after uninstall.
+5. Therefore installed native mod/effect state is serialized independently enough from the live weapon socket definition to remain functional on the item/save.
+6. This is a strong technical foundation for persistent Ascension if L+1..L+5 can be encoded using native invisible/startup mods or equivalent persistent per-item crafting/effect carriers.
+7. Do not use definition-only extra sockets themselves as the Ascension state marker; those are still proven runtime-dependent.
 
 ## Manual Save Anywhere
 
@@ -164,7 +169,7 @@ Collector V2 failed before extraction due a PowerShell path parsing bug. Collect
 - **Definition-added extra sockets after uninstall:** confirmed NOT persistent.
 - **POC-002 native installed-mod stat persistence:** GREEN for tested Venom-on-Camp-Axe path (`137` damage and `185/185` durability persisted after uninstall).
 - **Installed Venom visual attachment after uninstall:** GREEN for tested path.
-- **Toxic proc functionality after uninstall:** NOT YET VERIFIED.
+- **Functional Toxic proc after uninstall:** GREEN for tested path.
 
 ## Failed hypotheses / rejected implementations
 
@@ -175,12 +180,11 @@ Collector V2 failed before extraction due a PowerShell path parsing bug. Collect
 
 ## next_safe_action
 
-**Verify functional Venom effect after uninstall, then pivot Ascension design around persistent native per-item effects.**
+**Pivot from persistence discovery to the smallest Ascension stage-carrier POC, while Manual Save Anywhere mapping may continue in parallel.**
 
-1. While still fully vanilla after uninstall, equip the same Camp Axe.
-2. Hit ordinary infected repeatedly until a critical hit occurs and verify whether the Toxic/Venom effect can still trigger in actual combat.
-3. Do not reinstall the POC before this check.
-4. If Toxic still functions, freeze POC-002 as fully green for installed-mod state + stats + functional effect persistence.
-5. Regardless of Toxic UI visibility, preserve the confirmed stat persistence result: `137` damage and `185/185` durability after uninstall.
-6. After the functional check, investigate the smallest native invisible/startup-mod or crafting-effect mechanism that can encode Ascension L+1..L+5 per item without requiring persistent definition-added sockets.
-7. Manual Save Anywhere mapping may continue in parallel, but do not claim it implemented until a native save trigger is confirmed.
+1. Keep POC-001 and POC-002 frozen green; do not perturb their proven paths.
+2. Investigate the smallest native invisible/startup-mod or crafting-effect carrier that can encode one controlled **Legendary -> L+1** upgrade on a single weapon instance without depending on a persistent visible socket.
+3. First L+1 POC should target only the already-tested Camp Axe path and should change damage/durability by a clearly measurable amount while preserving rarity, affixes, repairs, identity, and hit behavior.
+4. Save/reload and uninstall-test that L+1 carrier exactly as with POC-002.
+5. Only after one L+1 carrier survives should extend the same mechanism to L+2..L+5 and then wire Legendary Core costs/UI around it.
+6. Manual Save Anywhere mapping may continue in parallel, but do not claim it implemented until a native save trigger is confirmed.
