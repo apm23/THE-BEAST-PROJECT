@@ -1,0 +1,27 @@
+# Local game data / proprietary baselines
+game_original/
+extracted_original/
+private_baseline/
+local_game/
+vanilla_dump/
+*.pak
+*.sav
+
+# Local test artifacts
+backups/
+local_build/
+local_test/
+*.bak
+*.tmp
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
