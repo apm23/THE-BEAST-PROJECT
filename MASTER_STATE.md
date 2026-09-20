@@ -15,7 +15,7 @@ This file plus actual GitHub HEAD are authoritative for continuation. Reconcile 
 
 ## Current phase
 
-**PHASE 1D — POC-001 is green; POC-002 persistent-upgrade probe is active. POC-002D is the current test artifact.**
+**PHASE 1D — POC-001 is green; POC-002 persistent-upgrade probe is active. POC-002E is the current test artifact.**
 
 Global gacha, Legendary Core, full Ascension, and Manual Save Anywhere are not implemented yet.
 
@@ -51,8 +51,10 @@ See `docs/BASELINE_1.71E_MAPPING.md`.
 - Native Legendary generation uses class-specific Legendary affix groups plus `Weapons_Random_Legendary_ft`.
 - Lower-rarity weapons can hardcode Rare affix groups; Universal Legendary cannot be cosmetic-only.
 - Standard inspected human weapon presets use held-weapon `LootChance(1.0)`.
-- Vanilla `LootedObject("Biter")` has `LootAmount(2)` and a very large `Empty` path (`50.0` normal, `70.0` PermaWorld) before considering the other resource pools. `Biter_CommonResources` is only weight `20.0` normal / `23.0` PermaWorld. Therefore an item placed only inside `Biter_CommonResources` can still be impractical to obtain during a focused test even if its internal item weight is huge.
-- `ShockMod_PowerAttack_FT_T4` is a native Orange/T4 Tip mod with native damage/durability effects and is suitable as a persistence probe.
+- Vanilla `LootedObject("Biter")` has `LootAmount(2)` and a very large `Empty` path (`50.0` normal, `70.0` PermaWorld) before considering the other resource pools. `Biter_CommonResources` is only weight `20.0` normal / `23.0` PermaWorld.
+- `ShockMod_PowerAttack_FT_T4` and `ShockMod_Random_FT_T4_TIP` are native Orange/T4 weapon mods. Their definitions are `CategoryType_CraftPart` / `ItemType_CraftPart` with native damage/durability effects.
+- In the targeted vanilla loot mappings inspected for this project, direct `Item(...)` loot entries are used for many inventory categories, but no normal corpse-loot precedent for directly materializing `CategoryType_CraftPart` weapon mods was found. Treat direct loose-mod injection into Biter resource loot as unsupported until separately proven.
+- `StartupMod(...)` is a confirmed native generation mechanism: vanilla generated weapons use visible T4 mods such as `HeatMod_Random_FT_T4_TIP` and invisible built-in mods on special weapons.
 
 ## POC-001 — Native Legendary Opportunity/Camp Axe
 
@@ -69,7 +71,7 @@ Frozen conclusion: rarity/affixes/damage/durability/repair count can persist per
 
 ## POC-002 — Persistent per-item upgrade probe
 
-Goal: install a native Shock T4 modification on the existing Legendary Camp Axe and determine separately whether mod UI/socket, damage bonus, and durability bonus persist across save/reload and uninstall.
+Goal: determine separately whether a native installed weapon mod, its damage bonus, and its durability bonus persist across save/reload and uninstall.
 
 ### Rejected iteration: POC-002 initial
 
@@ -79,31 +81,35 @@ A custom Biter loot subroutine removed corpse `F` loot interaction. Rejected.
 
 Intended Shock injection landed in `Resin_FT` because the builder used an ambiguous global `Craft_Resin` anchor. User killed 100+ zombies without Shock. Rejected builder strategy.
 
-### Rejected as a test-delivery strategy: POC-002C
+### Rejected iteration: POC-002C
 
-- Shock was correctly injected inside existing `Biter_CommonResources`.
-- Vanilla Biter outer loot structure remained intact.
-- Runtime looting worked, but user reported **many `Nothing` results** and Shock remained impractical to obtain for the persistence test.
-- Cause is now understood: the outer Biter pool still strongly favors `Empty` and other branches. A huge Shock weight inside `Biter_CommonResources` does nothing on rolls where that sub-pool is not selected.
-- This is not evidence that Shock itself is invalid; it is a bad test-delivery strategy.
+Shock was correctly injected inside existing `Biter_CommonResources`, but vanilla outer Biter loot still strongly favored `Empty`; many `Nothing` results made it impractical for focused testing.
 
-### Current iteration: POC-002D — deterministic test delivery
+### Rejected iteration: POC-002D
+
+POC-002D forced the outer Biter resource path and removed the practical `Empty` problem. Runtime result:
+
+- user reported Biter loot was no longer empty;
+- despite this, **Shock T4 still never materialized**;
+- therefore the outer loot-object patch was active, but direct loose `CategoryType_CraftPart` delivery through this corpse resource set did not produce the mod item in runtime.
+
+Conclusion: stop increasing weights. The loose-Shock-via-Biter strategy is rejected. This is a delivery-path failure, not evidence that native Shock mods or their crafting effects are invalid.
+
+### Current iteration: POC-002E — generated Camp Axe with native StartupMod
 
 Local-only `data2.pak` SHA-256:
-`9dca23d8adf0155eb22d859f1f799f03fedaa61787d5e0f4d4624b3cc60b8020`
+`76cac0e401c0ca21f7639b71f957680d6a19fb53cb8089c51531f1610d840191`
 
-POC-002D is intentionally **not final balance**. It exists only to stop wasting test time:
+POC-002E avoids loose weapon-mod loot entirely:
 
-- starts from vanilla 1.71E Biter loot definitions;
-- preserves Biter `LootAmount(2)`;
-- keeps the existing Biter loot architecture, with no custom subroutine;
-- injects Shock T4 only inside the real `Biter_CommonResources` block;
-- gives Shock internal weight `1,000,000`;
-- changes the existing `Biter_CommonResources` calls in Biter/Biter_Permadeath test paths to weight `1,000,000` and `min_amount=1`;
-- retains the POC-002 Camp Axe socket/effect test changes;
-- installer safely recognizes and replaces known POC-002 / 002B / 002C hashes.
+- reuses the already-proven POC-001 deterministic Camp Axe weapon-lottery path;
+- keeps the test Camp Axe native Legendary with Legendary affix groups and four test sockets while installed;
+- adds native `StartupMod("ShockMod_Random_FT_T4_TIP")` to the newly generated test Camp Axe;
+- uses a vanilla-supported weapon-generation mechanism rather than trying to materialize a CraftPart directly from corpse resources;
+- keeps the old Camp Axe untouched; the persistence target is a **new Camp Axe generated while POC-002E is installed**;
+- installer recognizes and safely replaces known POC-001 / POC-002 / 002B / 002C / 002D hashes.
 
-Expected test behavior: one or a few ordinary Biters should be enough to obtain Shock T4. If not, stop killing zombies and inspect the exact runtime loot-object path instead of increasing weights again.
+Expected test: obtain a new Legendary Camp Axe with Shock T4 already installed, record stats, save/reload with POC present, then uninstall and inspect whether Shock UI/state and its damage/durability effects remain.
 
 ## Manual Save Anywhere
 
@@ -122,6 +128,7 @@ Collector V2 failed before extraction due a PowerShell path parsing bug. Collect
 - Attack speed remains safety-sensitive.
 - Scope loot-builder edits to exact named sub/object blocks; do not use ambiguous global first-match anchors.
 - Test-delivery builds may be deterministic; final game balance must return to the frozen RNG targets.
+- Do not keep tuning loot weights after a runtime result proves the targeted delivery mechanism itself is not materializing the intended item class.
 
 ## Frozen-green systems
 
@@ -133,19 +140,20 @@ Collector V2 failed before extraction due a PowerShell path parsing bug. Collect
 
 1. Custom POC-002 Biter loot subroutine: rejected after corpse loot interaction disappeared.
 2. POC-002B global first-match resource-anchor patching: rejected; wrong subroutine was modified.
-3. POC-002C inner-weight-only delivery: rejected for focused testing because outer vanilla Biter loot RNG still produced too many `Nothing` outcomes.
+3. POC-002C inner-weight-only delivery: rejected for focused testing because outer vanilla Biter RNG still produced too many `Nothing` outcomes.
+4. POC-002D direct loose Shock CraftPart through forced `Biter_CommonResources`: rejected after runtime showed non-empty loot but still no Shock item.
 
 ## next_safe_action
 
-**Run POC-002D on the TEST SAVE.**
+**Run POC-002E on the TEST SAVE.**
 
-1. Close game and install POC-002D; installer may replace POC-002/002B/002C directly when their known hash is present.
-2. Kill and loot one or a few ordinary Biters.
-3. If Shock T4 does not appear quickly, stop and inspect the runtime loot-object path; do not farm hundreds more.
-4. Before installing Shock, record Camp Axe damage/durability and Poison/Freeze state.
-5. Install Shock T4 into the Tip socket and record changed stats.
-6. Save, quit, reload with POC-002D installed and re-check.
-7. If reload is green, uninstall POC-002D and reload the same save.
-8. Record separately whether Shock UI/socket, damage bonus, and durability bonus persist.
+1. Close the game and install POC-002E; installer may replace known older POC builds directly.
+2. Keep the old Camp Axe; the test target is a **new** Camp Axe generated after POC-002E installation.
+3. Kill/loot ordinary Biters until the new Legendary Camp Axe drops using the same proven POC-001 weapon-lottery path.
+4. Open Modify on the new axe and confirm Shock T4 is already installed via StartupMod.
+5. Record weapon damage, durability, rarity/affixes, visible mod state, and sockets.
+6. Save, quit, reload with POC-002E installed and re-check the same axe.
+7. If reload is green, close the game, uninstall POC-002E, reopen vanilla, and inspect the same axe.
+8. Record separately whether Shock mod UI/state, damage bonus, durability bonus, rarity and affixes persist.
 
 Do not proceed to full Ascension/Core/global gacha until this persistence result is known.
