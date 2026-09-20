@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "target_game_version": "1.71E",
+  "rarity": {
+    "legendary_per_generated_weapon": 0.30
+  },
+  "weapon_drop_targets": {
+    "common_infected": {
+      "min": 0.20,
+      "max": 0.25
+    },
+    "human_held_weapon": {
+      "min": 0.60,
+      "max": 0.75
+    }
+  },
+  "legendary_core_drop_targets": {
+    "common_infected": {
+      "min": 0.08,
+      "max": 0.10
+    },
+    "viral": 0.10,
+    "human": 0.10,
+    "ordinary_container": {
+      "min": 0.08,
+      "max": 0.10
+    },
+    "special_infected": {
+      "min": 0.12,
+      "max": 0.15
+    },
+    "good_or_locked_chest": {
+      "min": 0.12,
+      "max": 0.15
+    },
+    "boss_or_chimera": {
+      "min": 0.20,
+      "max": 0.30
+    }
+  },
+  "legendary_core_costs": {
+    "rare_or_epic_to_legendary": 1,
+    "legendary_to_l1": 1,
+    "l1_to_l2": 2,
+    "l2_to_l3": 3,
+    "l3_to_l4": 5,
+    "l4_to_l5": 8
+  },
+  "ascension_cumulative_targets": {
+    "l1": {
+      "damage": 0.12,
+      "durability": 0.15,
+      "attack_speed_ceiling": 0.02
+    },
+    "l2": {
+      "damage": 0.25,
+      "durability": 0.32,
+      "attack_speed_ceiling": 0.04
+    },
+    "l3": {
+      "damage": 0.40,
+      "durability": 0.50,
+      "attack_speed_ceiling": 0.06
+    },
+    "l4": {
+      "damage": 0.60,
+      "durability": 0.72,
+      "attack_speed_ceiling": 0.08
+    },
+    "l5": {
+      "damage": 0.85,
+      "durability": 1.00,
+      "attack_speed_ceiling": 0.10
+    }
+  }
+}
