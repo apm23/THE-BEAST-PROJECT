@@ -15,7 +15,7 @@ This file plus actual GitHub HEAD are authoritative for continuation. Reconcile 
 
 ## Current phase
 
-**PHASE 1D — POC-001 is green; POC-002 persistent-upgrade probe is active. A manual native Venom/Poison install test is now the current runtime path.**
+**PHASE 1E — POC-001 is green; POC-002 native installed-mod persistence is now strongly positive. Functional Toxic proc after uninstall remains to be checked.**
 
 Global gacha, Legendary Core, full Ascension, and Manual Save Anywhere are not implemented yet.
 
@@ -51,10 +51,10 @@ See `docs/BASELINE_1.71E_MAPPING.md`.
 - Native Legendary generation uses class-specific Legendary affix groups plus `Weapons_Random_Legendary_ft`.
 - Lower-rarity weapons can hardcode Rare affix groups; Universal Legendary cannot be cosmetic-only.
 - Standard inspected human weapon presets use held-weapon `LootChance(1.0)`.
-- Vanilla `LootedObject("Biter")` has `LootAmount(2)` and a very large `Empty` path (`50.0` normal, `70.0` PermaWorld) before considering the other resource pools. `Biter_CommonResources` is only weight `20.0` normal / `23.0` PermaWorld.
-- `ShockMod_PowerAttack_FT_T4` and `ShockMod_Random_FT_T4_TIP` are native Orange/T4 weapon mods. Their definitions are `CategoryType_CraftPart` / `ItemType_CraftPart` with native damage/durability effects.
-- In the targeted vanilla loot mappings inspected for this project, direct `Item(...)` loot entries are used for many inventory categories, but no normal corpse-loot precedent for directly materializing `CategoryType_CraftPart` weapon mods was found. Treat direct loose-mod injection into Biter resource loot as unsupported until separately proven.
-- `StartupMod(...)` is a confirmed native generation mechanism: vanilla generated weapons use visible T4 mods such as `HeatMod_Random_FT_T4_TIP` and invisible built-in mods on special weapons.
+- Vanilla `LootedObject("Biter")` has `LootAmount(2)` and a very large `Empty` path (`50.0` normal, `70.0` PermaWorld) before considering other resource pools.
+- `ShockMod_PowerAttack_FT_T4` and `ShockMod_Random_FT_T4_TIP` are native Orange/T4 weapon mods.
+- Direct loose `CategoryType_CraftPart` delivery through ordinary Biter corpse-resource loot is not proven and is currently rejected as a test-delivery mechanism.
+- `StartupMod(...)` is a confirmed native generation mechanism used by vanilla generated weapons.
 
 ## POC-001 — Native Legendary Opportunity/Camp Axe
 
@@ -69,75 +69,74 @@ Confirmed runtime result:
 
 Frozen conclusion: rarity/affixes/damage/durability/repair count can persist per item strongly enough to survive mod removal; definition-only socket structure cannot be assumed persistent.
 
-## POC-002 — Persistent per-item upgrade probe
+## POC-002 — Persistent native installed-mod probe
 
-Goal: determine separately whether a native installed weapon mod, its damage bonus, and its durability bonus persist across save/reload and uninstall.
+Goal: determine whether a native installed weapon mod and its stat effects persist across save/reload and uninstall even when the socket itself only exists while the POC definition is installed.
 
-### Rejected iteration: POC-002 initial
+### Rejected delivery iterations
 
-A custom Biter loot subroutine removed corpse `F` loot interaction. Rejected.
+- Initial POC-002 custom Biter loot subroutine removed corpse `F` interaction. Rejected.
+- POC-002B patched the wrong resource subroutine because of an ambiguous global anchor. Rejected.
+- POC-002C correctly patched `Biter_CommonResources`, but outer vanilla Biter loot produced too many `Nothing` results for focused testing. Rejected as impractical.
+- POC-002D forced the outer resource path and removed `Nothing`, but Shock T4 still never materialized as a loose CraftPart. Direct loose-mod-through-Biter-resource delivery is rejected.
+- POC-002E uses `StartupMod("ShockMod_Random_FT_T4_TIP")` on a generated test axe and remains a valid fallback, but it was not needed for the successful persistence probe below.
 
-### Rejected iteration: POC-002B
+### Manual Venom/Poison persistence test — confirmed runtime evidence
 
-Intended Shock injection landed in `Resin_FT` because the builder used an ambiguous global `Craft_Resin` anchor. User killed 100+ zombies without Shock. Rejected builder strategy.
+The user owned a native Poison/Venom weapon mod and manually installed it into the exposed Tip Socket of the same Legendary Camp Axe.
 
-### Rejected iteration: POC-002C
-
-Shock was correctly injected inside existing `Biter_CommonResources`, but vanilla outer Biter loot still strongly favored `Empty`; many `Nothing` results made it impractical for focused testing.
-
-### Rejected iteration: POC-002D
-
-POC-002D forced the outer Biter resource path and removed the practical `Empty` problem. Runtime result:
-
-- user reported Biter loot was no longer empty;
-- despite this, **Shock T4 still never materialized**;
-- therefore the outer loot-object patch was active, but direct loose `CategoryType_CraftPart` delivery through this corpse resource set did not produce the mod item in runtime.
-
-Conclusion: stop increasing weights. The loose-Shock-via-Biter strategy is rejected. This is a delivery-path failure, not evidence that native Shock mods or their crafting effects are invalid.
-
-### POC-002E — generated Camp Axe with native StartupMod
-
-Local-only `data2.pak` SHA-256:
-`76cac0e401c0ca21f7639b71f957680d6a19fb53cb8089c51531f1610d840191`
-
-POC-002E avoids loose weapon-mod loot entirely:
-
-- reuses the already-proven POC-001 deterministic Camp Axe weapon-lottery path;
-- keeps the test Camp Axe native Legendary with Legendary affix groups and four test sockets while installed;
-- adds native `StartupMod("ShockMod_Random_FT_T4_TIP")` to a newly generated test Camp Axe;
-- uses a vanilla-supported weapon-generation mechanism rather than trying to materialize a CraftPart directly from corpse resources.
-
-POC-002E remains a valid fallback, but it is no longer required for the current persistence test because the user already owns native Poison/Venom and Freeze mods and can install them manually into the exposed test sockets.
-
-### Current runtime probe — manual Venom/Poison install
-
-User provided before/after screenshots for the same Legendary Camp Axe while the four test sockets were exposed.
-
-**Before installing Venom/Poison:**
+**Before installing Venom:**
 
 - rarity: **Legendary One-Handed Axe**;
 - damage: **131 Slashing Damage / 131 Base Damage**;
 - affixes: `+33% Damage (Melee Weapon Throw)`, `+6% Damage (Infected)`, `-7.5% Stamina Cost (Melee Weapons)`;
 - durability: **160/160**;
-- repairs remaining: **7/7**;
-- Tip, Shaft, Grip, and Charm sockets visible and empty.
+- repairs: **7/7**;
+- Tip, Shaft, Grip, Charm sockets visible and empty.
 
-**Immediately after installing the user's Poison mod into Tip Socket:**
+**Immediately after installing Venom into Tip Socket:**
 
 - visible installed mod/effect: **Venom — Applies TOXIC on critical hits**;
 - damage: **137 Slashing Damage / 137 Base Damage**;
 - durability: **185/185**;
-- repairs remaining: **7/7** unchanged;
-- Legendary rarity and the three rolled affixes unchanged;
-- Shaft, Grip, and Charm sockets remain empty.
+- repairs: **7/7**;
+- Legendary rarity and all three rolled affixes unchanged;
+- damage delta: `131 -> 137` (`+6`);
+- durability delta: `160 -> 185` (`+25`).
 
-Observed immediate deltas from the installed Poison/Venom mod:
+**Save -> quit -> reload with POC still installed:** PASS.
 
-- damage: **131 -> 137** (`+6`, approximately `+4.58%` displayed base damage);
-- durability: **160 -> 185** (`+25`, `+15.625%`);
-- repairs: unchanged at **7/7**.
+The exact same axe still showed:
 
-This is the clean baseline for the persistence test. The relevant question is now whether the installed Venom state and/or its `+6` damage and `+25` durability survive save/reload and then survive removal of the mod package that exposes Tip/Shaft/Grip.
+- **137 damage**;
+- **185/185 durability**;
+- **7/7 repairs**;
+- visible **Venom** entry and Toxic description;
+- same Legendary rarity and same rolled affixes.
+
+**After uninstalling the POC and loading vanilla 1.71E:** STRONG PASS for persisted installed-mod stats/state.
+
+Observed after uninstall:
+
+- rarity still **Legendary One-Handed Axe**;
+- damage still **137**;
+- durability still **185/185**;
+- repairs still **7/7**;
+- original three rolled affixes still present;
+- Tip/Shaft/Grip socket UI disappeared exactly as expected from POC-001; only vanilla **Charm Socket** remains;
+- the Venom hardware/model is still visibly attached to the axe and the green poison visual effect is still visible on the weapon model;
+- the side-panel Venom row is no longer shown because the Tip Socket itself is no longer exposed by the vanilla weapon definition.
+
+### POC-002 conclusion
+
+This is the strongest persistence result so far:
+
+1. A native weapon mod installed on a per-item basis can survive save/reload.
+2. Its stat changes can survive removal of the mod package that exposed the socket: **+6 damage and +25 durability remained after uninstall**.
+3. The installed mod's visual attachment/effect also remained visible after uninstall even though the definition-added Tip Socket disappeared from the UI.
+4. Therefore the installed-mod state is serialized separately enough from the live weapon socket definition to remain on the item/save.
+5. This is a promising foundation for persistent Ascension, especially if native invisible/startup mods or persistent crafting effects can be used as per-item stage carriers.
+6. Do **not** yet claim that the Toxic combat proc itself remains functional after uninstall; that still needs an in-combat verification.
 
 ## Manual Save Anywhere
 
@@ -163,6 +162,9 @@ Collector V2 failed before extraction due a PowerShell path parsing bug. Collect
 - **POC-001 native Legendary identity:** GREEN.
 - **Persistence of rarity/affixes/damage/durability/repair count after uninstall:** GREEN for tested Camp Axe path.
 - **Definition-added extra sockets after uninstall:** confirmed NOT persistent.
+- **POC-002 native installed-mod stat persistence:** GREEN for tested Venom-on-Camp-Axe path (`137` damage and `185/185` durability persisted after uninstall).
+- **Installed Venom visual attachment after uninstall:** GREEN for tested path.
+- **Toxic proc functionality after uninstall:** NOT YET VERIFIED.
 
 ## Failed hypotheses / rejected implementations
 
@@ -173,17 +175,12 @@ Collector V2 failed before extraction due a PowerShell path parsing bug. Collect
 
 ## next_safe_action
 
-**Complete the manual Venom persistence test on the TEST SAVE.**
+**Verify functional Venom effect after uninstall, then pivot Ascension design around persistent native per-item effects.**
 
-1. With the Poison/Venom mod already installed in the Camp Axe Tip Socket, save and exit normally.
-2. Relaunch with the current POC/mod package still installed and inspect the same axe.
-3. PASS for reload stage if Venom is still installed and the weapon still shows **137 damage, 185/185 durability, 7/7 repairs**, unchanged Legendary rarity, and unchanged rolled affixes.
-4. If reload stage is green, close the game and uninstall the current POC/mod package.
-5. Relaunch vanilla 1.71E and inspect the exact same axe.
-6. Record separately whether:
-   - Venom UI/state remains visible;
-   - damage remains `137` or falls back to `131`;
-   - durability remains `185/185` or falls back to `160/160`;
-   - Tip/Shaft/Grip socket structure disappears as expected from POC-001;
-   - Legendary rarity, rolled affixes, and repairs remain intact.
-7. Do not proceed to full Ascension/Core/global gacha until this uninstall persistence result is known.
+1. While still fully vanilla after uninstall, equip the same Camp Axe.
+2. Hit ordinary infected repeatedly until a critical hit occurs and verify whether the Toxic/Venom effect can still trigger in actual combat.
+3. Do not reinstall the POC before this check.
+4. If Toxic still functions, freeze POC-002 as fully green for installed-mod state + stats + functional effect persistence.
+5. Regardless of Toxic UI visibility, preserve the confirmed stat persistence result: `137` damage and `185/185` durability after uninstall.
+6. After the functional check, investigate the smallest native invisible/startup-mod or crafting-effect mechanism that can encode Ascension L+1..L+5 per item without requiring persistent definition-added sockets.
+7. Manual Save Anywhere mapping may continue in parallel, but do not claim it implemented until a native save trigger is confirmed.
