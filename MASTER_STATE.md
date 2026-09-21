@@ -15,7 +15,7 @@ This file plus actual GitHub HEAD are authoritative for continuation. Reconcile 
 
 ## Current phase
 
-**PHASE 1F — POC-001 and POC-002 are frozen green. Weapon POC-003 (Legendary -> L+1 persistent carrier) is built and awaiting runtime persistence validation. Manual Save Anywhere research is active in parallel and has pivoted away from DebugConf/ConsoleCommand toward direct native save-controller mapping.**
+**PHASE 1F — POC-001 and POC-002 are frozen green. Weapon POC-003 (Legendary -> L+1 persistent carrier) is built and awaiting runtime persistence validation. Manual Save Anywhere is officially PAUSED / CLOSED TEMPORARILY by user decision after the native F5 POC proved save-file writes but exact last-position restoration remained unresolved.**
 
 Global gacha, Legendary Core, and full Ascension are not implemented yet.
 
@@ -32,7 +32,7 @@ Global gacha, Legendary Core, and full Ascension are not implemented yet.
 9. Per-weapon progression, not a global definition-only buff where persistent item state is possible.
 10. Preserve weapon identity/model/class.
 11. Keep RNG/farming in the final mod.
-12. Manual Save Anywhere: hotkey-driven native save request from ordinary gameplay locations, blocked only during unsafe transient/loading/death states.
+12. Manual Save Anywhere remains a project idea but is **PAUSED** and must not consume further test cycles until explicitly reopened by the user.
 
 ## Initial balance targets
 
@@ -141,106 +141,35 @@ Interpretation gate:
 Safety/coexistence:
 
 - POC-003 uses `ph_ft\source\data2.pak` and must not run concurrently with another test that owns the same path.
-- The supplied installer stops on an unknown existing `data2.pak` instead of overwriting it, specifically protecting parallel Manual Save work/unrelated mods.
+- The supplied installer stops on an unknown existing `data2.pak` instead of overwriting it, specifically protecting unrelated mods/tests.
 - The uninstaller removes only the exact POC-003 hash.
 - No proprietary PAK, vanilla source, or save is committed to this repository.
 
-## Manual Save Anywhere research
+## Manual Save Anywhere research — PAUSED / CLOSED TEMPORARILY
 
-Feature remains required, but no working native manual-save trigger has been proven yet.
+User decision on 2026-09-22: **stop Manual Save Anywhere work for now. Do not continue collectors, native hooks, position-restoration experiments, or extra user test cycles unless the user explicitly reopens this feature.**
 
-### Collectors and native evidence
+### What was actually proven
 
-- Collector V2/V3 failed before extraction due PowerShell executable/path parsing.
-- Collector V4 removed the 7-Zip dependency and succeeded: **350 targeted files extracted, 0 failures**.
-- V4 confirmed `ConsoleCommand(s)` is documented by `DebugConf.def`; `SaveGame(...)` / `SaveGameCtrl(...)` are logging config, not save-now commands.
-- Collector V5 scanned engine/game binaries for filtered save-related strings without copying binaries.
-- V5 established that the save system in `gamedll_ph_x64_rwdi.dll` contains native classes/identifiers including:
-  - `SaveController`
-  - `SaveRequestController`
-  - `SaveRequestHistory`
-  - `Savegame::Session::ESaveRequestPriority`
-  - `Savegame::ESessionSaveability`
-  - `AcceptSaveRequests` / `RejectSaveRequests`
-  - `SG_AcceptSaveRequests` / `SG_RejectSaveRequests`
-  - `Savegame::Tools::ConsoleCommand::BlockSaves` / `UnblockSaves`
-  - `engine.Savegame.DebugTools.Command.BlockSaveController` / `UnblockSaveController`
-  - `game.Savegame.Tools.Debug.Save.ForcedAutosave`
-  - `game.Savegame.Tools.Debug.Save.SaveFromQuests`
-  - `game.Savegame.Tools.Debug.Save.SaveOnSessionExit`
-  - `game.Savegame.Tools.Debug.FullSave.PerformFullSave`
-  - `game.Savegame.Tools.Debug.FullSave.PerformFullSaveNoPreparation`
-  - `_ACTION_QUICK_SAVE`
-- Collector V6 searched physical files, archives, and 72 EXE/DLL binaries for DebugConf load evidence. It found:
-  - `PhysicalDebugConfFiles=0` in the clean game tree;
-  - archive entries `data0.pak: debugconf.def` and `debugconfdefault.scr`;
-  - binary strings `debugconf.scr`, `-debugconf=`, and `-debugconf =` in the retail binaries;
-  - actual game executable `ph_ft\work\bin\x64\DyingLightGame_TheBeast_x64_rwdi.exe`.
+- DebugConf/ConsoleCommand was tested through packed, loose, EXE-adjacent, and explicit `-debugconf=` routes; visible `HideHUD()` canaries never executed. This route is a frozen dead end for retail 1.71E.
+- Native binary mapping V7–V11 recovered real save-system structures and call paths in `gamedll_ph_x64_rwdi.dll`, including `SaveController`, `SaveRequestController`, their vtables, the native save dispatcher, quick-save selector behavior, and the game's own caller setup.
+- The runtime helper was refined through POC-J/J2/J3/J4:
+  - J2 fixed disappearing error output by keeping PowerShell in the same CMD;
+  - J3 fixed the reserved PowerShell `$PID` collision;
+  - J4 fixed process discovery by selecting `DyingLightGame_TheBeast_x64_rwdi.exe` instead of relying on window title.
+- POC-J4 successfully found and validated exactly one active `SaveController` object, backed up the test save, armed the controller on F5, and observed the real Steam save file change immediately afterward.
+- The successful F5 sequence showed native controller state transition from inactive to armed and then back to inactive after the engine processed it; the watched `save_ft_0.sav` changed in the same trigger window.
 
-### Manual-save / DebugConf POC history
+### What remains unresolved
 
-**POC-A — bind F5 to `_ACTION_QUICK_SAVE`: no observed save.**
+- The F5-native trigger is therefore a **real save-file-write proof**, but it has **not** been accepted as a complete Save Anywhere feature.
+- Inventory/progression persistence is not sufficient proof because vanilla saves those normally.
+- Exact last-player-position restoration was not established to the user's satisfaction.
+- A possible future implementation could pair the native save with explicit position/rotation/map capture and post-load restoration, but the user chose not to pursue that now.
 
-- package installed successfully after CMD line-ending fix;
-- F5 produced no watched save-file change;
-- direct hidden-action binding is rejected for now.
+### Frozen conclusion
 
-**POC-B/C/D — save command probes through a virtual NUMPAD-SUBTRACT helper: inconclusive as save commands.**
-
-- helper itself was proven at runtime: F6 detected, foreground title was `Dying Light: The Beast`, virtual NUMPAD SUBTRACT sent;
-- no watched `.sav` change for ForcedAutosave / PerformFullSave / PerformFullSaveNoPreparation;
-- later DebugConf load tests showed these commands may never have been executed, so do not freeze them as native save-function failures.
-
-**POC-E — TeleportPlayerToRestingPlace ConsoleCommand canary: no teleport.**
-
-- also inconclusive until DebugConf loading was validated.
-
-**POC-F — `debugconfdefault.scr` inside `data2.pak` + `HideHUD()`: FAIL TO LOAD.**
-
-- installed and uninstalled screenshots both retained normal HUD.
-- Root DebugConf cannot be assumed overrideable through the ordinary `data2.pak` mod path.
-
-**POC-G — physical `ph_ft\source\debugconfdefault.scr`: HUD remained normal.**
-
-- no runtime evidence that this loose source path is consumed by the retail engine.
-- earlier installer UX was insufficiently explicit, so later packages added filesystem verification/status files.
-
-**POC-H — verified physical file beside game EXE as `debugconfdefault.scr`: FILESYSTEM PASS / ENGINE CANARY FAIL.**
-
-- installer explicitly verified target path, marker, `HideHUD()`, size, and SHA-256 and kept CMD open;
-- runtime screenshot still showed full HUD;
-- therefore a correctly installed `debugconfdefault.scr` beside the EXE was not enough to make the retail engine execute `HideHUD()`.
-
-**POC-I — V6-driven explicit `debugconf.scr` + `-debugconf=` launch: FILESYSTEM + LAUNCH REQUEST PASS / HUD CANARY FAIL.**
-
-- V6 found exact retail strings `debugconf.scr` and `-debugconf=`;
-- installer verified `ph_ft\work\bin\x64\debugconf.scr` with marker and `HideHUD()`;
-- launcher requested Steam AppID `3008130` with explicit `-debugconf=<absolute path>`;
-- user confirmed steps 1–7 completed as instructed;
-- resulting gameplay screenshot still showed the normal HUD (quest text, safe-zone/compass strip, health/stamina, item bar, world markers).
-
-### DebugConf conclusion — FROZEN DEAD END FOR THIS PROJECT
-
-The DebugConf/ConsoleCommand route is no longer a productive basis for Manual Save Anywhere on retail build 1.71E. Even after verified filesystem placement and an explicit `-debugconf=` launch request, the visible `HideHUD()` canary did not execute. Whether Steam strips/rewrites the argument or the retail build ignores/restricts DebugConf, the route is not reliable enough for the mod.
-
-Do not spend more user test cycles on DebugConf path guesses or ConsoleCommand save strings. Continue from direct native save-controller mapping instead.
-
-### Current artifact / next native step
-
-Local-only **Collector V7 — Native Save Xref Collector** is the next safe action.
-
-It targets only `gamedll_ph_x64_rwdi.dll` and exports no game binary. It maps:
-
-- exact RVAs for save-controller strings/classes;
-- RIP-relative code xrefs in `.text`;
-- containing function boundaries from `.pdata`;
-- other ASCII strings referenced by those functions;
-- limited hex windows around relevant xrefs;
-- data/RVA references and PDB/debug-path strings.
-
-Primary targets include `SaveRequestController`, `SaveController`, `AcceptSaveRequests`, `RejectSaveRequests`, `ESaveRequestPriority`, `ESessionSaveability`, Block/UnblockSaves, ForcedAutosave, SaveFromQuests, SaveOnSessionExit, PerformFullSave, and hidden quick-save strings.
-
-Goal: identify exact 1.71E native function boundaries/signatures before attempting any runtime native hook or direct save request.
+Manual Save Anywhere is **not GREEN**, **not deleted**, and **not an active workstream**. Preserve all findings for a possible future reopen, but spend zero further development/test effort on it until explicitly requested.
 
 ## Technical invariants
 
@@ -265,6 +194,7 @@ Goal: identify exact 1.71E native function boundaries/signatures before attempti
 - **Installed Venom visual attachment after uninstall:** GREEN.
 - **Functional Toxic proc after uninstall:** GREEN.
 - **POC-003 L+1 carrier:** BUILT / NOT GREEN until full runtime + uninstall persistence test passes.
+- **Manual Save Anywhere:** PAUSED / NOT GREEN. Native F5 save-file write is proven, exact position behavior unresolved.
 
 ## Failed hypotheses / rejected implementations
 
@@ -283,8 +213,8 @@ POC-B/C/D/E remain **inconclusive command probes**, not proof that the underlyin
 ## next_safe_action
 
 1. Keep POC-001 and POC-002 frozen green.
-2. **Weapon track:** when `ph_ft\source\data2.pak` is free from the parallel Manual Save test, run POC-003 on a disposable save and obtain a **new** Legendary Camp Axe with Startup Shock.
-3. Record its exact damage/durability/repairs/affixes, then perform save -> quit -> reload with POC-003 installed.
-4. If that passes, uninstall only POC-003, vanilla-reload the same save, and compare the exact POC-003 stat values. Freeze POC-003 green only on a strong persistence pass.
-5. Do not start L+2..L+5 or full Legendary Core until POC-003's uninstall result is known.
-6. **Manual Save track (parallel):** uninstall POC-I to leave its prior test path clean, run Collector V7, analyze the 1.71E save-controller xref map, identify the smallest exact native call path, and only then build a disposable-test-save native hook POC.
+2. **Manual Save Anywhere stays paused. Do not resume it without an explicit user request.**
+3. **Weapon track:** run POC-003 on a disposable save and obtain a **new** Legendary Camp Axe with Startup Shock.
+4. Record its exact damage/durability/repairs/affixes, then perform save -> quit -> reload with POC-003 installed.
+5. If that passes, uninstall only POC-003, vanilla-reload the same save, and compare the exact POC-003 stat values. Freeze POC-003 green only on a strong persistence pass.
+6. Do not start L+2..L+5 or full Legendary Core until POC-003's uninstall result is known.
