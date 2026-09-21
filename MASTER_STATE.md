@@ -15,7 +15,7 @@ This file plus actual GitHub HEAD are authoritative for continuation. Reconcile 
 
 ## Current phase
 
-**PHASE 1F — POC-001 and POC-002 are frozen green. Weapon POC-003 (Legendary -> L+1 persistent carrier) is built and awaiting runtime persistence validation. Manual Save Anywhere is officially PAUSED / CLOSED TEMPORARILY by user decision after the native F5 POC proved save-file writes but exact last-position restoration remained unresolved.**
+**PHASE 1F — POC-001 and POC-002 are frozen green. Weapon POC-003 runtime is complete: with-POC reload passed, but its deliberately non-vanilla L+1 stat signature did not survive POC removal. Weapon research now pivots to a different serialized per-item Ascension field/carrier. Manual Save Anywhere remains PAUSED / CLOSED TEMPORARILY by user decision.**
 
 Global gacha, Legendary Core, and full Ascension are not implemented yet.
 
@@ -104,15 +104,18 @@ Successful manual Venom persistence test on the Legendary Camp Axe:
 - Venom hardware/green visual remained attached
 - Toxic combat proc remained functional after uninstall
 
-Frozen conclusion: native installed per-item mod/effect state, stat changes, visual attachment, and functional effect can serialize strongly enough to survive removal of the POC that exposed the socket. This is the current technical foundation for persistent Ascension carriers.
+Frozen conclusion: native installed per-item mod/effect state, stat changes, visual attachment, and functional effect can serialize strongly enough to survive removal of the POC that exposed the socket. This remains useful, but POC-003 proved that arbitrary replacement of the carrier's definition-level stat magnitude is not itself serialized per item.
 
-## POC-003 — Legendary -> L+1 persistent carrier probe — BUILT / AWAITING RUNTIME
+## POC-003 — Legendary -> L+1 persistent carrier probe — RUNTIME COMPLETE / CUSTOM STAT SIGNATURE FAILED UNINSTALL
 
 Project-authored builder:
 `tools/build_poc003_l1_carrier.py`
 
-Detailed test contract:
+Detailed test contract/result:
 `patches/poc/POC_003_L1_CARRIER.md`
+
+Runtime record:
+`tests/results/POC_003_RUNTIME_UNINSTALL_RESULT.md`
 
 Local-only `data2.pak` SHA-256:
 `5608ecb1336ca84c80bc1472000ab9b50eb79a94a8a6a6c1b127f370cd31e17a`
@@ -120,30 +123,49 @@ Local-only `data2.pak` SHA-256:
 Local user-test package SHA-256:
 `a1eee27144a7ac612d0600bce57fa117d3ea8a915ca8ca258ae1615b13655a59`
 
-Purpose:
+POC design:
 
-- generate a **new** POC-003 Legendary Camp Axe through the already-proven deterministic POC-001 acquisition path;
-- attach native `ShockMod_Random_FT_T4_TIP` at generation time via `StartupMod(...)`;
-- temporarily give that exact native carrier a deliberately non-vanilla persistence signature:
+- generate a **new** Legendary Camp Axe through the controlled POC-001 acquisition path;
+- attach native `ShockMod_Random_FT_T4_TIP` via `StartupMod(...)`;
+- temporarily give that carrier a deliberately non-vanilla signature:
   - `CraftingEffect_IncreasedDamageMul` level **8**;
   - `CraftingEffect_IncreasedDurability` level **3** (`+18%`);
-  - attack speed unchanged;
-- save/reload, remove POC-003, vanilla-reload, then check whether the **exact POC-specific damage/durability values** remain on that item.
+  - attack speed unchanged.
 
-This signature is test-only and is intentionally distinct from vanilla Shock T4 so persistence is unambiguous. It is **not** final L+1 balance; the current target envelope remains approximately +12% damage / +15% durability with conservative attack speed.
+Runtime result:
 
-Interpretation gate:
+**Initial / POC active:**
+- damage `147`
+- durability `160/188`
+- repairs `7/7`
+- visible affixes: `+6% Damage (Infected)`, `+20% Damage (Accessories)`, `-7.5% Stamina Cost (Melee Weapons)`
+- `Spark — Applies SHOCK on critical hits` visible
 
-- **Strong pass:** Shock plus the exact POC-003 stat values persist after POC removal -> strong evidence for a serialized native per-item Ascension carrier.
-- **Partial pass:** Shock persists but stats resolve back to vanilla Shock behavior -> carrier identity persists, but arbitrary Ascension parameters remain definition-dependent; do not advance to full Ascension on this carrier strategy.
-- **Fail:** item/mod state corrupts or disappears -> stop and preserve POC-001/002 as frozen green.
+**Save -> quit -> reload with POC-003 installed:** PASS.
+- damage remained `147`
+- durability remained `160/188`
+- repairs remained `7/7`
+- affixes and Spark remained visible
 
-Safety/coexistence:
+**After POC-003 uninstall -> vanilla reload:**
+- Legendary rarity preserved
+- listed affixes preserved
+- damage changed `147 -> 142`
+- max durability changed `188 -> 185`
+- current durability remained `160`
+- repairs remained `7/7`
+- POC-added Tip/Shaft/Grip UI disappeared; only Charm Socket remained
+- Spark UI disappeared with the definition-added socket exposure
+- Shock hardware/visual attachment still appeared physically attached in the supplied screenshot
+- post-uninstall SHOCK proc functionality was not directly combat-tested for this exact POC-003 item
 
-- POC-003 uses `ph_ft\source\data2.pak` and must not run concurrently with another test that owns the same path.
-- The supplied installer stops on an unknown existing `data2.pak` instead of overwriting it, specifically protecting unrelated mods/tests.
-- The uninstaller removes only the exact POC-003 hash.
-- No proprietary PAK, vanilla source, or save is committed to this repository.
+Frozen interpretation:
+
+- **Strong persistence pass rejected.** The exact POC-003 custom stat values did not survive POC removal.
+- Current durability remaining `160` while max durability recomputed `188 -> 185` is consistent with current item condition being serialized separately from the carrier's definition-resolved max-stat contribution.
+- A native installed-mod identity/attachment may persist, but arbitrary custom modifier magnitude supplied by a temporary CraftPart definition is not proven serialized per item.
+- Do **not** extend this parameter-override strategy to L+2..L+5.
+- Next Ascension research must identify a different serialized per-item field/state or a native carrier whose magnitude itself is stored on the item instance.
 
 ## Manual Save Anywhere research — PAUSED / CLOSED TEMPORARILY
 
@@ -193,7 +215,8 @@ Manual Save Anywhere is **not GREEN**, **not deleted**, and **not an active work
 - **POC-002 native installed-mod stat persistence:** GREEN for tested Venom-on-Camp-Axe path.
 - **Installed Venom visual attachment after uninstall:** GREEN.
 - **Functional Toxic proc after uninstall:** GREEN.
-- **POC-003 L+1 carrier:** BUILT / NOT GREEN until full runtime + uninstall persistence test passes.
+- **POC-003 with-POC save/reload:** PASS.
+- **POC-003 arbitrary custom L+1 stat signature after uninstall:** NOT persistent / NOT GREEN.
 - **Manual Save Anywhere:** PAUSED / NOT GREEN. Native F5 save-file write is proven, exact position behavior unresolved.
 
 ## Failed hypotheses / rejected implementations
@@ -202,11 +225,12 @@ Manual Save Anywhere is **not GREEN**, **not deleted**, and **not an active work
 2. POC-002B ambiguous global anchor.
 3. POC-002C inner-weight-only test delivery.
 4. POC-002D loose CraftPart through Biter resources.
-5. Manual Save POC-A direct `_ACTION_QUICK_SAVE` binding.
-6. `debugconfdefault.scr` override from inside `data2.pak`.
-7. physical `ph_ft\source\debugconfdefault.scr` as a reliable retail DebugConf load path.
-8. physical EXE-adjacent `debugconfdefault.scr` as a reliable retail DebugConf load path.
-9. explicit `debugconf.scr` + `-debugconf=` as a reliable retail runtime route for this mod.
+5. POC-003 temporary native CraftPart parameter override as an arbitrary uninstall-persistent Ascension magnitude carrier.
+6. Manual Save POC-A direct `_ACTION_QUICK_SAVE` binding.
+7. `debugconfdefault.scr` override from inside `data2.pak`.
+8. physical `ph_ft\source\debugconfdefault.scr` as a reliable retail DebugConf load path.
+9. physical EXE-adjacent `debugconfdefault.scr` as a reliable retail DebugConf load path.
+10. explicit `debugconf.scr` + `-debugconf=` as a reliable retail runtime route for this mod.
 
 POC-B/C/D/E remain **inconclusive command probes**, not proof that the underlying native save functions themselves fail.
 
@@ -214,7 +238,7 @@ POC-B/C/D/E remain **inconclusive command probes**, not proof that the underlyin
 
 1. Keep POC-001 and POC-002 frozen green.
 2. **Manual Save Anywhere stays paused. Do not resume it without an explicit user request.**
-3. **Weapon track:** run POC-003 on a disposable save and obtain a **new** Legendary Camp Axe with Startup Shock.
-4. Record its exact damage/durability/repairs/affixes, then perform save -> quit -> reload with POC-003 installed.
-5. If that passes, uninstall only POC-003, vanilla-reload the same save, and compare the exact POC-003 stat values. Freeze POC-003 green only on a strong persistence pass.
-6. Do not start L+2..L+5 or full Legendary Core until POC-003's uninstall result is known.
+3. Treat POC-003's custom parameter-override carrier strategy as rejected for arbitrary persistent Ascension magnitude; do not build L+2..L+5 from it.
+4. Weapon track: inspect the extracted 1.71E weapon/save-related definitions for a different **per-item serialized** quantity/state that can encode L+1 independently for two copies of the same weapon.
+5. Prefer a field that already survives definition removal or whose numeric magnitude is item-instance data; avoid another global definition-only multiplier.
+6. Build the next smallest L+1 POC only after that serialized candidate is mapped. Full Legendary Core remains blocked until a viable per-item Ascension state is proven.
