@@ -15,7 +15,7 @@ This file plus actual GitHub HEAD are authoritative for continuation. Reconcile 
 
 ## Current phase
 
-**PHASE 1F — POC-001 and POC-002 are frozen green. Manual Save Anywhere research is active in parallel and has pivoted away from DebugConf/ConsoleCommand toward direct native save-controller mapping.**
+**PHASE 1F — POC-001 and POC-002 are frozen green. Weapon POC-003 (Legendary -> L+1 persistent carrier) is built and awaiting runtime persistence validation. Manual Save Anywhere research is active in parallel and has pivoted away from DebugConf/ConsoleCommand toward direct native save-controller mapping.**
 
 Global gacha, Legendary Core, and full Ascension are not implemented yet.
 
@@ -105,6 +105,45 @@ Successful manual Venom persistence test on the Legendary Camp Axe:
 - Toxic combat proc remained functional after uninstall
 
 Frozen conclusion: native installed per-item mod/effect state, stat changes, visual attachment, and functional effect can serialize strongly enough to survive removal of the POC that exposed the socket. This is the current technical foundation for persistent Ascension carriers.
+
+## POC-003 — Legendary -> L+1 persistent carrier probe — BUILT / AWAITING RUNTIME
+
+Project-authored builder:
+`tools/build_poc003_l1_carrier.py`
+
+Detailed test contract:
+`patches/poc/POC_003_L1_CARRIER.md`
+
+Local-only `data2.pak` SHA-256:
+`5608ecb1336ca84c80bc1472000ab9b50eb79a94a8a6a6c1b127f370cd31e17a`
+
+Local user-test package SHA-256:
+`a1eee27144a7ac612d0600bce57fa117d3ea8a915ca8ca258ae1615b13655a59`
+
+Purpose:
+
+- generate a **new** POC-003 Legendary Camp Axe through the already-proven deterministic POC-001 acquisition path;
+- attach native `ShockMod_Random_FT_T4_TIP` at generation time via `StartupMod(...)`;
+- temporarily give that exact native carrier a deliberately non-vanilla persistence signature:
+  - `CraftingEffect_IncreasedDamageMul` level **8**;
+  - `CraftingEffect_IncreasedDurability` level **3** (`+18%`);
+  - attack speed unchanged;
+- save/reload, remove POC-003, vanilla-reload, then check whether the **exact POC-specific damage/durability values** remain on that item.
+
+This signature is test-only and is intentionally distinct from vanilla Shock T4 so persistence is unambiguous. It is **not** final L+1 balance; the current target envelope remains approximately +12% damage / +15% durability with conservative attack speed.
+
+Interpretation gate:
+
+- **Strong pass:** Shock plus the exact POC-003 stat values persist after POC removal -> strong evidence for a serialized native per-item Ascension carrier.
+- **Partial pass:** Shock persists but stats resolve back to vanilla Shock behavior -> carrier identity persists, but arbitrary Ascension parameters remain definition-dependent; do not advance to full Ascension on this carrier strategy.
+- **Fail:** item/mod state corrupts or disappears -> stop and preserve POC-001/002 as frozen green.
+
+Safety/coexistence:
+
+- POC-003 uses `ph_ft\source\data2.pak` and must not run concurrently with another test that owns the same path.
+- The supplied installer stops on an unknown existing `data2.pak` instead of overwriting it, specifically protecting parallel Manual Save work/unrelated mods.
+- The uninstaller removes only the exact POC-003 hash.
+- No proprietary PAK, vanilla source, or save is committed to this repository.
 
 ## Manual Save Anywhere research
 
@@ -225,6 +264,7 @@ Goal: identify exact 1.71E native function boundaries/signatures before attempti
 - **POC-002 native installed-mod stat persistence:** GREEN for tested Venom-on-Camp-Axe path.
 - **Installed Venom visual attachment after uninstall:** GREEN.
 - **Functional Toxic proc after uninstall:** GREEN.
+- **POC-003 L+1 carrier:** BUILT / NOT GREEN until full runtime + uninstall persistence test passes.
 
 ## Failed hypotheses / rejected implementations
 
@@ -243,8 +283,8 @@ POC-B/C/D/E remain **inconclusive command probes**, not proof that the underlyin
 ## next_safe_action
 
 1. Keep POC-001 and POC-002 frozen green.
-2. Uninstall POC-I to leave the game tree clean.
-3. Run **Collector V7 — Native Save Xref Collector** and analyze the returned 1.71E function/xref map.
-4. Identify the smallest exact native call path that submits/accepts a save request through `SaveRequestController` / `SaveController` rather than DebugConf.
-5. Only after exact function/signature mapping, build a disposable-test-save native hook POC with explicit install verification and a save-file watcher.
-6. In parallel, continue the smallest controlled Legendary -> L+1 persistent Ascension carrier POC without perturbing frozen-green paths.
+2. **Weapon track:** when `ph_ft\source\data2.pak` is free from the parallel Manual Save test, run POC-003 on a disposable save and obtain a **new** Legendary Camp Axe with Startup Shock.
+3. Record its exact damage/durability/repairs/affixes, then perform save -> quit -> reload with POC-003 installed.
+4. If that passes, uninstall only POC-003, vanilla-reload the same save, and compare the exact POC-003 stat values. Freeze POC-003 green only on a strong persistence pass.
+5. Do not start L+2..L+5 or full Legendary Core until POC-003's uninstall result is known.
+6. **Manual Save track (parallel):** uninstall POC-I to leave its prior test path clean, run Collector V7, analyze the 1.71E save-controller xref map, identify the smallest exact native call path, and only then build a disposable-test-save native hook POC.
