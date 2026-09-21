@@ -1,6 +1,6 @@
 # POC-003 — Legendary -> L+1 persistent carrier probe
 
-Status: **BUILT — awaiting in-game persistence validation**
+Status: **RUNTIME COMPLETE — custom stat signature did not survive uninstall**
 
 Target: Dying Light: The Beast **1.71E**.
 
@@ -28,7 +28,7 @@ The Camp Axe uses the same controlled native-Legendary path proven by POC-001 an
 
 `StartupMod("ShockMod_Random_FT_T4_TIP")`
 
-A **newly generated** POC-003 Camp Axe must be used. Do not reuse the old POC-001/002 axe when deciding this result.
+A **newly generated** POC-003 Camp Axe was used for the runtime result.
 
 ## Deliberate POC-003 signature
 
@@ -93,60 +93,68 @@ The binary PAK/package remains local-only and is not committed to this public re
 
 POC-003 uses `ph_ft\source\data2.pak`, so it must **not** be active at the same time as another test that also owns that path.
 
-The supplied installer recognizes known older weapon POC hashes. If any unknown `data2.pak` exists, installation stops instead of overwriting it. This specifically protects parallel Manual Save Anywhere work or any unrelated mod/test package.
+The supplied installer recognizes known older weapon POC hashes. If any unknown `data2.pak` exists, installation stops instead of overwriting it. The uninstaller removes `data2.pak` only when its SHA-256 exactly matches POC-003.
 
-The uninstaller removes `data2.pak` only when its SHA-256 exactly matches POC-003.
+## Runtime result
 
-## Required runtime order
+Detailed runtime record:
 
-Use a disposable/copied test save.
+`tests/results/POC_003_RUNTIME_UNINSTALL_RESULT.md`
 
-1. Make sure no Manual Save POC or unrelated package currently owns `ph_ft\source\data2.pak`.
-2. Install POC-003 and confirm the installer reports the expected POC-003 hash.
-3. Launch 1.71E and acquire a **new** Camp Axe from the controlled Biter path.
-4. Confirm it is a genuine Orange/Legendary Camp Axe and that Shock is already installed.
-5. Record, before doing anything else:
-   - displayed damage;
-   - durability/max durability;
-   - repairs;
-   - rarity and rolled affixes;
-   - visible Shock state/effect.
-6. Store/retrieve the weapon once if practical, then re-check stats.
-7. Trigger a normal save, quit fully, restart with POC-003 still installed, and inspect the exact same weapon.
-8. If the with-POC reload passes, save/quit again and run the POC-003 uninstaller.
-9. Launch clean vanilla 1.71E and inspect the exact same weapon again.
-10. Record whether Shock still exists/works and whether the **POC-specific damage/durability values** remain unchanged.
+### Initial / with POC-003 active
+
+The newly generated Legendary Camp Axe showed:
+
+- damage **147**
+- durability **160/188**
+- repairs **7/7**
+- affixes `+6% Damage (Infected)`, `+20% Damage (Accessories)`, `-7.5% Stamina Cost (Melee Weapons)`
+- **Spark — Applies SHOCK on critical hits** visible
+
+### Save -> quit -> reload with POC-003 still installed
+
+**PASS.**
+
+The exact same item remained at:
+
+- damage **147**
+- durability **160/188**
+- repairs **7/7**
+- same affixes
+- Spark / SHOCK still visible
+
+### POC-003 uninstall -> vanilla reload
+
+The same saved item then showed:
+
+- Legendary rarity preserved
+- same listed affixes preserved
+- damage **147 -> 142**
+- max durability **188 -> 185** while current durability remained **160**
+- repairs remained **7/7**
+- POC-added Tip/Shaft/Grip UI disappeared; only vanilla Charm Socket remained
+- Spark UI text disappeared with the definition-added socket exposure
+- the Shock hardware/visual attachment still appeared attached in the supplied runtime screenshot
+- post-uninstall SHOCK proc functionality was not directly combat-tested in this comparison
 
 ## Interpretation
 
-### Strong pass
+### Strong pass — REJECTED
 
-After POC removal, the same item retains:
+The exact POC-specific damage and max-durability values did **not** survive POC removal.
 
-- Legendary identity/affixes;
-- installed Shock state;
-- the exact POC-003 damage value;
-- the exact POC-003 max durability value;
-- normal inventory/equip/stash behavior.
+Therefore a native installed-mod identity plus temporary custom CraftPart parameters is **not** sufficient as an arbitrary persistent Ascension-stat carrier.
 
-Interpretation: strong evidence that a native installed-mod carrier can serialize non-vanilla Ascension parameters per item. This becomes the preferred foundation for real L+1 state before extending to L+2..L+5.
+### Carrier persistence — PARTIAL EVIDENCE
 
-### Partial pass
+The weapon itself remained valid, Legendary identity/affixes/repairs persisted, and the physical Shock attachment remained visible. This remains compatible with POC-002's conclusion that installed native mod state can serialize strongly.
 
-Shock remains installed/functioning after POC removal, but damage and/or durability changes to the values implied by the vanilla Shock T4 definition.
+However, the custom modifier magnitude is still definition-dependent rather than proven serialized per item. Post-uninstall SHOCK combat behavior remains unconfirmed for this exact POC-003 item.
 
-Interpretation: the carrier identity persists, but its parameters are definition-resolved after load. Do **not** claim arbitrary persistent Ascension from this route. The next POC must find a different serialized per-item field/carrier strategy.
+## Frozen consequence
 
-### Fail
-
-The item corrupts, disappears, loses its installed-mod state, or causes save/inventory regressions.
-
-Interpretation: stop and preserve POC-001/002 as the last frozen-green weapon state.
-
-## Freeze rule
-
-Do not advance to full Legendary Core, global Ascension, or L+2..L+5 from code inspection alone. POC-003 becomes green only after the complete:
-
-`generate -> inspect -> save -> reload -> remove POC -> vanilla reload -> inspect`
-
-protocol succeeds and the result is recorded in `MASTER_STATE.md`.
+- POC-001 and POC-002 remain frozen green.
+- POC-003 is **not green for arbitrary L+1 stat persistence**.
+- Do not extend this parameter-override strategy to L+2..L+5.
+- Do not claim the POC-003 custom L+1 values survive uninstall.
+- The next Ascension POC must find a different serialized per-item field/state or another native carrier whose magnitude itself is stored on the item instance.
