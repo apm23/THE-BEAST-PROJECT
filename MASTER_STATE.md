@@ -115,10 +115,10 @@ Feature remains required, but no working native manual-save trigger has been pro
 - Collector V2/V3 failed before extraction due PowerShell executable/path parsing.
 - Collector V4 removed 7-Zip dependency and succeeded: **350 targeted files extracted, 0 failures**.
 - V4 confirmed `ConsoleCommand(s)` is documented by `DebugConf.def` as running at game start or when numpad-subtract is pressed.
-- V4 also confirmed `SaveGame(...)` / `SaveGameCtrl(...)` are logging config, not a save-now command.
+- V4 also confirmed `SaveGame(...)` / `SaveGameCtrl(...)` are logging config, not save-now commands.
 - Collector V5 scanned engine/game binaries for filtered save-related strings without copying binaries.
 
-Important V5 strings/classes:
+Important V5 strings/classes include:
 
 - `_ACTION_QUICK_SAVE`
 - `MenuSaveLoad_InfoQuickSaveOK`
@@ -126,6 +126,8 @@ Important V5 strings/classes:
 - `SaveRequestController`
 - `SaveRequestHistory`
 - `Savegame::Session::ESaveRequestPriority`
+- `Savegame::Tools::ConsoleCommand::AcceptSaveRequests`
+- `Savegame::Tools::ConsoleCommand::BlockSaves`
 - `AcceptSaveRequests`
 - `RejectSaveRequests`
 - `SG_AcceptSaveRequests`
@@ -138,42 +140,57 @@ Important V5 strings/classes:
 - `game.Savegame.Tools.Debug.FullSave.PerformFullSave`
 - `game.Savegame.Tools.Debug.FullSave.PerformFullSaveNoPreparation`
 
-### Rejected manual-save POCs
+### Manual-save POC history
 
-**POC-A — bind F5 to `_ACTION_QUICK_SAVE`: FAIL.**
+**POC-A — bind F5 to `_ACTION_QUICK_SAVE`: no observed save.**
 
 - package installed successfully after CMD line-ending fix;
-- F5 produced no observed save and no watched save-file change;
+- F5 produced no watched save-file change;
 - direct hidden action binding is rejected for now.
 
-**POC-B — `game.Savegame.Tools.Debug.Save.ForcedAutosave`: FAIL.**
+**POC-B/C/D — debug save command probes via virtual NUMPAD SUBTRACT: no watched save-file change.**
 
-- user keyboard has no numpad, so an F6 helper injected virtual NUMPAD SUBTRACT;
-- helper was fixed to remove a wrong hardcoded process-name gate;
-- runtime evidence showed F6 detected, foreground title `Dying Light: The Beast`, and virtual NUMPAD SUBTRACT sent repeatedly;
-- no `*** CHANGED ***` event from watched `.sav` file.
+Tested strings:
+- `game.Savegame.Tools.Debug.Save.ForcedAutosave`
+- `game.Savegame.Tools.Debug.FullSave.PerformFullSave`
+- `game.Savegame.Tools.Debug.FullSave.PerformFullSaveNoPreparation`
 
-**POC-C — `game.Savegame.Tools.Debug.FullSave.PerformFullSave`: FAIL.**
+The F6 helper itself is proven: runtime screenshots showed F6 detected, foreground title `Dying Light: The Beast`, and virtual NUMPAD SUBTRACT sent to the active game window.
 
-- F6 trigger path confirmed active against the game window;
-- no watched save-file write.
+**POC-E — `TeleportPlayerToRestingPlace` ConsoleCommand canary: no teleport.**
 
-**POC-D — `game.Savegame.Tools.Debug.FullSave.PerformFullSaveNoPreparation`: FAIL.**
+This alone was not enough to conclude `ConsoleCommand(...)` is disabled, because the debugconf override itself had not yet been proven to load.
 
-- user reports same result as POC-C: no save-file change;
-- screenshot was not captured, but result is recorded as user runtime report.
+**POC-F — `debugconfdefault.scr` in `data2.pak` with `HideHUD()` load canary: FAIL TO LOAD.**
 
-### Important interpretation
+User supplied installed-vs-uninstalled gameplay screenshots. In both states the normal HUD remained visibly present: quest text, compass/safe-zone strip, health/stamina/item bar, world markers, and other HUD elements. Therefore `HideHUD()` from the `debugconfdefault.scr` packed inside `data2.pak` did not take effect.
 
-Do **not** keep guessing additional save command names yet. POC-B/C/D prove the F6-to-virtual-NUMPAD-SUBTRACT helper works, but they do not prove that `ConsoleCommand(...)` itself is actually being executed in this retail build. Before interpreting the save commands as individually broken/gated, validate the console-command execution mechanism with a visible harmless canary.
+### Critical interpretation after POC-F
 
-Current canary artifact (local-only): **POC-E**, using:
+- `data2.pak` itself is a valid mod-loading path for ordinary game scripts (proven by POC-001/002), but **the root `debugconfdefault.scr` is not being overridden from that PAK path in retail 1.71E**.
+- Therefore POC-B/C/D/E must **not** be treated as proof that those ConsoleCommand strings themselves were executed and failed. The command script may simply never have been loaded.
+- Stop interpreting those command probes until the actual debugconf load path is found.
+- Do not guess more save command names yet.
 
-`game.Savegame.Tools.Debug.TeleportPlayerToRestingPlace`
+### Current Manual Save artifact / next test
 
-If POC-E visibly teleports the player, `ConsoleCommand(...)` execution works and the save commands are likely gated/rejected; next investigation should center on `AcceptSaveRequests` / `UnblockSaveController` / `SaveRequestController` semantics.
+Local-only **POC-G — DebugConf Loose Source Canary** tests the most likely physical path:
 
-If POC-E does nothing, stop testing save commands through `ConsoleCommand(...)` and move to direct `SaveRequestController` / native-call investigation.
+`C:\Program Files (x86)\Steam\steamapps\common\Dying Light The Beast\ph_ft\source\debugconfdefault.scr`
+
+POC-G installer:
+
+- removes only the exact known POC-F `data2.pak` if present;
+- reads the vanilla `debugconfdefault.scr` from the user's own `data0.pak` at install time;
+- injects only a marker plus `HideHUD()`;
+- writes the patched file as a physical loose file at `ph_ft\source\debugconfdefault.scr`;
+- backs up any pre-existing physical loose file instead of overwriting it blindly;
+- package contains no copied vanilla debugconf file.
+
+Interpretation:
+
+- HUD hidden after full restart -> the physical `ph_ft\source` debugconf path is real; use that path for a new ConsoleCommand canary and then save-controller research.
+- HUD unchanged -> uninstall POC-G and test the next plausible physical load location (game executable/root directory), not more save commands.
 
 ## Technical invariants
 
@@ -186,6 +203,7 @@ If POC-E does nothing, stop testing save commands through `ConsoleCommand(...)` 
 - Attack speed remains safety-sensitive.
 - Scope loot-builder edits to exact named blocks; no ambiguous global first-match anchors.
 - Test-delivery builds may be deterministic; final balance must return to frozen RNG targets.
+- For Windows helper packages: user launches `.cmd`; `.cmd` only launches the `.ps1` and stays open with `pause`; install/uninstall logic lives in PowerShell.
 
 ## Frozen-green systems
 
@@ -203,14 +221,15 @@ If POC-E does nothing, stop testing save commands through `ConsoleCommand(...)` 
 3. POC-002C inner-weight-only test delivery.
 4. POC-002D loose CraftPart through Biter resources.
 5. Manual Save POC-A direct `_ACTION_QUICK_SAVE` binding.
-6. Manual Save POC-B `ForcedAutosave` through current debug-command path.
-7. Manual Save POC-C `PerformFullSave` through current debug-command path.
-8. Manual Save POC-D `PerformFullSaveNoPreparation` through current debug-command path.
+6. `debugconfdefault.scr` override from inside `data2.pak` for retail debug commands / `HideHUD()`.
+
+Note: POC-B/C/D/E are retained as **inconclusive command probes**, not frozen command failures, because POC-F proved the debugconf packed in `data2.pak` was not actually applied.
 
 ## next_safe_action
 
 1. Keep POC-001 and POC-002 frozen green.
-2. Run **Manual Save Console Canary POC-E** on disposable test save.
-3. If teleport occurs, investigate save gating/controller state before any more save-command guesses.
-4. If teleport does not occur, abandon `ConsoleCommand(...)` as the retail trigger path and investigate direct `SaveRequestController` native-call access.
-5. In parallel, continue the smallest controlled Legendary -> L+1 persistent Ascension carrier POC without perturbing frozen-green paths.
+2. Run **POC-G DebugConf Loose Source Canary** after a full game shutdown/restart.
+3. If HUD disappears, freeze `ph_ft\source\debugconfdefault.scr` as the actual physical debugconf load path and re-test one harmless ConsoleCommand canary through that path before save commands.
+4. If HUD remains normal, uninstall POC-G and test the next physical debugconf candidate at game root/executable directory.
+5. Do not resume save-command guesses until a debugconf execution path is proven.
+6. In parallel, continue the smallest controlled Legendary -> L+1 persistent Ascension carrier POC without perturbing frozen-green paths.
