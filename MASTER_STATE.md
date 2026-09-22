@@ -15,9 +15,9 @@ This file plus actual GitHub HEAD are authoritative for continuation. Reconcile 
 
 ## Current phase
 
-**PHASE 1F — POC-001 and POC-002 are frozen green. Weapon POC-003 runtime is complete: with-POC reload passed, but its deliberately non-vanilla L+1 stat signature did not survive POC removal. Weapon research now pivots to a different serialized per-item Ascension field/carrier. Manual Save Anywhere remains PAUSED / CLOSED TEMPORARILY by user decision.**
+**PLAY NOW V3 (A1+A2+A3) is locally built and has passed static package/integrity gates, but is awaiting the user's first in-game smoke test and is therefore NOT runtime GREEN. POC-001 and POC-002 remain frozen green. POC-003's arbitrary custom L+1 parameter-magnitude strategy remains rejected after uninstall testing. Manual Save Anywhere remains PAUSED / CLOSED TEMPORARILY by user decision.**
 
-Global gacha, Legendary Core, and full Ascension are not implemented yet.
+The Play Now branch now contains a practical rarity/loot gacha. The deeper final Legendary Core + uninstall-persistent per-item Ascension system is still not implemented.
 
 ## Frozen project goals
 
@@ -52,6 +52,62 @@ See `docs/BASELINE_1.71E_MAPPING.md`.
 - Standard inspected human weapon presets use held-weapon `LootChance(1.0)`.
 - `StartupMod(...)` is a confirmed native generation mechanism used by vanilla generated weapons.
 - Direct loose `CategoryType_CraftPart` delivery through ordinary Biter corpse-resource loot is rejected as a test-delivery path after runtime failure.
+
+## PLAY NOW A1+A2+A3 V3 — BUILT / STATIC PASS / RUNTIME PENDING
+
+Detailed contract:
+`patches/play_now/PLAY_NOW_A1_A2_A3_V3.md`
+
+Final local distributable ZIP SHA-256:
+`4bc2b1c93c92ab269f4790a458e1ff89d267671844d5d3913b06605b01b322d5`
+
+The binary/user package is local-only and is not committed.
+
+### A1 locked ammo economy
+
+Standard firearm ammo is Scrap-only:
+
+- Pistol `10 Scrap -> 60`
+- Revolver `14 Scrap -> 24`
+- SMG `18 Scrap -> 120`
+- Shotgun `24 Scrap -> 24`
+- Rifle `30 Scrap -> 80`
+- Marksman `37 Scrap -> 32`
+
+Native/special ammo recipes are patched at install time from the user's own game archives. Arrow/Bolt/40mm/Sawblade output is `35` per craft with the user-approved Scrap-heavy / one-secondary-material recipe structure; Flamethrower is `1 Resin + 1 Fuel Can -> 800`.
+
+### A2 loot rebuild
+
+- Rebuilt added loot layer across **28 mapped infected/human/boss corpse objects**.
+- Human corpse loot now participates in the modded system; existing held-weapon behavior remains separate.
+- Mapped enemy/human Scrap quantities are minimum `40` when the rebuilt resource path selects Scrap; internal Scrap weight in those mapped subpools is increased by `10%`.
+- Empty target by tier: ordinary Biter `8%`, Viral/Police/basic human `5%`, special/armed human `3%`, elite/boss `1%` per rebuilt draw.
+- Added categories include firearms, melee, native weapon-mod blueprints, actual ammo, and a deliberately rare all-ammo blueprint pack.
+- Conditional weapon rarity in V3: Common `5%`, Rare `20%`, Epic `35%`, Legendary `40%`.
+- Conditional Legendary split: **80% native-Legendary path / 20% promoted-expanded path**.
+- Native firearm path contains `75` explicit rank-mapped vanilla `_legendary_` firearm item IDs.
+- Native melee Legendary path uses vanilla `Enemy_Lottery_Weapons`.
+- Conditional mod-blueprint tier split: T1 `10%`, T2 `20%`, T3 `30%`, T4 `40%`.
+- Added-category calls use `min_amount=1,max_amount=1` so an added category selection does not deliberately resolve to zero quantity.
+
+### A3 inventory safety decision
+
+- `QuickSlotsCount` total weapon inventory target: **300% vanilla**, cap `99`.
+- `AmmoSlotsCount`: **200% vanilla** when present, cap `99`.
+- mapped Storage/Stash slot counts: **200% vanilla** when present.
+- native ranged `MaxAmmoCountInventoryUpgrade(...)`: **200% vanilla**, cap `999`.
+- general consumable inventory is not aggressively expanded.
+- **Eight active/equipped weapon slots are NOT forced in V3.** `VisibleQuickSlotsCount` is intentionally unchanged because the mapped input/UI path is only proven for weapon SLOT1–SLOT4. Safety takes precedence over the eight-slot target until a proven UI/input/save-safe route exists.
+
+### V3 package safety
+
+- User launches `.cmd`; installer/uninstaller run PowerShell with explicit exit/status output.
+- Installer backs up discovered Steam AppID `3008130` saves and the previous known project `data2.pak` before replacement.
+- Known project V1/V2/POC hashes may be intentionally replaced; an **unknown `data2.pak` stops safely**.
+- Native A1 special recipes and A3 player-variable changes are generated from the user's own `data0.pak` / `data1.pak` during install instead of redistributing vanilla source.
+- Uninstaller hash-checks the installed V3 archive, requires explicit `REMOVE`, and warns to reduce inventory/ammo/stash contents below vanilla limits before capacity is reduced.
+- Static gates passed: ZIP integrity, internal manifest hashes, payload brace balance, six exact standard recipes, A2 subroutine references, mapped Scrap minimum, 19 doubled ammo-cap triplets, active-wheel non-modification, and no proprietary binary/save artifact in the distributable source package.
+- **Runtime status: NOT GREEN until normal gameplay smoke test passes.**
 
 ## POC-001 — Native Legendary Opportunity/Camp Axe — FROZEN GREEN
 
@@ -236,9 +292,11 @@ POC-B/C/D/E remain **inconclusive command probes**, not proof that the underlyin
 
 ## next_safe_action
 
-1. Keep POC-001 and POC-002 frozen green.
-2. **Manual Save Anywhere stays paused. Do not resume it without an explicit user request.**
-3. Treat POC-003's custom parameter-override carrier strategy as rejected for arbitrary persistent Ascension magnitude; do not build L+2..L+5 from it.
-4. Weapon track: inspect the extracted 1.71E weapon/save-related definitions for a different **per-item serialized** quantity/state that can encode L+1 independently for two copies of the same weapon.
-5. Prefer a field that already survives definition removal or whose numeric magnitude is item-instance data; avoid another global definition-only multiplier.
-6. Build the next smallest L+1 POC only after that serialized candidate is mapped. Full Legendary Core remains blocked until a viable per-item Ascension state is proven.
+1. **Run the first PLAY NOW A1+A2+A3 V3 in-game smoke test before changing V3 balance again.** Verify install ExitCode=0, normal corpse `F` interaction, weapon inventory/UI, human loot, Scrap >=40 when selected, ammo/mod variety, at least one A1 standard and one A1 native/special recipe, save/reload stability, and continued Legendary-family behavior over normal play.
+2. Keep the eight-active-weapon target deferred. Do not modify `VisibleQuickSlotsCount` or invent SLOT5–SLOT8 until a proven UI/input/save-safe implementation is mapped.
+3. Keep POC-001 and POC-002 frozen green.
+4. **Manual Save Anywhere stays paused. Do not resume it without an explicit user request.**
+5. Treat POC-003's custom parameter-override carrier strategy as rejected for arbitrary persistent Ascension magnitude; do not build L+2..L+5 from it.
+6. After V3 smoke testing, the deeper weapon track may resume by inspecting extracted 1.71E weapon/save-related definitions for a different **per-item serialized** quantity/state that can encode L+1 independently for two copies of the same weapon.
+7. Prefer a field that already survives definition removal or whose numeric magnitude is item-instance data; avoid another global definition-only multiplier.
+8. Build the next smallest L+1 POC only after that serialized candidate is mapped. Full Legendary Core remains blocked until a viable per-item Ascension state is proven.
