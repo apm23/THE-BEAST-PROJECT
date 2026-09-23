@@ -4,43 +4,90 @@
 
 This file plus actual GitHub HEAD are authoritative for continuation. Reconcile both before acting.
 
+Continuity phrase:
+
+`BEAST-PROVEN-SWITCH45`
+
+Interpret it as: continue THE BEAST PROJECT from this exact state, preserve proven runtime structures, and do not restart rejected experiments.
+
 ## Baseline
 
 - Game: **Dying Light: The Beast**
 - Target build: **VER. 1.71E**
+- Steam AppID: **3008130**
 - Fresh-install baseline captured before mod development.
 - Clean save remains local/private and must not be committed.
 - Clean archive map: `data0.pak,data1.pak`.
 - Targeted 1.71E extraction completed locally: **58 requested files, 0 missing**.
+- Repository must contain only tooling/docs/config/audit state. Do **not** commit proprietary PAKs, vanilla extracted archives, saves, DLLs, EXEs, or local binary distributions.
 
 ## Current phase
 
-**PLAY NOW V3 (A1+A2+A3) is locally built and has passed static package/integrity gates, but is awaiting the user's first in-game smoke test and is therefore NOT runtime GREEN. POC-001 and POC-002 remain frozen green. POC-003's arbitrary custom L+1 parameter-magnitude strategy remains rejected after uninstall testing. Manual Save Anywhere remains PAUSED / CLOSED TEMPORARILY by user decision.**
+**CURRENT RUNTIME-GREEN PLAY STATE:** the project has moved past the old A1+A2+A3 V3 experiment. The current proven architecture is **A1+A2 loot in `data2.pak` + vanilla output-only recipe overrides in `data3.pak`**, with a one-click installer/uninstaller and a proven NORMAL <-> CO-OP MultiMod switcher.
 
-The Play Now branch now contains a practical rarity/loot gacha. The deeper final Legendary Core + uninstall-persistent per-item Ascension system is still not implemented.
+The user's current canonical gameplay profile is **USER HIGH LOOT SPECIAL45**.
+
+Important current status:
+
+- Corpse `F` interaction: **runtime GREEN** on the frozen corpse-safe lineage.
+- DLC behavior: **runtime GREEN** on the current lineage; no DLC-disabled popup in proven builds.
+- `data2` / `data3` split: **runtime GREEN**.
+- One-click install / uninstall / detect architecture: **GREEN enough for continued use**.
+- CO-OP MultiMod mode: **RUNTIME PROVEN**; user successfully joined sibling's vanilla world while user remained modded.
+- Sibling does not currently want the gameplay mod installed.
+- A3 inventory expansion is **SUSPENDED** and must not be reintroduced unless explicitly requested.
+- Manual Save Anywhere remains **PAUSED / CLOSED TEMPORARILY** by user decision.
+- POC-001 and POC-002 remain frozen green.
+- POC-003 arbitrary custom L+1 parameter-magnitude strategy remains rejected after uninstall testing.
+- Deeper Legendary Core + uninstall-persistent per-item Ascension is still not implemented.
+
+## Hard safety rules
+
+Priority order:
+
+1. Save / DLC safety.
+2. Corpse loot interaction must remain functional (`F`).
+3. Preserve runtime-proven structures.
+4. Prefer numeric balance changes over structural rewrites.
+5. Keep install / rollback simple and detectable.
+6. Preserve CO-OP with vanilla sibling.
+
+Do **not** reintroduce or casually modify:
+
+- A3 inventory expansion;
+- `player_variables`;
+- `stash_dlc`;
+- inventory versioning;
+- quickslot/stash rewrites;
+- save-versioning paths;
+- DLC-sensitive files;
+- aggressive `LootedObject` structure replacement;
+- delete/reorder/add corpse branches without a separately proven need;
+- `VisibleQuickSlotsCount` / invented SLOT5-SLOT8 behavior.
+
+Historical hard failure: an aggressive rewrite of `scripts/inventory/loot/lootpools_ft.loot` caused the corpse loot prompt `F` to disappear. Therefore the **`LootedObject` structure is frozen**.
+
+Preferred future balance changes:
+
+- numeric weights;
+- existing sub-pool contents;
+- min/max quantities;
+- isolated safe sub-pools already following the proven structure.
 
 ## Frozen project goals
 
 1. Universal native Legendary eligibility even for weapons vanilla-capped at Rare/Epic.
-2. Global per-weapon rarity gacha; initial Legendary target ~30% per generated weapon.
-3. Slightly increased weapon availability from common infected, humans, and supported loot sources.
-4. Human held weapon itself participates in rarity gacha.
+2. Per-weapon rarity gacha while preserving farming/RNG.
+3. Increased but controllable weapon availability from infected/humans/supported loot sources.
+4. Human held weapon behavior remains separate from extra corpse-loot rolls.
 5. Legendary must be real item quality/state, not cosmetic recolor.
 6. Legendary Core: Rare/Epic -> Legendary, Legendary -> per-item Ascension.
 7. Ascension: L -> L+1 -> L+2 -> L+3 -> L+4 -> L+5.
 8. Ascension emphasizes damage/durability; secondary stats moderate; attack speed conservative.
-9. Per-weapon progression, not a global definition-only buff where persistent item state is possible.
+9. Prefer per-item serialized progression, not global definition-only buffs.
 10. Preserve weapon identity/model/class.
-11. Keep RNG/farming in the final mod.
-12. Manual Save Anywhere remains a project idea but is **PAUSED** and must not consume further test cycles until explicitly reopened by the user.
-
-## Initial balance targets
-
-- Legendary per generated weapon: **30%**.
-- Common Biter weapon availability: **20–25%** final target.
-- Human held-weapon drop: preserve confirmed vanilla `LootChance(1.0)` where present.
-- Legendary Core chances: common infected 8–10%, Viral/human ~10%, special infected 12–15%, ordinary containers 8–10%, good/locked chest 12–15%, boss/Chimera 20–30%.
-- Core costs: Rare/Epic->Legendary 1; L->L+1 1; +1->+2 2; +2->+3 3; +3->+4 5; +4->+5 8.
+11. Keep RNG/farming in the final design.
+12. Manual Save Anywhere remains a project idea but is **PAUSED** until explicitly reopened.
 
 ## Confirmed 1.71E mapping
 
@@ -53,65 +100,455 @@ See `docs/BASELINE_1.71E_MAPPING.md`.
 - `StartupMod(...)` is a confirmed native generation mechanism used by vanilla generated weapons.
 - Direct loose `CategoryType_CraftPart` delivery through ordinary Biter corpse-resource loot is rejected as a test-delivery path after runtime failure.
 
-## PLAY NOW A1+A2+A3 V3 — BUILT / STATIC PASS / RUNTIME PENDING
+---
 
-Detailed contract:
-`patches/play_now/PLAY_NOW_A1_A2_A3_V3.md`
+# Current proven gameplay lineage
 
-Final local distributable ZIP SHA-256:
-`4bc2b1c93c92ab269f4790a458e1ff89d267671844d5d3913b06605b01b322d5`
+## CORPSE SAFE A1+A2 — runtime GREEN structural baseline
 
-The binary/user package is local-only and is not committed.
+Local artifact:
 
-### A1 locked ammo economy
+`DLTB_V3_CORPSE_SAFE_A1_A2.zip`
 
-Standard firearm ammo is Scrap-only:
+Package SHA-256:
 
-- Pistol `10 Scrap -> 60`
-- Revolver `14 Scrap -> 24`
-- SMG `18 Scrap -> 120`
-- Shotgun `24 Scrap -> 24`
-- Rifle `30 Scrap -> 80`
-- Marksman `37 Scrap -> 32`
+`b867bcf6b5eca93a91f6535358c1ea84239e4146711687f8f50b3998a5d0cf6f`
 
-Native/special ammo recipes are patched at install time from the user's own game archives. Arrow/Bolt/40mm/Sawblade output is `35` per craft with the user-approved Scrap-heavy / one-secondary-material recipe structure; Flamethrower is `1 Resin + 1 Fuel Can -> 800`.
+`data2.pak` SHA-256:
 
-### A2 loot rebuild
+`dc7dc7970088f7a4f3e7c547c0a6fb7229abaadca8a30f3836491e4624015c75`
 
-- Rebuilt added loot layer across **28 mapped infected/human/boss corpse objects**.
-- Human corpse loot now participates in the modded system; existing held-weapon behavior remains separate.
-- Mapped enemy/human Scrap quantities are minimum `40` when the rebuilt resource path selects Scrap; internal Scrap weight in those mapped subpools is increased by `10%`.
-- Empty target by tier: ordinary Biter `8%`, Viral/Police/basic human `5%`, special/armed human `3%`, elite/boss `1%` per rebuilt draw.
-- Added categories include firearms, melee, native weapon-mod blueprints, actual ammo, and a deliberately rare all-ammo blueprint pack.
-- Conditional weapon rarity in V3: Common `5%`, Rare `20%`, Epic `35%`, Legendary `40%`.
-- Conditional Legendary split: **80% native-Legendary path / 20% promoted-expanded path**.
-- Native firearm path contains `75` explicit rank-mapped vanilla `_legendary_` firearm item IDs.
-- Native melee Legendary path uses vanilla `Enemy_Lottery_Weapons`.
-- Conditional mod-blueprint tier split: T1 `10%`, T2 `20%`, T3 `30%`, T4 `40%`.
-- Added-category calls use `min_amount=1,max_amount=1` so an added category selection does not deliberately resolve to zero quantity.
+Runtime result:
 
-### A3 inventory safety decision
+- corpse `F` works;
+- DLC normal;
+- mod active.
 
-- `QuickSlotsCount` total weapon inventory target: **300% vanilla**, cap `99`.
-- `AmmoSlotsCount`: **200% vanilla** when present, cap `99`.
-- mapped Storage/Stash slot counts: **200% vanilla** when present.
-- native ranged `MaxAmmoCountInventoryUpgrade(...)`: **200% vanilla**, cap `999`.
-- general consumable inventory is not aggressively expanded.
-- **Eight active/equipped weapon slots are NOT forced in V3.** `VisibleQuickSlotsCount` is intentionally unchanged because the mapped input/UI path is only proven for weapon SLOT1–SLOT4. Safety takes precedence over the eight-slot target until a proven UI/input/save-safe route exists.
+This is the structural safety ancestor. Preserve its corpse-routing topology.
 
-### V3 package safety
+## GREEN BALANCED baseline
 
-- User launches `.cmd`; installer/uninstaller run PowerShell with explicit exit/status output.
-- Installer backs up discovered Steam AppID `3008130` saves and the previous known project `data2.pak` before replacement.
-- Known project V1/V2/POC hashes may be intentionally replaced; an **unknown `data2.pak` stops safely**.
-- Native A1 special recipes and A3 player-variable changes are generated from the user's own `data0.pak` / `data1.pak` during install instead of redistributing vanilla source.
-- Uninstaller hash-checks the installed V3 archive, requires explicit `REMOVE`, and warns to reduce inventory/ammo/stash contents below vanilla limits before capacity is reduced.
-- Static gates passed: ZIP integrity, internal manifest hashes, payload brace balance, six exact standard recipes, A2 subroutine references, mapped Scrap minimum, 19 doubled ammo-cap triplets, active-wheel non-modification, and no proprietary binary/save artifact in the distributable source package.
-- **Runtime status: NOT GREEN until normal gameplay smoke test passes.**
+Local artifact:
 
-## POC-001 — Native Legendary Opportunity/Camp Axe — FROZEN GREEN
+`DLTB_V3_GREEN_BALANCED.zip`
+
+Package SHA-256:
+
+`a7f02823958e09b2d2b2111a81870fc98ea2ae37adeccc37338b47c0dce35ced`
+
+`data2.pak` SHA-256:
+
+`ecbbbc1ca3725c4507ce6e3f893c5e3438dc882e1a4bd4b69dbff4457812609e`
+
+This was built strictly from the runtime-GREEN corpse-safe base and became the main low-loot balance reference.
+
+Relevant GREEN-era balance decisions:
+
+- firearm/melee Common/Rare/Epic project weights strongly reduced from earlier aggressive levels;
+- firearm/melee Legendary project weights reduced even more;
+- weapon-mod blueprint pressure reduced;
+- ammo blueprint pack kept rare;
+- native firearm Legendary preference reduced from the older aggressive value;
+- corpse structure remained frozen.
+
+---
+
+# A1 — custom standard firearm ammo economy
+
+Six project-authored standard firearm ammo recipes remain active:
+
+- Pistol: `10 Scrap -> 60`
+- Revolver: `14 Scrap -> 24`
+- SMG: `18 Scrap -> 120`
+- Shotgun: `24 Scrap -> 24`
+- Rifle: `30 Scrap -> 80`
+- Marksman: `37 Scrap -> 32`
+
+## Six-blueprint bundle
+
+The six custom ammo craftplans are delivered as one bundle item:
+
+`DLTB_PlayNow_AllAmmoBlueprints`
+
+Bundle contents:
+
+- `Craftplan_PlayNow_Ammo_Pistol`
+- `Craftplan_PlayNow_Ammo_SMG`
+- `Craftplan_PlayNow_Ammo_Rifle`
+- `Craftplan_PlayNow_Ammo_Shotgun`
+- `Craftplan_PlayNow_Ammo_Revolver`
+- `Craftplan_PlayNow_Ammo_Marksman`
+
+**One bundle drop = all six custom ammo craftplans.**
+
+Do not split these back into six independent blueprint drops unless explicitly requested.
+
+---
+
+# Vanilla special-ammo recipe patch — proven `data3` architecture
+
+Final architecture:
+
+- `data2.pak` = loot + A1/A2 gameplay mod.
+- `data3.pak` = vanilla recipe **output-only** overrides.
+
+`data3` is generated from the user's currently installed official `data0.pak` / `data1.pak` instead of redistributing stale vanilla source.
+
+Current outputs:
+
+- Arrow = `35`
+- Fire Arrow = `35`
+- Shock Arrow = `35`
+- Bolt = `35`
+- Fire Bolt = `35`
+- Shock Bolt = `35`
+- 40mm Electric = `35`
+- 40mm Explosive = `35`
+- 40mm Flashbang = `35`
+- 40mm Freeze = `35`
+- 40mm Incendiary = `35`
+- Sawblade = `35`
+- Flamethrower ammo = `400`
+
+**RequiredItem ingredients remain vanilla.** Do not change special-ammo ingredients unless explicitly requested.
+
+Relevant vanilla craftplans:
+
+- `Craftplan_Arrows_FT`
+- `Craftplan_Arrows_Fire_FT`
+- `Craftplan_Arrows_Shock_FT`
+- `Craftplan_Bolt_FT`
+- `Craftplan_Bolts_Fire_FT`
+- `Craftplan_Bolts_Shock_FT`
+- `Craftplan_GrenadeLauncher_Ammo_Electric_FT`
+- `Craftplan_GrenadeLauncher_Ammo_Explosive_FT`
+- `Craftplan_GrenadeLauncher_Ammo_Flashbang_FT`
+- `Craftplan_GrenadeLauncher_Ammo_Freeze_FT`
+- `Craftplan_GrenadeLauncher_Ammo_Incendiary_FT`
+- `Craftplan_SawbladeLauncher_Ammo_FT`
+- `Craftplan_Flamethrower_Ammo_FT`
+
+Proven source path for these definitions:
+
+`scripts/inventory/collectables_ft.scr`
+
+---
+
+# Final current resource balance
+
+Important correction from an earlier typo:
+
+**Resource chance / route weight is NOT +40%.**
+
+Current rule:
+
+- resource route chance stays at the proven GREEN-style balance;
+- when a resource route is selected, the **quantity** is enlarged;
+- preserve each material's existing internal relative weight;
+- Scrap keeps the already-proven `40++` style ranges.
+
+Typical Scrap ranges retained from the proven lineage include:
+
+- `40-55`
+- `45-65`
+- `50-70`
+- `55-80`
+
+Non-Scrap enemy resource quantity targets:
+
+- Base / Biter / medicine: `33-50`
+- Viral / Human: `33-60`
+- Screamer: `33-70`
+- Screamer Perma: `40-70`
+- Charger / Goon: `40-70`
+- Volatile: `45-75`
+- Baron / elite: `45-80`
+
+Existing materials affected by quantity scaling include resource-pool entries such as:
+
+- Rags;
+- Wiring;
+- Container;
+- Resin;
+- Blades;
+- Weights;
+- Feathers;
+- Leather;
+- Battery;
+- Cleaning Supplies;
+- Oxidizer;
+- Alcohol;
+- Fuel Can;
+- other existing `Craft_*` entries in the selected enemy resource pools.
+
+Do not convert this back into an independent +40% resource-chance system.
+
+---
+
+# Two gameplay profiles
+
+## SIBLING BALANCED
+
+Purpose: more conservative weapon pressure.
+
+- firearm + melee project drop weights: approximately **GREEN x1.05**;
+- weapon-mod blueprint weights: approximately **GREEN x1.05**;
+- native Legendary preference remains conservative relative to old SAFE;
+- resource chance = current proven baseline;
+- resource quantity = current `33++` / Scrap `40++` system;
+- Special Infected Legendary rule below still applies.
+
+Canonical local artifact:
+
+`DLTB_ONECLICK_SIBLING_BALANCED_SPECIAL45.zip`
+
+`data2.pak` SHA-256:
+
+`ab18b545bffbee00ff8ff8ee1e0a9b241bfb2f5864aa88bedc282dab428e771d`
+
+Package SHA-256:
+
+`4e7013a60c10acadaa98a04af78205333cfc86796572227d99d78ebc3c5311b6`
+
+Current usage: sibling ultimately declined installing the gameplay mod, so keep this as an optional artifact only.
+
+## USER HIGH LOOT — current canonical user profile
+
+Purpose: weapon availability close to old A1+A2 SAFE while retaining the safer final architecture.
+
+- firearm + melee project weights = approximately **97% of old A1+A2 SAFE values**;
+- native firearm Legendary preference target = `3.88` versus old SAFE `4.0`;
+- weapon-mod blueprint weights remain modest at approximately **GREEN x1.05**;
+- resource chance = current proven baseline;
+- resource quantity = current `33++` / Scrap `40++` system;
+- Special Infected Legendary rule below applies.
+
+Canonical local artifact:
+
+`DLTB_ONECLICK_USER_HIGH_LOOT_SPECIAL45.zip`
+
+`data2.pak` SHA-256:
+
+`190d7cb172fffe09b227f9b2fdb9b596dea5bf1e2d239fe804c377c45e392657`
+
+Package SHA-256:
+
+`780ce15ce103febee1f9ebd3d35a272c3635e8683f07f404b4f9094b9890429c`
+
+This is the gameplay payload used by the current CO-OP/NORMAL switcher.
+
+---
+
+# Special Infected Legendary 45% — current rule
+
+Special Infected currently tuned:
+
+- Screamer
+- Spitter
+- Banshee
+- Suicider
+- Charger
+- Goon
+- Demolisher
+- Volatile
+- Volatile Apex (`Volatile_Apex`)
+- Tyrant
+
+**Viral is intentionally excluded** because it is too common and would flood Legendary loot.
+
+Current rule:
+
+When the existing project weapon rarity route is selected for one of the Special Infected above, **Legendary rarity share is 45%**.
+
+More precisely:
+
+- Firearm Legendary + Melee Legendary combined = `45%` of the existing project-weapon rarity weight for that Special Infected;
+- Common/Rare/Epic share the remaining `55%` while preserving their prior relative ratio;
+- total project-weapon route weight is preserved;
+- resource chance is unchanged;
+- no new loot branch is added;
+- both NORMAL and PERMA routes are tuned.
+
+Important semantic rule:
+
+**This is NOT an absolute 45% Legendary drop chance per kill.** It is a 45% Legendary share **inside the existing project weapon rarity selection** when that weapon route is actually selected.
+
+This implementation deliberately avoids changing `LootAmount`, `LootedObject` topology, or corpse branch structure.
+
+---
+
+# One-click installer architecture
+
+Current installer philosophy:
+
+`DETECT -> verify known hashes -> backup save -> build recipe data3 from official data0/data1 -> install data2 -> install data3 -> verify -> show final status`
+
+Unknown `data2` / `data3`:
+
+**STOP SAFE.** Do not overwrite or delete unknown mod files.
+
+Uninstall philosophy:
+
+`DETECT -> verify exact known project hashes/state -> remove project data2 + data3 -> verify CLEAN`
+
+Do not blindly delete unknown PAKs.
+
+The installer/uninstaller must keep user-facing `.cmd` launchers, explicit status output, and `pause` on success/failure.
+
+---
+
+# CO-OP / MultiMod mode — RUNTIME PROVEN
+
+Goal:
+
+- user remains modded;
+- sibling remains vanilla;
+- user can join sibling's world.
+
+External compatibility layer used:
+
+Data Pak Limit Bypass / MultiMod.
+
+The project does **not** commit or bundle third-party loader DLL/EXE binaries.
+
+## Current switcher artifact
+
+Local artifact:
+
+`DLTB_USER_SPECIAL45_MODE_SWITCHER.zip`
+
+Switcher package SHA-256:
+
+`55f20cdc44dda8ad9c79d0d1671bf302ee7a0b1410adbb9bba36bb02d5ed28e7`
+
+Gameplay payload inside switcher:
+
+`data2.pak` SHA-256:
+
+`190d7cb172fffe09b227f9b2fdb9b596dea5bf1e2d239fe804c377c45e392657`
+
+## NORMAL / PROVEN mode
+
+Project gameplay files live at:
+
+- `ph_ft\source\data2.pak`
+- `ph_ft\source\data3.pak`
+
+Expected detector state:
+
+`MODE=NORMAL_SOURCE`
+
+User command:
+
+`2_SWITCH_BACK_NORMAL_PROVEN.cmd`
+
+## CO-OP / MULTIMOD mode
+
+Project gameplay files live at:
+
+- `ph_ft\MultiMod\data2.pak`
+- `ph_ft\MultiMod\data3.pak`
+
+Project copies in `ph_ft\source\data2.pak` and `ph_ft\source\data3.pak` are removed while CO-OP mode is active so the project PAKs are loaded only through MultiMod.
+
+Expected detector state:
+
+`MODE=COOP_MULTIMOD`
+
+User command:
+
+`1_SWITCH_TO_COOP_MULTIMOD.cmd`
+
+Switcher requires both loader indicators before entering CO-OP mode:
+
+- `ph_ft\MultiMod`
+- `ph_ft\work\bin\x64\CustomPak.ini`
+
+If these are not detected, switch must stop safely.
+
+## Switcher commands
+
+`0_OPEN_MULTIMOD_DOWNLOAD_PAGE.cmd`
+
+- opens the external Data Pak Limit Bypass / MultiMod page;
+- no third-party binary is bundled by THE BEAST PROJECT.
+
+`1_SWITCH_TO_COOP_MULTIMOD.cmd`
+
+- detect game;
+- verify loader;
+- verify known PAK hashes;
+- build recipe `data3` from official archives;
+- backup saves;
+- snapshot source2/source3/multi2/multi3;
+- install project `data2/data3` into MultiMod;
+- verify;
+- remove project copies from source;
+- verify final CO-OP state.
+
+`2_SWITCH_BACK_NORMAL_PROVEN.cmd`
+
+- detect game;
+- rebuild recipe `data3`;
+- install project `data2/data3` back into source;
+- verify;
+- remove project copies from MultiMod;
+- verify final NORMAL state.
+
+`3_CHECK_CURRENT_MODE.cmd`
+
+Expected status categories:
+
+- `NORMAL_SOURCE`
+- `COOP_MULTIMOD`
+- `OUR_MOD_DISABLED`
+- `MIXED_BOTH_LOCATIONS`
+- `PARTIAL / LEGACY / UNKNOWN`
+
+`4_DISABLE_OUR_MOD.cmd`
+
+- removes project PAKs from both source and MultiMod;
+- does **not** remove the external MultiMod/Data Pak Limit Bypass loader.
+
+## Switcher safety
+
+Each switch:
+
+- requires game closed;
+- creates save backup;
+- snapshots source2/source3/MultiMod2/MultiMod3;
+- stops on unknown PAKs;
+- attempts rollback after mutation failure;
+- rebuilds recipe `data3` from current official `data0/data1`.
+
+## Proven CO-OP runtime result
+
+**Major milestone:** user enabled `COOP_MULTIMOD` and successfully joined sibling's world while sibling remained vanilla and did not install the gameplay mod.
+
+Therefore this exact scenario is **RUNTIME PROVEN**:
+
+USER:
+
+- Data Pak Limit Bypass / MultiMod;
+- USER HIGH LOOT SPECIAL45 gameplay payload in MultiMod.
+
+SIBLING:
+
+- vanilla gameplay;
+- no THE BEAST PROJECT gameplay mod.
+
+RESULT:
+
+- user successfully joined sibling's vanilla world.
+
+Freeze the NORMAL <-> CO-OP switch mechanism unless a concrete runtime failure requires a change. Future gameplay patches should ideally replace only the known `data2` payload and extend the switcher's known-hash list.
+
+---
+
+# POC-001 — Native Legendary Opportunity/Camp Axe — FROZEN GREEN
 
 Local-only artifact SHA-256:
+
 `b707f6918c83dc5962dc24695c63b94244f1f9d77eec2af9be37fed9ceaa5659`
 
 Confirmed runtime result:
@@ -122,7 +559,7 @@ Confirmed runtime result:
 
 Frozen conclusion: rarity/affixes/damage/durability/repair count can persist per item strongly enough to survive mod removal; definition-only socket structure cannot be used as persistent Ascension state.
 
-## POC-002 — Persistent native installed-mod probe — FROZEN GREEN
+# POC-002 — Persistent native installed-mod probe — FROZEN GREEN
 
 Rejected delivery iterations:
 
@@ -135,6 +572,7 @@ Rejected delivery iterations:
 Successful manual Venom persistence test on the Legendary Camp Axe:
 
 **Before Venom:**
+
 - damage `131`
 - durability `160/160`
 - repairs `7/7`
@@ -142,6 +580,7 @@ Successful manual Venom persistence test on the Legendary Camp Axe:
 - Tip/Shaft/Grip/Charm exposed and empty
 
 **After native Venom installed into Tip:**
+
 - visible `Venom — Applies TOXIC on critical hits`
 - damage `137` (`+6`)
 - durability `185/185` (`+25`)
@@ -162,35 +601,41 @@ Successful manual Venom persistence test on the Legendary Camp Axe:
 
 Frozen conclusion: native installed per-item mod/effect state, stat changes, visual attachment, and functional effect can serialize strongly enough to survive removal of the POC that exposed the socket. This remains useful, but POC-003 proved that arbitrary replacement of the carrier's definition-level stat magnitude is not itself serialized per item.
 
-## POC-003 — Legendary -> L+1 persistent carrier probe — RUNTIME COMPLETE / CUSTOM STAT SIGNATURE FAILED UNINSTALL
+# POC-003 — Legendary -> L+1 persistent carrier probe — RUNTIME COMPLETE / CUSTOM STAT SIGNATURE FAILED UNINSTALL
 
 Project-authored builder:
+
 `tools/build_poc003_l1_carrier.py`
 
-Detailed test contract/result:
+Detailed contract:
+
 `patches/poc/POC_003_L1_CARRIER.md`
 
 Runtime record:
+
 `tests/results/POC_003_RUNTIME_UNINSTALL_RESULT.md`
 
 Local-only `data2.pak` SHA-256:
+
 `5608ecb1336ca84c80bc1472000ab9b50eb79a94a8a6a6c1b127f370cd31e17a`
 
 Local user-test package SHA-256:
+
 `a1eee27144a7ac612d0600bce57fa117d3ea8a915ca8ca258ae1615b13655a59`
 
 POC design:
 
-- generate a **new** Legendary Camp Axe through the controlled POC-001 acquisition path;
+- generate a new Legendary Camp Axe through the controlled POC-001 acquisition path;
 - attach native `ShockMod_Random_FT_T4_TIP` via `StartupMod(...)`;
 - temporarily give that carrier a deliberately non-vanilla signature:
-  - `CraftingEffect_IncreasedDamageMul` level **8**;
-  - `CraftingEffect_IncreasedDurability` level **3** (`+18%`);
+  - `CraftingEffect_IncreasedDamageMul` level `8`;
+  - `CraftingEffect_IncreasedDurability` level `3` (`+18%`);
   - attack speed unchanged.
 
 Runtime result:
 
 **Initial / POC active:**
+
 - damage `147`
 - durability `160/188`
 - repairs `7/7`
@@ -198,12 +643,14 @@ Runtime result:
 - `Spark — Applies SHOCK on critical hits` visible
 
 **Save -> quit -> reload with POC-003 installed:** PASS.
+
 - damage remained `147`
 - durability remained `160/188`
 - repairs remained `7/7`
 - affixes and Spark remained visible
 
 **After POC-003 uninstall -> vanilla reload:**
+
 - Legendary rarity preserved
 - listed affixes preserved
 - damage changed `147 -> 142`
@@ -223,33 +670,113 @@ Frozen interpretation:
 - Do **not** extend this parameter-override strategy to L+2..L+5.
 - Next Ascension research must identify a different serialized per-item field/state or a native carrier whose magnitude itself is stored on the item instance.
 
-## Manual Save Anywhere research — PAUSED / CLOSED TEMPORARILY
+---
+
+# Manual Save Anywhere research — PAUSED / CLOSED TEMPORARILY
 
 User decision on 2026-09-22: **stop Manual Save Anywhere work for now. Do not continue collectors, native hooks, position-restoration experiments, or extra user test cycles unless the user explicitly reopens this feature.**
 
-### What was actually proven
+## What was actually proven
 
 - DebugConf/ConsoleCommand was tested through packed, loose, EXE-adjacent, and explicit `-debugconf=` routes; visible `HideHUD()` canaries never executed. This route is a frozen dead end for retail 1.71E.
-- Native binary mapping V7–V11 recovered real save-system structures and call paths in `gamedll_ph_x64_rwdi.dll`, including `SaveController`, `SaveRequestController`, their vtables, the native save dispatcher, quick-save selector behavior, and the game's own caller setup.
-- The runtime helper was refined through POC-J/J2/J3/J4:
-  - J2 fixed disappearing error output by keeping PowerShell in the same CMD;
-  - J3 fixed the reserved PowerShell `$PID` collision;
-  - J4 fixed process discovery by selecting `DyingLightGame_TheBeast_x64_rwdi.exe` instead of relying on window title.
+- Native binary mapping V7-V11 recovered real save-system structures and call paths in `gamedll_ph_x64_rwdi.dll`, including `SaveController`, `SaveRequestController`, their vtables, the native save dispatcher, quick-save selector behavior, and the game's own caller setup.
+- Runtime helper refinements through POC-J/J2/J3/J4 fixed status output, PowerShell `$PID` collision, and process discovery.
 - POC-J4 successfully found and validated exactly one active `SaveController` object, backed up the test save, armed the controller on F5, and observed the real Steam save file change immediately afterward.
 - The successful F5 sequence showed native controller state transition from inactive to armed and then back to inactive after the engine processed it; the watched `save_ft_0.sav` changed in the same trigger window.
 
-### What remains unresolved
+## What remains unresolved
 
-- The F5-native trigger is therefore a **real save-file-write proof**, but it has **not** been accepted as a complete Save Anywhere feature.
-- Inventory/progression persistence is not sufficient proof because vanilla saves those normally.
+- The F5-native trigger is a **real save-file-write proof**, but it is **not** accepted as a complete Save Anywhere feature.
+- Inventory/progression persistence is insufficient proof because vanilla saves those normally.
 - Exact last-player-position restoration was not established to the user's satisfaction.
-- A possible future implementation could pair the native save with explicit position/rotation/map capture and post-load restoration, but the user chose not to pursue that now.
+- A possible future implementation could pair native save with explicit position/rotation/map capture and post-load restoration, but the user chose not to pursue that now.
 
-### Frozen conclusion
+## Frozen conclusion
 
 Manual Save Anywhere is **not GREEN**, **not deleted**, and **not an active workstream**. Preserve all findings for a possible future reopen, but spend zero further development/test effort on it until explicitly requested.
 
-## Technical invariants
+---
+
+# Historical failures / rejected builds
+
+Do not recommend or reuse these as active builds:
+
+## A3/DLC failure lineage
+
+- `DLTB_A1_A2_A3_V3.zip` — produced `DLC ITEMS DISABLED` popup.
+- `DLTB_A1_A2_A3_V31_SAFE.zip` — also failed.
+- `DLTB_EMERGENCY_RECOVER_PRE_V3.zip` — recovery attempt did not solve that lineage.
+
+A3 remains suspended.
+
+## Aggressive V3 FINAL LootedObject rewrite
+
+Runtime failure:
+
+- corpse `F` prompt disappeared.
+
+Frozen conclusion:
+
+- never repeat the aggressive `LootedObject` rewrite.
+
+## Old STEP1 runtime-merge installer
+
+`DLTB_V3_GREEN_VANILLA_RECIPE_OUTPUT_STEP1.zip`
+
+Do not reuse.
+
+Observed failure state included missing `data2.pak`, so game ran vanilla. This did not prove recipe content itself was invalid; it proved that installer architecture/state handling was unsafe.
+
+## STEP1 FIXED V2
+
+Failed with:
+
+`Argument types do not match`
+
+Abandoned.
+
+## STEP1 V3
+
+False duplicate Steam-library detection caused safe-stop / non-install behavior.
+
+Abandoned.
+
+## STEP1 V4
+
+Succeeded and proved the safer architectural split:
+
+- `data2` = gameplay/loot;
+- `data3` = output-only recipe override.
+
+That architecture was carried forward into current one-click packages.
+
+---
+
+# Total clean / emergency recovery tool
+
+Local artifact:
+
+`DLTB_TOTAL_CLEAN_TOOL.zip`
+
+SHA-256:
+
+`1b1e638217a8e8051ce6f981274eaea2dac2d0a0defc7a558eafade327e73de9`
+
+Purpose: local DLTB cleanup/reset when needed.
+
+Can target local game/install leftovers such as game folder, Steam userdata AppID `3008130`, Documents, shader/downloading/compatdata, and manifest-related local state.
+
+Steam Cloud server data is **not** directly deleted by the script.
+
+Official Steam save location used by project tooling:
+
+`Steam\userdata\<SteamID>\3008130\remote\out\`
+
+Use only for emergency recovery / clean reinstall, not routine patching.
+
+---
+
+# Technical invariants
 
 - Do not commit proprietary PAKs, vanilla extracted archives, saves, DLLs, EXEs, or local-only binary test artifacts.
 - Prefer patch/config/build tooling over redistributing vanilla content.
@@ -259,11 +786,12 @@ Manual Save Anywhere is **not GREEN**, **not deleted**, and **not an active work
 - Keep held-weapon drop and extra corpse-loot weapon rolls separate.
 - Attack speed remains safety-sensitive.
 - Scope loot-builder edits to exact named blocks; no ambiguous global first-match anchors.
-- Test-delivery builds may be deterministic; final balance must return to frozen RNG targets.
-- For Windows helper packages: user launches `.cmd`; `.cmd` launches the `.ps1`, status/log output is explicit, and the CMD stays open with `pause` on both success and failure.
+- For Windows helper packages: user launches `.cmd`; `.cmd` launches `.ps1`, status/log output is explicit, and CMD stays open with `pause` on both success and failure.
 - Distinguish **FILESYSTEM_INSTALL** from **ENGINE_LOAD / runtime effect** in every future installer/test.
+- Treat current corpse routing, `data2/data3` split, and NORMAL<->COOP switcher as frozen-green structures.
+- Future gameplay patches should ideally change only the known `data2` payload and extend known-hash detection.
 
-## Frozen-green systems
+# Frozen-green systems
 
 - **POC-001 native Legendary identity:** GREEN.
 - **Persistence of rarity/affixes/damage/durability/repair count after uninstall:** GREEN for tested Camp Axe path.
@@ -273,9 +801,13 @@ Manual Save Anywhere is **not GREEN**, **not deleted**, and **not an active work
 - **Functional Toxic proc after uninstall:** GREEN.
 - **POC-003 with-POC save/reload:** PASS.
 - **POC-003 arbitrary custom L+1 stat signature after uninstall:** NOT persistent / NOT GREEN.
-- **Manual Save Anywhere:** PAUSED / NOT GREEN. Native F5 save-file write is proven, exact position behavior unresolved.
+- **CORPSE SAFE A1+A2 routing:** GREEN.
+- **GREEN `data2` + separate recipe `data3` architecture:** GREEN.
+- **Current one-click `data2/data3` install architecture:** proven enough for active use.
+- **COOP_MULTIMOD -> join vanilla sibling world:** RUNTIME GREEN for the tested setup.
+- **Manual Save Anywhere:** PAUSED / NOT GREEN. Native F5 save-file write is proven; exact position behavior unresolved.
 
-## Failed hypotheses / rejected implementations
+# Failed hypotheses / rejected implementations
 
 1. Custom POC-002 Biter loot subroutine.
 2. POC-002B ambiguous global anchor.
@@ -286,17 +818,87 @@ Manual Save Anywhere is **not GREEN**, **not deleted**, and **not an active work
 7. `debugconfdefault.scr` override from inside `data2.pak`.
 8. physical `ph_ft\source\debugconfdefault.scr` as a reliable retail DebugConf load path.
 9. physical EXE-adjacent `debugconfdefault.scr` as a reliable retail DebugConf load path.
-10. explicit `debugconf.scr` + `-debugconf=` as a reliable retail runtime route for this mod.
+10. explicit `debugconf.scr` + `-debugconf=` as a reliable retail runtime route.
+11. Aggressive `LootedObject` rewrite that removed corpse `F` interaction.
+12. A3 inventory/player-variable lineage that triggered DLC-disable behavior.
+13. Old STEP1 merge-in-place architecture that could leave `data2` absent.
 
 POC-B/C/D/E remain **inconclusive command probes**, not proof that the underlying native save functions themselves fail.
 
-## next_safe_action
+---
 
-1. **Run the first PLAY NOW A1+A2+A3 V3 in-game smoke test before changing V3 balance again.** Verify install ExitCode=0, normal corpse `F` interaction, weapon inventory/UI, human loot, Scrap >=40 when selected, ammo/mod variety, at least one A1 standard and one A1 native/special recipe, save/reload stability, and continued Legendary-family behavior over normal play.
-2. Keep the eight-active-weapon target deferred. Do not modify `VisibleQuickSlotsCount` or invent SLOT5–SLOT8 until a proven UI/input/save-safe implementation is mapped.
-3. Keep POC-001 and POC-002 frozen green.
-4. **Manual Save Anywhere stays paused. Do not resume it without an explicit user request.**
-5. Treat POC-003's custom parameter-override carrier strategy as rejected for arbitrary persistent Ascension magnitude; do not build L+2..L+5 from it.
-6. After V3 smoke testing, the deeper weapon track may resume by inspecting extracted 1.71E weapon/save-related definitions for a different **per-item serialized** quantity/state that can encode L+1 independently for two copies of the same weapon.
-7. Prefer a field that already survives definition removal or whose numeric magnitude is item-instance data; avoid another global definition-only multiplier.
-8. Build the next smallest L+1 POC only after that serialized candidate is mapped. Full Legendary Core remains blocked until a viable per-item Ascension state is proven.
+# Current canonical local artifacts
+
+These are local/user artifacts and are **not committed** to the repository.
+
+## Main user gameplay
+
+`DLTB_ONECLICK_USER_HIGH_LOOT_SPECIAL45.zip`
+
+`data2` SHA-256:
+
+`190d7cb172fffe09b227f9b2fdb9b596dea5bf1e2d239fe804c377c45e392657`
+
+Package SHA-256:
+
+`780ce15ce103febee1f9ebd3d35a272c3635e8683f07f404b4f9094b9890429c`
+
+## NORMAL / CO-OP switcher
+
+`DLTB_USER_SPECIAL45_MODE_SWITCHER.zip`
+
+Package SHA-256:
+
+`55f20cdc44dda8ad9c79d0d1671bf302ee7a0b1410adbb9bba36bb02d5ed28e7`
+
+Embedded gameplay `data2` SHA-256:
+
+`190d7cb172fffe09b227f9b2fdb9b596dea5bf1e2d239fe804c377c45e392657`
+
+Runtime milestone:
+
+**CO-OP with vanilla sibling = PROVEN SUCCESS.**
+
+## Optional sibling balanced build
+
+`DLTB_ONECLICK_SIBLING_BALANCED_SPECIAL45.zip`
+
+`data2` SHA-256:
+
+`ab18b545bffbee00ff8ff8ee1e0a9b241bfb2f5864aa88bedc282dab428e771d`
+
+Package SHA-256:
+
+`4e7013a60c10acadaa98a04af78205333cfc86796572227d99d78ebc3c5311b6`
+
+Sibling currently chooses vanilla instead.
+
+---
+
+# next_safe_action
+
+When development resumes:
+
+1. Treat **USER HIGH LOOT SPECIAL45** as the canonical user gameplay baseline.
+2. Preserve corpse routing / `LootedObject` topology.
+3. Preserve the `data2` gameplay + `data3` recipe split.
+4. Preserve the NORMAL <-> COOP MultiMod switch mechanism.
+5. Preserve current resource **chance** and `33++` / Scrap `40++` **quantity** behavior unless the user explicitly asks for rebalance.
+6. Preserve the six-ammo-blueprint one-bundle behavior.
+7. Preserve Special Infected Legendary `45%` semantics as **share inside the existing project weapon rarity route**, not an absolute per-kill chance.
+8. Viral stays excluded from Special45 unless explicitly requested.
+9. Do not reintroduce A3, `player_variables`, stash/versioning changes, or aggressive corpse rewrites.
+10. Prefer the next gameplay patch as numeric/sub-pool changes in `data2` only.
+11. Extend installer/switcher known-hash detection for any new canonical `data2` payload.
+12. Test NORMAL mode first after each gameplay payload change:
+    - modified-data behavior as expected;
+    - no `DLC ITEMS DISABLED`;
+    - corpse `F` works;
+    - loot/resources behave as intended;
+    - recipe `data3` still works;
+    - save/reload stable.
+13. Then test `COOP_MULTIMOD` and confirm joining sibling's vanilla world still works.
+14. Keep POC-001 and POC-002 frozen green.
+15. Keep Manual Save Anywhere paused unless explicitly reopened.
+16. Keep POC-003 custom magnitude strategy rejected; do not build L+2..L+5 from it.
+17. Deeper Ascension research may resume only by finding a genuinely per-item serialized state/carrier whose magnitude survives definition removal.
