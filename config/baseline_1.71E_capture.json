@@ -1,0 +1,12 @@
+{
+  "game": "Dying Light: The Beast",
+  "observed_version": "1.71E",
+  "source_paks": ["data0.pak", "data1.pak"],
+  "all_archive_path_count": 19727,
+  "relevant_path_count": 366,
+  "targeted_extract_count": 58,
+  "targeted_extract_missing": 0,
+  "captured_at": "2026-09-20T17:19:02.1011483+09:00",
+  "local_reference_zip_sha256": "09a57b50bffd90f9862b36377384b172e23770787ab086b2a65809a9d63455bb",
+  "note": "Original local paths omitted. Raw extracted game content is intentionally not committed; regenerate it with tools/extract_targeted_baseline_1.71E.ps1."
+}
