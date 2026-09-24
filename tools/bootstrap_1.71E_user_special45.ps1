@@ -23,10 +23,12 @@ Write-Host ' THE BEAST PROJECT - 1.71E PORTABLE BOOTSTRAP'
 Write-Host '=============================================================='
 Write-Host ''
 Write-Host '1/2 Verify + extract exact 58-file 1.71E local baseline'
-$extractArgs=@('-NoProfile','-ExecutionPolicy','Bypass','-File',$extractor)
-if($GameDir){$extractArgs+=@('-GameDir',$GameDir)}
-$p=Start-Process powershell.exe -Wait -PassThru -NoNewWindow -ArgumentList $extractArgs
-if($p.ExitCode -ne 0){throw "Baseline extractor gagal. ExitCode=$($p.ExitCode)"}
+if($GameDir){
+    & $extractor -GameDir $GameDir
+}else{
+    & $extractor
+}
+if($LASTEXITCODE -and $LASTEXITCODE -ne 0){throw "Baseline extractor gagal. ExitCode=$LASTEXITCODE"}
 
 $py=Find-Python
 if(-not $py){throw 'Python 3 tidak ditemukan. Install Python 3 lalu jalankan bootstrap lagi.'}
