@@ -18,12 +18,14 @@ This candidate intentionally does **not** alter `LootedObject("Biter")` topology
 
 Only this canonical SPECIAL45 file is changed:
 
-`scripts/inventory/loot/lootpools_ft.loot`
+`scripts/inventory/loot/lootsets_ft.loot`
 
 Only these existing named sub-pools are replaced:
 
 - `Biter_CommonResources`
 - `Biter_Resources`
+
+`scripts/inventory/loot/lootpools_ft.loot` remains byte-identical to canonical SPECIAL45 and is used only to verify the frozen Biter route.
 
 The outer ordinary Biter routes remain frozen:
 
@@ -84,7 +86,7 @@ Output:
 
 The builder first reconstructs canonical SPECIAL45 and requires its exact parent hash before applying the candidate patch.
 
-It also guards the frozen `LootedObject("Biter")` route lines and fails if those routes no longer match the expected SPECIAL45 structure.
+It also verifies the frozen `LootedObject("Biter")` route in untouched `lootpools_ft.loot` and fails if those routes no longer match the expected SPECIAL45 structure.
 
 ## Runtime gate before promotion
 
