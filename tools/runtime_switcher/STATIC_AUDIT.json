@@ -1,0 +1,13 @@
+{
+  "package": "DLTB_USER_SPECIAL45_MODE_SWITCHER",
+  "payload_data2_sha256": "190d7cb172fffe09b227f9b2fdb9b596dea5bf1e2d239fe804c377c45e392657",
+  "normal_mode": ["ph_ft/source/data2.pak", "ph_ft/source/data3.pak"],
+  "coop_mode": ["ph_ft/MultiMod/data2.pak", "ph_ft/MultiMod/data3.pak"],
+  "multimod_detection": ["ph_ft/MultiMod", "ph_ft/work/bin/x64/CustomPak.ini"],
+  "third_party_binary_bundled": false,
+  "recipe_built_from_current_official_data0_data1": true,
+  "unknown_slot_policy": "STOP",
+  "backup_saves_each_switch": true,
+  "snapshot_four_mod_slots": true,
+  "rollback_attempt_on_failure": true
+}
