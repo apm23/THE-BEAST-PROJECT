@@ -58,11 +58,15 @@ The original baseline scanner recorded:
 - `RelevantPathCount=366`
 - `data0.pak,data1.pak`
 
-The 366 project-relevant path list is committed as `config/relevant_file_list_1.71E.txt` so future work can search likely game definitions without redistributing their contents.
+The exact 366 project-relevant archive-path records are committed as six text parts under:
+
+`config/relevant_file_list_1.71E/`
+
+Concatenate `part01.txt` through `part06.txt` in lexical order to reconstruct the original 366-line list. This is path metadata only; no vanilla file content is stored there.
 
 ## Current runtime tooling source
 
-Project-authored switcher source is committed under `tools/runtime_switcher/`. It preserves the proven NORMAL <-> CO-OP MultiMod logic without committing the gameplay `data2_payload.pak` or any third-party loader binary.
+Project-authored switcher source belongs under `tools/runtime_switcher/`. It preserves the proven NORMAL <-> CO-OP MultiMod logic without committing the gameplay `data2_payload.pak` or any third-party loader binary.
 
 The canonical USER HIGH LOOT SPECIAL45 payload SHA-256 remains:
 
