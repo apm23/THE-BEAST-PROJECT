@@ -11,7 +11,8 @@ from pathlib import Path
 import build_user_special45_payload as special45
 
 PROFILE = "USER_SPECIAL45_BITER_RESOURCE_PARITY"
-LOOT_PATH = "scripts/inventory/loot/lootpools_ft.loot"
+POOL_PATH = "scripts/inventory/loot/lootpools_ft.loot"
+SETS_PATH = "scripts/inventory/loot/lootsets_ft.loot"
 COMMON_ANCHOR = "sub Biter_CommonResources(float weight = 1.0, int min_amount = 1, int max_amount = 1, float prob = 1.0)"
 RESOURCES_ANCHOR = "sub Biter_Resources(float weight = 1.0, int min_amount = 1, int max_amount = 1, float prob = 1.0)"
 
@@ -175,9 +176,13 @@ def patch_biter_subpools(text: str) -> str:
     if before_braces != after_braces:
         raise RuntimeError(f"Brace count changed: {before_braces} -> {after_braces}")
 
-    # Guardrails: outer corpse-routing block must not be edited by this builder.
+    return text
+
+
+def verify_frozen_biter_routes(lootpools_text: str) -> None:
+    # Guardrails live in lootpools_ft.loot; we never mutate this file.
     biter_anchor = 'LootedObject("Biter")'
-    _, _, biter_block = find_braced_block(text, biter_anchor)
+    _, _, biter_block = find_braced_block(lootpools_text, biter_anchor)
     expected_routes = [
         "use Biter_CommonResources (weight = 20.0, min_amount = 0, max_amount = 2);",
         "use Biter_Resources (weight = 10.0, min_amount = 0, max_amount = 1);",
@@ -188,10 +193,8 @@ def patch_biter_subpools(text: str) -> str:
         if route not in biter_block:
             raise RuntimeError(f"Frozen Biter route guard failed: {route}")
 
-    return text
 
-
-def reconstruct_special45(repo: Path, baseline: Path, patch_dir: Path) -> dict[str, bytes]:
+def reconstruct_special45(baseline: Path, patch_dir: Path) -> dict[str, bytes]:
     files: dict[str, bytes] = {}
     for path, stem in special45.PATCH_MAP.items():
         base_path = baseline / Path(path)
@@ -270,21 +273,25 @@ def main() -> int:
     )
     args = ap.parse_args()
 
-    files = reconstruct_special45(repo, args.baseline, args.patch_dir)
+    files = reconstruct_special45(args.baseline, args.patch_dir)
 
     original_hashes = {path: sha256(data) for path, data in files.items()}
-    original_loot = files[LOOT_PATH]
-    text = original_loot.decode("latin1")
-    patched_text = patch_biter_subpools(text)
-    files[LOOT_PATH] = patched_text.encode("latin1")
 
-    # Only lootpools_ft.loot may differ from canonical SPECIAL45.
+    # lootpools_ft.loot contains LootedObject("Biter") routing and stays byte-identical.
+    verify_frozen_biter_routes(files[POOL_PATH].decode("latin1"))
+
+    # lootsets_ft.loot contains the two resource sub-pools we intentionally rebalance.
+    original_sets = files[SETS_PATH]
+    patched_text = patch_biter_subpools(original_sets.decode("latin1"))
+    files[SETS_PATH] = patched_text.encode("latin1")
+
+    # Only lootsets_ft.loot may differ from canonical SPECIAL45.
     for path, data in files.items():
-        if path == LOOT_PATH:
-            if data == original_loot:
-                raise RuntimeError("Candidate patch made no change to lootpools_ft.loot")
+        if path == SETS_PATH:
+            if data == original_sets:
+                raise RuntimeError("Candidate patch made no change to lootsets_ft.loot")
         elif sha256(data) != original_hashes[path]:
-            raise RuntimeError(f"Unexpected non-loot file change: {path}")
+            raise RuntimeError(f"Unexpected canonical file change: {path}")
 
     candidate_data = write_candidate_pak(files, args.output)
     candidate_hash = sha256(candidate_data)
@@ -295,7 +302,8 @@ def main() -> int:
         "game": "Dying Light: The Beast 1.71E",
         "derived_from_data2_sha256": special45.CANONICAL_DATA2_SHA256,
         "candidate_data2_sha256": candidate_hash,
-        "changed_file": LOOT_PATH,
+        "changed_file": SETS_PATH,
+        "verified_unchanged_route_file": POOL_PATH,
         "frozen_outer_biter_routing": True,
         "resource_weight": RESOURCE_WEIGHT,
         "resource_quantities": {
@@ -308,6 +316,7 @@ def main() -> int:
             "Each listed craft resource has weight 5.0, equal to Scrap.",
             "Cash remains only in Biter_CommonResources.",
             "Plant_Poppy and Plant_Cordyceps remain low-weight extras only in Biter_Resources.",
+            "lootpools_ft.loot remains byte-identical to canonical SPECIAL45.",
             "No LootedObject(Biter) route/topology edit is performed.",
             "Canonical SPECIAL45 source and hash remain unchanged for rollback.",
         ],
