@@ -16,9 +16,8 @@ SETS_PATH = "scripts/inventory/loot/lootsets_ft.loot"
 COMMON_ANCHOR = "sub Biter_CommonResources(float weight = 1.0, int min_amount = 1, int max_amount = 1, float prob = 1.0)"
 RESOURCES_ANCHOR = "sub Biter_Resources(float weight = 1.0, int min_amount = 1, int max_amount = 1, float prob = 1.0)"
 
-# Keep this first candidate limited to crafting resources already present in the
-# canonical SPECIAL45 Biter resource graph. This avoids introducing a new
-# item family while making each listed crafting resource equiprobable with Scrap.
+# Main loose/pickup crafting resources. Keep firearm-specific scrap excluded.
+# Every listed resource gets the same internal selection weight as Scrap.
 RESOURCE_ITEMS = [
     ("Craft_Scrap", 40, 55),
     ("Craft_Rags", 33, 50),
@@ -29,6 +28,8 @@ RESOURCE_ITEMS = [
     ("Craft_Weights", 33, 50),
     ("Craft_Feathers", 33, 50),
     ("Craft_Leather", 33, 50),
+    ("Craft_Electrical_Parts", 33, 50),
+    ("Craft_Pigments", 33, 50),
     ("Craft_Battery", 33, 50),
     ("Craft_Cleaning_Supplies", 33, 50),
     ("Craft_Oxidizer", 33, 50),
@@ -314,6 +315,8 @@ def main() -> int:
         "notes": [
             "Both Biter_CommonResources and Biter_Resources use the same craft-resource set.",
             "Each listed craft resource has weight 5.0, equal to Scrap.",
+            "Electrical Parts and Pigments are added as normal pickup-resource types.",
+            "Firearm-specific scrap remains excluded.",
             "Cash remains only in Biter_CommonResources.",
             "Plant_Poppy and Plant_Cordyceps remain low-weight extras only in Biter_Resources.",
             "lootpools_ft.loot remains byte-identical to canonical SPECIAL45.",
