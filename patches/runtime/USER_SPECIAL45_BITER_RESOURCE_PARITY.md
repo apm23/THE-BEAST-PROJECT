@@ -10,7 +10,7 @@ Canonical parent `data2` SHA-256:
 
 ## Goal
 
-Make the ordinary Biter crafting-resource drops such as Battery, Wiring, Oxidizer, Cleaning Supplies, etc. have the **same internal selection weight as Scrap**, while preserving the proven corpse routing.
+Make the ordinary Biter crafting-resource drops such as Battery, Wiring, Oxidizer, Cleaning Supplies, Electrical Parts, Pigments, etc. have the **same internal selection weight as Scrap**, while preserving the proven corpse routing.
 
 This candidate intentionally does **not** alter `LootedObject("Biter")` topology or its outer route weights.
 
@@ -51,15 +51,17 @@ Both Biter resource sub-pools contain the same crafting-resource set below, and 
 | `Craft_Weights` | 33-50 | 5.0 |
 | `Craft_Feathers` | 33-50 | 5.0 |
 | `Craft_Leather` | 33-50 | 5.0 |
+| `Craft_Electrical_Parts` | 33-50 | 5.0 |
+| `Craft_Pigments` | 33-50 | 5.0 |
 | `Craft_Battery` | 33-50 | 5.0 |
 | `Craft_Cleaning_Supplies` | 33-50 | 5.0 |
 | `Craft_Oxidizer` | 33-50 | 5.0 |
 | `Craft_Alcohol` | 33-50 | 5.0 |
 | `Craft_Fuel_Can_FT` | 33-50 | 5.0 |
 
-This first candidate is deliberately restricted to resource types already present in the canonical SPECIAL45 Biter resource graph.
+The first 15 entries correspond to the main loose/pickup craftpart families exposed by the game's general loot definitions; Fuel Can is retained because it is already part of the canonical SPECIAL45 Biter resource graph.
 
-`Craft_Electrical_Parts`, `Craft_Pigments`, and `Craft_Firearm_Scrap_FT` are not added in this candidate because they were not part of the existing ordinary-Biter resource set.
+`Craft_Firearm_Scrap_FT` remains excluded because it is firearm-specific rather than part of the normal loose crafting-resource family targeted here.
 
 Existing extras are preserved:
 
@@ -94,7 +96,7 @@ Do not mark this profile proven until all of these pass in NORMAL mode:
 
 1. no `DLC ITEMS DISABLED`;
 2. ordinary corpse `F` interaction still works;
-3. ordinary Biters visibly yield the intended Battery/Wiring/Oxidizer/etc. resource mix;
+3. ordinary Biters visibly yield the intended Battery/Wiring/Oxidizer/Electrical Parts/Pigments/etc. resource mix;
 4. quantities remain Scrap `40-55`, non-Scrap `33-50`;
 5. save/reload is stable;
 6. standard/special weapon loot behavior is unchanged;
