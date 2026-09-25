@@ -997,3 +997,593 @@ When development resumes:
 17. Keep Manual Save Anywhere paused unless explicitly reopened.
 18. Keep POC-003 custom magnitude strategy rejected.
 19. Deeper Ascension research may resume only after finding a genuinely per-item serialized state/carrier whose magnitude survives definition removal.
+
+---
+
+# LATEST OVERRIDE — 2026-09-25 — G1.1 / CP1 CO-OP COMPATIBILITY
+
+**This section is the newest authority for the G1/G1.1/CP1 branch.** Where it conflicts with older `Current phase`, `CO-OP / MultiMod`, `Current canonical artifacts / hashes`, or `next_safe_action` text above, **this section wins**.
+
+Global continuity phrase remains:
+
+`BEAST-PROVEN-SWITCH45`
+
+CP1 sub-project resume code:
+
+`PO`
+
+Interpret `PO` as: resume the paused CP1 co-op compatibility investigation from the recovered G1.1-safe state and the untested Beta1 native-carrier candidate below. Do **not** restart Alpha3/Alpha4 experiments.
+
+## Runtime-safe current local state after recovery
+
+As of the end of this session:
+
+- user is back on the recovered **SOLO G1.1** state;
+- inventory is normal again;
+- attacks work again;
+- corpse `F` loot works again;
+- Alpha4 is permanently blacklisted;
+- CP1 is intentionally **PAUSED** until the user resumes it with code `PO`;
+- CP1 Beta1 exists as a local test artifact but has **NOT** received runtime proof yet.
+
+## Biter resource parity / post-SPECIAL45 lineage
+
+A Biter resource parity pass was made while preserving corpse topology.
+
+The relevant candidate `data2` after resource parity was:
+
+`fba6fec688aba689b515897a8d20c421d14033dd8ba92efed958a4bc272ae775`
+
+Local artifact:
+
+`DLTB_SPECIAL45_BITER_RESOURCE_FINAL_AB.zip`
+
+ZIP SHA-256:
+
+`189b268b63343535422d25b64d21e764bf564a8b1f81aa1171eb4a72b9a4659c`
+
+Resource parity behavior included equal internal weight `5` for the ordinary Biter/Common resource families and retained the high-quantity resource philosophy. User runtime result: **SUCCESS**.
+
+The old DATA2-only MultiMod co-op architecture was then tested using this lineage.
+
+Initial local switcher artifact:
+
+`DLTB_BITER_RESOURCE_COOP_SWITCHER_SAFE.zip`
+
+ZIP SHA-256:
+
+`355b9ad42f961dde58ea45ae3a920fb8bb537db008b42bf5a17f97c55dad44d2`
+
+Hotfix script SHA-256:
+
+`ede06d6d21b7eb1366787a22f9cd92ef68fe47d77bdd868f790b58e387b5f5d5`
+
+Proven safe CO-OP layout from that test:
+
+- `ph_ft\source\data2.pak` = absent;
+- `ph_ft\source\data3.pak` = absent;
+- `ph_ft\MultiMod\data2.pak` = project payload;
+- `ph_ft\MultiMod\data3.pak` = absent;
+- `CustomPak.ini` present.
+
+User runtime result: **"work maksimal"**. Therefore **DATA2-only MultiMod** is a stronger proven co-op topology than the older data2+data3 MultiMod arrangement, which had repeated disconnects.
+
+## QOL merge / stack / weapon-access proven lineage
+
+A merged QOL parent was produced after auditing the user-selected Nexus changes:
+
+- silent gunshots;
+- improved flashlight;
+- expanded inventory capacity without upgrades;
+- survivor sense fix.
+
+Merged QOL parent `data2` SHA-256:
+
+`a02a19560cd61b153135d7e4c777521a4cc5fc9d20046199155cdad1145b9fdf`
+
+A stack `99,999` hotfix parent was then proven at runtime:
+
+`77e7ff5630167af4f733bda7e754ab0eb8f90c0491e75403caaeb64077a44155`
+
+Weapon access test artifact:
+
+`DLTB_WEAPON68_LEGEND_DROP_DISSOLVE_TEST.zip`
+
+ZIP SHA-256:
+
+`925fcb456f774f012cdaebf4c5e8756a30b396c1756dff5b876354465c4d4094`
+
+`data2` SHA-256:
+
+`8b1587ce0741295e98598a2ea6e22fe67102a6b34644cacd14f7558ea09dde18`
+
+This expanded quick slots `34 -> 68` and normalized 60 Legendary firearm definitions for drop/share/dismantle testing.
+
+Final G1 weapon-access preflight artifact:
+
+`DLTB_G1_WEAPON_ACCESS_PREFLIGHT.zip`
+
+ZIP SHA-256:
+
+`a4873805c6989fe29dd35d5820e61478b9fc8229b0cc9add7a582cb3da54c010`
+
+`data2` SHA-256:
+
+`6ee08e9d867a9a72b1968b557256747ac701c511f7580b0605f4cd3906e2b5c5`
+
+Normalized target definitions:
+
+- Orange: `180`;
+- Exotic: `90`;
+- special Violet `.38` family: `15`;
+- total target definitions: `285`;
+- changed definitions: `225`.
+
+Runtime proof from user:
+
+**weapon drop + dismantle works.**
+
+Important limitation:
+
+`CanDrop(true)` + `IsShareable(true)` is **not** enough to prove cross-player pickup. That later failed for some Iconic/Legendary items with the message `This item belongs to other player`.
+
+## G1 — Night Sovereign scope and runtime findings
+
+G1 source collector artifact:
+
+`DLTB_G1_SOURCE_COLLECTOR.zip`
+
+ZIP SHA-256:
+
+`344178b8d3c461e39a28d2f6a5d9a1a9a6bffc7fa820ef5238fa8bd3d5b19b61`
+
+Collector result passed `21/21` expected sources.
+
+G1 runtime-test artifact:
+
+`DLTB_G1_NIGHT_SOVEREIGN_TEST.zip`
+
+ZIP SHA-256:
+
+`cda130396a1f6aeaf65a9c8948d6dcb42721502dcbd756766072db1387c8353e`
+
+G1 `data2` SHA-256:
+
+`047a44416f7ab8a1bb736cf2aac374a0cb36b96a0ff775ed05ff8ad2e73e4521`
+
+G1 parent:
+
+`6ee08e9d867a9a72b1968b557256747ac701c511f7580b0605f4cd3906e2b5c5`
+
+Night Sovereign design uses the six **vanilla Vanguard item IDs as armor carriers**. That was already true in G1; CP1 did not invent Vanguard carrier IDs.
+
+Target armor effects include:
+
+- infected damage reduction `80%` including special infected classes;
+- human melee/firearm damage reduction `70%`;
+- melee stamina cost `-80%`;
+- parkour stamina cost `-80%`;
+- ranged stamina cost `-80%` if the native property is applicable;
+- stamina regeneration `+100%`;
+- healing `+35%`;
+- Fire/Electric/Toxic resistance `+50%`;
+- knockdown/stagger resistance `+60%`;
+- melee damage `+25%`;
+- firearm/ranged damage `+20%`;
+- parkour attack `+25%`;
+- headshot/headstrike `+30%`;
+- Survivor Sense range `+60%`;
+- Survivor Sense duration `+40%`;
+- enemy detection/recognition `40%` slower;
+- XP `+20%`.
+
+No global `+25% HP` and no literal `120%` stamina reduction were intended.
+
+Set route target:
+
+- full Night Sovereign set from one set-route hit;
+- flat `5%` infected-kill route chance;
+- no pity system.
+
+Additional G1 scope:
+
+- `Craft_Firearm_Scrap_FT` in Biter resource loot, `15-25`, rarer than common resources;
+- native charms in corpse loot;
+- custom Night Sovereign Sigil target: `+10%` weapon damage, `-20%` durability loss, `+10%` infected damage.
+
+Runtime proof:
+
+- Night Sovereign armor **did drop and render**;
+- tactical/Vanguard-like visual was accepted by the user;
+- selected pieces displayed Night Sovereign stats while mod was active;
+- after rollback to vanilla definitions, the **per-item affix/stat state remained**, while the custom name reverted to Vanguard and base/overall armor changed;
+- one rollback screenshot showed `VANGUARD REINFORCED TROUSERS / ICONIC JOGGERS`, Gear Armor `8`, with visible persisted values including `+13.333333%` infected resistance, `+11.666667%` human resistance, `-80%` melee stamina cost, `-80%` parkour stamina cost and `+100%` stamina regeneration;
+- total visible Gear Armor after rollback was `38`;
+- user reported modded overall armor around `64`, then `38` after rollback.
+
+Therefore:
+
+- **Night Sovereign affixes persisted locally after rollback: PROVEN**;
+- **custom name/base armor persistence without the mod: NOT PROVEN and expected to revert**;
+- do **not** rely on an older `54 total armor` claim as current visible truth;
+- **Night Sovereign cross-player pickup to an unmodded sibling remains UNPROVEN**.
+
+## Charm bug and G1.1 fix
+
+Runtime bug found in G1:
+
+final `charm_*` items could appear in loot, but `Modify Weapon -> Charm` remained empty because the game expects the `Craftplan_charm_*` collectable/modification recipe path rather than loose final charm items.
+
+G1.1 fix artifact:
+
+`DLTB_G1_1_CHARM_FIX.zip`
+
+G1.1 `data2` SHA-256:
+
+`ead01c994d8b6a10bc4c9d2dc5be5373df35235a7ab77d3c9e776b175502527a`
+
+ZIP SHA-256:
+
+`8f7e9cecccfedf16442f7f94f7e7302ce7812cdcb967cb615611724c024542d4`
+
+Only two gameplay files changed versus G1:
+
+- `scripts/inventory/loot/lootsets_ft.loot`;
+- `scripts/inventory/inventory_charms.scr`.
+
+G1.1 charm behavior:
+
+- `27` native charm drops converted to `Craftplan_charm_*` blueprint drops;
+- one custom Night Sovereign Sigil blueprint retained;
+- Sigil recipe: `10 Scrap + 5 Wiring`;
+- charm route chance retained at `8%`;
+- charm items lacking native craftplans removed from loot to avoid dead items.
+
+**Runtime UI proof for the G1.1 charm blueprint fix itself has NOT been explicitly reported.** Do not mark the Charm UI fix GREEN until the user confirms it.
+
+## CP1 goal and fixed compatibility contract
+
+CP1 goal:
+
+user keeps the gameplay mod while joining sibling-hosted co-op; sibling remains **100% vanilla** if possible.
+
+Primary architecture requirement:
+
+- use proven DATA2-only MultiMod topology;
+- backup saves before each switch;
+- strict hash/layout verification;
+- stop-safe on unknown PAK layout;
+- do not apply random networking registry hacks;
+- preserve vanilla sibling compatibility.
+
+### CP1 network baseline
+
+Adapter:
+
+`MediaTek Wi-Fi 7 MT7925`
+
+Baseline:
+
+- connected on `5 GHz`;
+- `802.11ac`;
+- link `866.7 / 866.7 Mbps`;
+- signal `77%`;
+- RSSI `-63 dBm`;
+- gateway ping `20/20`, `0% loss`, approximately `1-5 ms`, average `2 ms`;
+- `1.1.1.1` ping `20/20`, `0% loss`, approximately `6-8 ms`, average `6 ms`;
+- MTU `1500`;
+- TCP Receive Window Auto-Tuning = `normal`;
+- Steam HTTPS TCP/443 = PASS.
+
+Steam evidence also captured short adapter-disconnect episodes followed by Steam reconnects and one `FailDueToNoHearbeatResponse` event.
+
+Frozen network decision:
+
+Do **not** change DNS, MTU, TCP auto-tuning/congestion, global IPv6, Nagle, or `NetworkThrottlingIndex` for CP1.
+
+During CP1 CO-OP only on AC power:
+
+1. Wireless Adapter Settings -> `Maximum Performance`;
+2. PCIe Link State Power Management -> `Off`.
+
+Original values must be stored and restored.
+
+## CP1 Alpha1
+
+Artifact:
+
+`DLTB_CP1_ALPHA_COOP_SAFE.zip`
+
+ZIP SHA-256:
+
+`120902f9482c72e37befe9ab99fc4d5e84ba41f6468024f7f618798c9d28e4e0`
+
+Embedded G1.1 payload:
+
+`ead01c994d8b6a10bc4c9d2dc5be5373df35235a7ab77d3c9e776b175502527a`
+
+Alpha1 stopped safely before mutation because Windows returned the same install path twice with capitalization differences such as `c:\program files...` and `C:\Program Files...`.
+
+This was a **detector bug only**. The fail-safe behavior itself was correct.
+
+## CP1 Alpha2 — switch + connection runtime proof
+
+Artifact:
+
+`DLTB_CP1_ALPHA2_COOP_SAFE.zip`
+
+ZIP SHA-256:
+
+`9380d2d06517034c0dee3e11007b7d6c40e91ecb1cb81491e575067e4e617ef6`
+
+Payload remained exact G1.1:
+
+`ead01c994d8b6a10bc4c9d2dc5be5373df35235a7ab77d3c9e776b175502527a`
+
+Alpha2 fixed install-path deduplication case-insensitively.
+
+Successful switch log proved:
+
+- `MODE=CP1_COOP_SAFE_DATA2_ONLY`;
+- source data2 = absent;
+- source data3 = absent;
+- MultiMod data2 = exact G1.1 hash;
+- MultiMod data3 = absent;
+- `CustomPak.ini` present;
+- network state = CP1 stability ON;
+- save backup created;
+- `CP1 CO-OP SAFE = PASS`.
+
+User then reported **connection safe / stable**.
+
+Therefore:
+
+- **Alpha2 file-operation switch logic = PROVEN**;
+- **G1.1 through DATA2-only MultiMod can join the sibling's vanilla world = runtime-proven in this session**;
+- **the limited Wi-Fi/PCIe power-stability setup is runtime-compatible**;
+- this does **not** prove individual modded item interoperability.
+
+## CP1 item interoperability failures discovered after connection success
+
+Two independent runtime failures appeared once the connection itself was stable:
+
+1. Night Sovereign/full-set drops could resolve into unrelated item types such as **vehicle skins** and **weapon mods** instead of armor.
+2. Some Iconic/Legendary weapons could be dropped but another player could not pick them up; game message:
+
+`This item belongs to other player`
+
+The ownership issue was also reproduced when testing in the user's own world, so it cannot be treated as a simple guest-vs-host-only problem.
+
+Static inventory definitions already showed cases with `CanDrop(true)` and `IsShareable(true)`, proving those flags alone are insufficient to guarantee cross-player pickup.
+
+Ownership collector result captured for later analysis:
+
+`CP1_OWNERSHIP_RESULT_20260925_134208.zip`
+
+Ownership remains **UNRESOLVED**.
+
+## CP1 Alpha3 — native-ID loot-route attempt — FAILED
+
+Final Alpha3 artifact:
+
+`DLTB_CP1_ALPHA3_FINAL_TEST.zip`
+
+ZIP SHA-256:
+
+`e091979a57c3c947af3ae4801db75acab7b79356a3eaccef97b6f56b1a70f91c`
+
+Alpha3 `data2` SHA-256:
+
+`75ea737974b4189a71bf40e916990461fd7ac1bf9aba479ea00b084fa869866a`
+
+Alpha3 removed the custom Night Sovereign set-bundle ID from the set loot route and directly requested the six native Vanguard armor IDs. It also kept the custom Sigil blueprint out of CP1 world loot.
+
+Static audit showed `32` Night Sovereign loot call sites patched.
+
+Runtime result:
+
+**FAILED.** User reported the set still did not drop correctly and unrelated items such as vehicle skins / weapon mods still appeared.
+
+Therefore the problem was **not solved by merely replacing the custom set bundle with direct Vanguard item names**.
+
+Do not revive Alpha3 as an install candidate.
+
+## CP1 Alpha4 — registry-parity deletion experiment — CATASTROPHIC FAILURE / BLACKLIST
+
+Artifact:
+
+`DLTB_CP1_ALPHA4_REGISTRY_PARITY_TEST.zip`
+
+ZIP SHA-256:
+
+`084e3a8a47d8d486ef6d4cf569df33f451318832f7d10469a7fcbefc650a39fa`
+
+Alpha4 `data2` SHA-256:
+
+`7591e8f4ad028ea7961d38cc98d06b4950a943469e11a0d1ae349091ace0b6a4`
+
+Alpha4 attempted to remove ten G1.1 custom top-level Item definitions during CP1 in order to force registry parity with vanilla.
+
+Runtime result was a **hard failure**:
+
+- nearly all equipment appeared missing;
+- only one Iconic axe remained visible;
+- player could not attack;
+- player could not use `F` to loot zombies.
+
+User immediately stopped testing.
+
+Plain rollback of the mod back to G1.1 **did not restore the already-saved inventory state**.
+
+Conclusion:
+
+**Alpha4 is permanently BLACKLISTED.**
+
+Never again delete, reorder, rename, or otherwise remove live G1.1 custom Item definitions from a save that has already loaded them merely to chase multiplayer registry parity.
+
+Do not casually modify inventory versioning or item-registry structure on the active user save.
+
+## Emergency PRE-Alpha4 save restore — RUNTIME PROVEN RECOVERY
+
+Emergency recovery artifact:
+
+`DLTB_EMERGENCY_RESTORE_PRE_ALPHA4.zip`
+
+ZIP SHA-256:
+
+`edfa418694cd0f79a97c6b6b9e8aa8098b7086985f00900a49d631a89bb2a4cd`
+
+The recovery logic:
+
+- required DLTB closed;
+- required Steam fully exited;
+- verified proven SOLO G1.1 layout first;
+- located the newest pre-Alpha4 `SAVE_BEFORE_CP1` snapshot (Alpha4 had accidentally retained the `CP1_ALPHA3_*` backup folder tag);
+- backed up the currently corrupted save first;
+- restored the exact pre-Alpha4 Steam save;
+- verified restored bytes against backup hashes;
+- did not mutate gameplay PAKs during save restore.
+
+User runtime result after recovery:
+
+**"oke udah balik normal"**.
+
+Therefore **PRE-Alpha4 save recovery is runtime-proven**, and the current user save returned to normal inventory/attack/loot behavior.
+
+## CP1 Beta registry collector — READ-ONLY source audit
+
+After recovery, development switched to read-only investigation before any further live mutation.
+
+Collector artifact:
+
+`DLTB_CP1_BETA_REGISTRY_COLLECTOR.zip`
+
+ZIP SHA-256:
+
+`e4af8ff89388d02de48bf1dc22d260402c770b081315217f4ea6d04ce0a74fb3`
+
+User result:
+
+`CP1_BETA_REGISTRY_RESULT_20260925_143911.zip`
+
+Collector intentionally changed nothing and captured:
+
+- inventory import/load order;
+- `inventory_versioning_config.scr`;
+- `inventory_items_version_000.scr` through `_013.scr`;
+- vanilla ranged/outfit/charm/vehicle-related definitions;
+- current G1.1 comparison material;
+- network-related source needed for follow-up.
+
+A confirmed static mapping from the collected vanilla source:
+
+`Bundle_FT_Arrow` = official vanilla inventory ID `113`.
+
+This read-only collector is safe evidence. It does **not** itself prove a runtime carrier solution.
+
+## CP1 Beta1 — native carrier candidate — BUILT / NOT RUNTIME TESTED
+
+Artifact:
+
+`DLTB_CP1_BETA1_NATIVE_CARRIER_TEST.zip`
+
+ZIP SHA-256:
+
+`4fcd97e4529bc49390d68564e7560bea028d3aeaadf5234f7829b75829893291`
+
+Beta1 `data2` SHA-256:
+
+`9fbb6f515652f747d81c9e20ffaa20109e58bf86a745d13f95f09acbc7ecce88`
+
+Design:
+
+- preserve **all ten G1.1 custom Item definitions** so the recovered save sees the same definitions;
+- do not delete/reorder them as Alpha4 did;
+- keep Night Sovereign on the six native Vanguard armor IDs;
+- route the Night Sovereign full-set loot through native `Bundle_FT_Arrow` (vanilla ID `113`) as a carrier candidate;
+- on the modded client, redefine that native carrier to contain the six Vanguard/Night Sovereign pieces;
+- keep custom standard-ammo bundle definitions local, but do not send their custom bundle ID through CP1 world loot;
+- keep the custom Night Sovereign Sigil definition local, but do not world-drop its custom blueprint ID in CP1 Beta1;
+- keep the `32` Night Sovereign loot call-site weights/amount behavior unchanged from G1.1;
+- keep Alpha2 network-power behavior.
+
+Important status:
+
+**Beta1 has NOT been runtime tested.**
+
+The sibling was unavailable for multiplayer testing, and the user chose to pause this branch rather than continue with a solo smoke-test variant.
+
+Do not call Beta1 GREEN and do not install it automatically on resume.
+
+## Proof matrix — latest
+
+### Runtime GREEN / proven
+
+- CORPSE SAFE A1+A2 corpse routing.
+- Current recipe `data3` output-only architecture.
+- USER SPECIAL45 deterministic rebuild against its canonical payload.
+- Biter resource parity runtime behavior.
+- DATA2-only MultiMod topology from the older resource co-op test.
+- G1/G1.1 ancestor weapon drop + dismantle behavior for normalized target definitions.
+- Night Sovereign armor appearance/rendering while G1 active.
+- Night Sovereign affix/stat persistence locally after rollback to vanilla definitions.
+- CP1 Alpha2 safe switch to DATA2-only MultiMod with exact G1.1 hash.
+- CP1 Alpha2 connection/join stability with vanilla sibling.
+- emergency PRE-Alpha4 save restore returning the user to normal state.
+
+### Static/build proof only — runtime still required
+
+- G1.1 charm blueprint fix structure.
+- CP1 ownership-source collection.
+- CP1 Beta registry/versioning collection.
+- CP1 Beta1 native carrier candidate.
+
+### Explicitly NOT proven / unresolved
+
+- G1.1 Charm UI actually exposing the blueprint-fixed charms at runtime.
+- Night Sovereign full-set transfer/drop correctness in vanilla-host co-op.
+- Night Sovereign cross-player pickup to vanilla sibling.
+- general Iconic/Legendary cross-player pickup.
+- root cause of `This item belongs to other player`.
+- CP1 Beta1 runtime safety/functionality.
+
+### Runtime FAILED / BLACKLIST
+
+- aggressive LootedObject structural rewrite.
+- A3/DLC-disabled lineage.
+- CP1 Alpha3 as a Night Sovereign co-op fix.
+- **CP1 Alpha4 registry-parity deletion experiment — catastrophic, permanently blacklist.**
+
+## New hard safety rules added by CP1 incident
+
+1. **Never delete/reorder/rename G1.1 custom Item definitions on the active user save** to pursue vanilla registry parity.
+2. **Do not touch inventory versioning or save-versioning casually.** Any future work there requires read-only source proof first and a disposable/fully restorable save test.
+3. Every gameplay-mode switch that can touch item interpretation must create a verified save backup first.
+4. After any item-registry experiment, verify inventory, attack, corpse `F`, equipment, and save/reload before continuing play.
+5. `CanDrop(true)` and `IsShareable(true)` do not by themselves prove cross-player pickup.
+6. Keep sibling vanilla unless the user explicitly changes that requirement.
+7. Preserve Alpha2's known-good DATA2-only MultiMod / network-power architecture unless a concrete runtime failure demands change.
+8. Never present Alpha3 or Alpha4 as active candidates again.
+9. If a future experiment corrupts visible inventory/state, stop play immediately; do not allow the damaged state to overwrite the last known-good save if avoidable.
+10. Save recovery tooling must preserve the damaged save first, verify target layout, restore a specific pre-test snapshot, and verify bytes after restore.
+
+## CP1 pending code `PO`
+
+The user intentionally paused CP1 with code:
+
+`PO`
+
+When the user later says `PO`:
+
+1. Re-read this latest override section first.
+2. Confirm actual GitHub HEAD and current `MASTER_STATE.md` before acting.
+3. Assume the user is currently on recovered normal G1.1 unless new evidence says otherwise.
+4. Do **not** rerun Alpha3 or Alpha4.
+5. Do **not** remove/reorder custom G1.1 Item definitions.
+6. Treat Beta1 as **built but unproven**, not as the default install.
+7. If the sibling is available, the next meaningful proof is a tightly-scoped Beta1 multiplayer test with save backup and immediate inventory/attack/`F` checks.
+8. If the sibling is not available and the user still wants progress, prefer a disposable/backup-backed local smoke-test variant that does not mutate item registry/versioning and makes the carrier route easy to trigger, then roll back immediately.
+9. Only after the Night Sovereign carrier problem is isolated should CP1 Beta2 target `This item belongs to other player` ownership behavior.
+10. Keep ownership and armor-carrier investigations separate; do not bundle multiple unproven mechanisms into one test.
+
+Until the user resumes with `PO`, CP1 is **PAUSED**.
