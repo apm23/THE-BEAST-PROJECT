@@ -1,0 +1,97 @@
+{
+  "profile": "REMAKE_PROVEN45",
+  "game_build": "1.71E",
+  "base_payload_sha256": "190d7cb172fffe09b227f9b2fdb9b596dea5bf1e2d239fe804c377c45e392657",
+  "policy": "derive_from_canonical_SPECIAL45_only",
+  "frozen": {
+    "looted_object_topology": true,
+    "corpse_F_route": true,
+    "save_versioning": true,
+    "stash_dlc": true,
+    "player_variables": true,
+    "quickslot_rewrites": true
+  },
+  "stages": [
+    {
+      "id": "R1",
+      "name": "Native rarity through Exotic",
+      "status": "AUTHORING_PENDING_LOCAL_BASELINE",
+      "allowed_files": [
+        "scripts/inventory/inventory_gen.scr",
+        "scripts/inventory/inventory_weapondefintions_ft.scr",
+        "scripts/inventory/itemaffixes.scr",
+        "scripts/inventory/loot/color_sets.loot",
+        "scripts/inventory/loot/weaponprobpresets.scr",
+        "scripts/inventory/loot/weaponscolorpresets.scr",
+        "scripts/inventory/loot/lootsets_ft.loot"
+      ],
+      "forbidden_strategy": [
+        "cosmetic-only rarity",
+        "replace LootedObject blocks",
+        "rewrite corpse routing"
+      ]
+    },
+    {
+      "id": "R2",
+      "name": "Human zombie-style corpse lootpool",
+      "status": "AUTHORING_PENDING_LOCAL_BASELINE",
+      "allowed_files": [
+        "scripts/inventory/loot/lootpools_ft.loot",
+        "scripts/inventory/loot/lootsets_ft.loot"
+      ],
+      "rule": "numeric weights and existing sub-pool contents only; preserve each Human_* LootedObject outer topology"
+    },
+    {
+      "id": "R3",
+      "name": "Special infected Exotic chance",
+      "status": "AUTHORING_PENDING_LOCAL_BASELINE",
+      "allowed_files": [
+        "scripts/inventory/loot/lootpools_ft.loot",
+        "scripts/inventory/loot/lootsets_ft.loot",
+        "scripts/inventory/loot/color_sets.loot"
+      ]
+    },
+    {
+      "id": "R4",
+      "name": "Custom powerful outfit",
+      "status": "MAPPING_REQUIRED",
+      "rule": "must not require inventory/save versioning rewrites"
+    },
+    {
+      "id": "R5",
+      "name": "Inventory and stack expansion",
+      "status": "ISOLATED_CANDIDATE_ONLY",
+      "targets": {
+        "equipment": 34,
+        "consumable": 34,
+        "weapon": 68,
+        "ammo": 42,
+        "stack": 99999
+      },
+      "rule": "do not merge until reload + scene + save-swap tests are green"
+    },
+    {
+      "id": "R6",
+      "name": "Sense narrow",
+      "status": "AFTER_R1_R5",
+      "blacklist": ["Sense V4", "Sense V4.1"],
+      "targets": {"range_m": 200, "duration_s": 15}
+    },
+    {
+      "id": "R7",
+      "name": "One-sided COOP validation",
+      "status": "FINAL_GATE",
+      "reference": "CP1_COOP_SAFE_DATA2_ONLY"
+    }
+  ],
+  "runtime_gates": [
+    "game boots",
+    "corpse F works",
+    "attack works",
+    "inventory opens",
+    "scene transition keeps mod active",
+    "save reload keeps mod active",
+    "save swap keeps mod active",
+    "modded player can join vanilla sibling"
+  ]
+}
