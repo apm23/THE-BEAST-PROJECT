@@ -26,8 +26,8 @@ def main() -> int:
     repo = Path(__file__).resolve().parents[1]
     old = repo / "local_baseline" / "1.71E"
     new = repo / "local_baseline" / "1.71PE"
-    compat_path = repo / "local_build" / "COMPAT_1.71PE_VS_1.71E" / "compatibility.json"
-    out = repo / "local_build" / "PORT_1.71PE_PLAN"
+    compat_path = repo / "local_build/COMPAT_1.71PE_VS_1.71E/compatibility.json"
+    out = repo / "local_build/PORT_1.71PE_PLAN"
     diffs = out / "diffs"
     diffs.mkdir(parents=True, exist_ok=True)
 
@@ -52,11 +52,8 @@ def main() -> int:
                 a_lines = a.read_text(encoding="latin1").splitlines(True)
                 b_lines = b.read_text(encoding="latin1").splitlines(True)
                 delta = "".join(difflib.unified_diff(
-                    a_lines,
-                    b_lines,
-                    fromfile=f"1.71E/{rel}",
-                    tofile=f"1.71PE/{rel}",
-                    n=5,
+                    a_lines, b_lines,
+                    fromfile=f"1.71E/{rel}", tofile=f"1.71PE/{rel}", n=5,
                 ))
                 safe_name = rel.replace("/", "__") + ".diff"
                 (diffs / safe_name).write_text(delta, encoding="utf-8")
@@ -75,16 +72,16 @@ def main() -> int:
             "PROVEN45 behavior is the reference, not a license to copy stale files blindly.",
             "LootedObject outer topology remains frozen.",
             "Prefer porting numeric/sub-pool semantics onto 1.71PE when a core file changed.",
-            "Do not touch inventory versioning, stash_dlc, player_variables, quickslot rewrites, Sense, or CO-OP in the core phase.",
-            "No gameplay build becomes RUNTIME_PROVEN until F corpse, attack, inventory, scene transition, and save reload pass in game.",
+            "Do not touch inventory versioning or stash_dlc in this phase.",
+            "player_variables/common_skills may change only through the committed narrow inventory/stack allowlist recovered from the proven lineage; unrelated parameters and Sense must remain untouched.",
+            "Sense and CO-OP remain deferred.",
+            "No gameplay build becomes RUNTIME_PROVEN until F corpse, attack, inventory, scene transition, and save reload pass in game."
         ],
         "files": rows,
     }
     (out / "PORT_PLAN.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     with (out / "PORT_PLAN.txt").open("w", encoding="utf-8") as f:
-        f.write(f"MODE={mode}\n")
-        f.write("TARGET=1.71PE\n")
-        f.write("BASELINE=USER_HIGH_LOOT_SPECIAL45_1.71E\n\n")
+        f.write(f"MODE={mode}\nTARGET=1.71PE\nBASELINE=USER_HIGH_LOOT_SPECIAL45_1.71E\n\n")
         for r in rows:
             f.write(f"[{r['class']}] {r['compat_status']} -> {r['action']} :: {r['path']}\n")
             if "diff_file" in r:
