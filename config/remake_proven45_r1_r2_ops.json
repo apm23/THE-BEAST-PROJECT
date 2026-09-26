@@ -1,0 +1,30 @@
+{
+  "status": "WAITING_FOR_LOCAL_MAPPING",
+  "description": "Guarded authoring plan for R1 native rarity through Exotic plus R2 human corpse-loot changes. This file must only be promoted to AUTHORED_FROM_LOCAL_MAPPING after exact 1.71E mapping is collected locally.",
+  "derived_from": "USER_HIGH_LOOT_SPECIAL45",
+  "allowed_changed_files": [
+    "scripts/inventory/loot/lootpools_ft.loot",
+    "scripts/inventory/loot/lootsets_ft.loot"
+  ],
+  "required_mapping_tokens": [
+    "Exotic",
+    "Human_1h",
+    "Human_2h",
+    "Enemy_Lottery_Weapons"
+  ],
+  "required_human_looted_objects": [
+    "Human_1h",
+    "Human_2h"
+  ],
+  "hard_guards": {
+    "preserve_lootedobject_outer_topology": true,
+    "no_held_weapon_feature": true,
+    "no_inventory_versioning": true,
+    "no_stash_dlc": true,
+    "no_player_variables": true,
+    "no_global_root_override": true,
+    "native_rarity_only": true,
+    "preserve_rng": true
+  },
+  "file_operations": {}
+}
