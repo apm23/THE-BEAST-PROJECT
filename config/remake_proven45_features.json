@@ -1,0 +1,116 @@
+{
+  "project": "THE-BEAST-PROJECT",
+  "game_build": "1.71E",
+  "remake_baseline": "USER_HIGH_LOOT_SPECIAL45",
+  "continuity": "BEAST-PROVEN-SWITCH45",
+  "global_loot_policy": "immutable_proven45_foundation_no_new_global_root_override",
+  "features": [
+    {
+      "id": 1,
+      "name": "PROVEN45 global loot foundation",
+      "status": "RUNTIME_PROVEN_BASELINE",
+      "rule": "Preserve corpse routing and LootedObject topology; layer changes without replacing the proven global loot architecture."
+    },
+    {
+      "id": 2,
+      "name": "Weapon rarity up to Exotic",
+      "status": "MAPPING_REQUIRED",
+      "rule": "Use native item quality/state and native affix mechanisms where supported; no cosmetic-only rarity."
+    },
+    {
+      "id": 3,
+      "name": "Human zombie-style corpse lootpool",
+      "status": "MAPPED_NOT_REBUILT",
+      "rule": "Use extra corpse/search loot similar to infected; do not implement held-weapon drop as a project feature."
+    },
+    {
+      "id": 4,
+      "name": "Exotic special infected drops",
+      "status": "MAPPING_REQUIRED",
+      "rule": "Prefer native Exotic quality mechanisms; preserve RNG."
+    },
+    {
+      "id": 5,
+      "name": "Custom powerful outfit",
+      "status": "REBUILD_REQUIRED",
+      "rule": "Keep independent from frozen loot topology and avoid save/versioning rewrites."
+    },
+    {
+      "id": 6,
+      "name": "Expanded inventory",
+      "status": "UNTESTED_REMAKE_TARGET",
+      "targets": {
+        "equipment": 34,
+        "consumable": 34,
+        "weapon": 68,
+        "ammo": 42
+      }
+    },
+    {
+      "id": 7,
+      "name": "Huge stack size",
+      "status": "UNTESTED_REMAKE_TARGET",
+      "target": 99999
+    },
+    {
+      "id": 8,
+      "name": "Dismantle compatibility",
+      "status": "VALIDATION_TARGET"
+    },
+    {
+      "id": 9,
+      "name": "Drop/share compatibility",
+      "status": "VALIDATION_TARGET"
+    },
+    {
+      "id": 10,
+      "name": "Sense wallhack",
+      "status": "NARROW_REMAKE_ONLY",
+      "targets": {
+        "range_m": 200,
+        "duration_s": 15,
+        "infected": true,
+        "humans": true,
+        "dormant_ai": true,
+        "dead_ai": false
+      }
+    },
+    {
+      "id": 11,
+      "name": "One-sided CO-OP",
+      "status": "RUNTIME_PROVEN_ARCHITECTURE",
+      "reference": "CP1_COOP_SAFE_DATA2_ONLY",
+      "vanilla_sibling_requires_gameplay_mod": false
+    },
+    {
+      "id": 12,
+      "name": "Save/scene persistence",
+      "status": "REQUIRED_GATE",
+      "validated_cases": ["ordinary_reload", "save_swap", "scene_transition"],
+      "separate_unproven_cases": ["new_game", "ng_plus"]
+    },
+    {
+      "id": 13,
+      "name": "Corpse F compatibility",
+      "status": "HARD_GATE"
+    },
+    {
+      "id": 14,
+      "name": "Attack/controls compatibility",
+      "status": "HARD_GATE"
+    },
+    {
+      "id": 15,
+      "name": "Installer/rollback discipline",
+      "status": "REQUIRED"
+    }
+  ],
+  "cancelled": [
+    "Legendary Core",
+    "Legendary Ascension",
+    "L+1..L+5",
+    "Core drop/cost system",
+    "human held-weapon drop feature",
+    "Manual Save Anywhere in this remake"
+  ]
+}
