@@ -29,7 +29,8 @@ jobs:
             tools/build_remake_proven45_recovered_candidate.py \
             tools/remake_status.py \
             tools/package_remake_candidate.py \
-            tools/runtime_test_gate.py
+            tools/runtime_test_gate.py \
+            tools/finalize_runtime_green.py
       - name: Validate remake JSON configs
         run: |
           python - <<'PY'
@@ -71,8 +72,9 @@ jobs:
           assert 'DLTB_G1_Firearm_ExoticNative' in block
           print('TRANSPLANT PASS: lootsets_append')
           PY
-      - name: Validate runtime promotion gate
+      - name: Validate runtime promotion and finalizer gate
         run: |
+          rm -rf /tmp/remake_gate
           mkdir -p /tmp/remake_gate
           cp config/remake_singleplayer_test_matrix.json /tmp/remake_gate/TEST_MATRIX.json
           python tools/runtime_test_gate.py init --root /tmp/remake_gate
@@ -84,14 +86,35 @@ jobs:
             python tools/runtime_test_gate.py pass "$id" --note ci --root /tmp/remake_gate
           done
           python tools/runtime_test_gate.py promote --root /tmp/remake_gate
+          printf 'ci-payload' > /tmp/remake_gate/data2_payload.pak
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          r=Path('/tmp/remake_gate')
+          h=hashlib.sha256((r/'data2_payload.pak').read_bytes()).hexdigest()
+          pm={
+            'profile':'REMAKE_PROVEN45_SINGLEPLAYER_CORE',
+            'runtime_target':'1.71PE',
+            'runtime_status':'CANDIDATE_NOT_RUNTIME_GREEN',
+            'data2_sha256':h,
+            'source_manifest':{
+              'foundation_sha256':'190d7cb172fffe09b227f9b2fdb9b596dea5bf1e2d239fe804c377c45e392657',
+              'sense_included':False,
+              'coop_included':False
+            }
+          }
+          (r/'PACKAGE_MANIFEST.json').write_text(json.dumps(pm,indent=2),encoding='utf-8')
+          PY
+          (cd /tmp/remake_gate && python "$GITHUB_WORKSPACE/tools/finalize_runtime_green.py")
           python - <<'PY'
           import json
-          p='/tmp/remake_gate/RUNTIME_TEST_RESULTS.json'
-          s=json.load(open(p, encoding='utf-8'))
-          assert s['runtime_status']=='RUNTIME_GREEN'
-          assert all(v['result']=='PASS' for v in s['tests'].values())
-          assert not s['hard_fail_events']
-          print('RUNTIME GATE PASS')
+          r='/tmp/remake_gate/'
+          pm=json.load(open(r+'PACKAGE_MANIFEST.json',encoding='utf-8'))
+          cert=json.load(open(r+'RUNTIME_GREEN_CERTIFICATE.json',encoding='utf-8'))
+          assert pm['runtime_status']=='RUNTIME_GREEN'
+          assert cert['runtime_status']=='RUNTIME_GREEN'
+          assert cert['tests_passed']==[f'T{i:02d}' for i in range(1,16)]
+          print('RUNTIME FINALIZER PASS')
           PY
       - name: Policy guard
         run: |
