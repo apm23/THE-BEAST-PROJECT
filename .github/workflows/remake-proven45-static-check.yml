@@ -28,7 +28,8 @@ jobs:
             tools/build_remake_final_candidate.py \
             tools/build_remake_proven45_recovered_candidate.py \
             tools/remake_status.py \
-            tools/package_remake_candidate.py
+            tools/package_remake_candidate.py \
+            tools/runtime_test_gate.py
       - name: Validate remake JSON configs
         run: |
           python - <<'PY'
@@ -69,6 +70,28 @@ jobs:
           block = zlib.decompress(base64.b64decode((root/'lootsets_append.b64').read_text().strip())).decode('latin1')
           assert 'DLTB_G1_Firearm_ExoticNative' in block
           print('TRANSPLANT PASS: lootsets_append')
+          PY
+      - name: Validate runtime promotion gate
+        run: |
+          mkdir -p /tmp/remake_gate
+          cp config/remake_singleplayer_test_matrix.json /tmp/remake_gate/TEST_MATRIX.json
+          python tools/runtime_test_gate.py init --root /tmp/remake_gate
+          if python tools/runtime_test_gate.py promote --root /tmp/remake_gate; then
+            echo 'ERROR: premature promotion unexpectedly succeeded'
+            exit 1
+          fi
+          for id in T01 T02 T03 T04 T05 T06 T07 T08 T09 T10 T11 T12 T13 T14 T15; do
+            python tools/runtime_test_gate.py pass "$id" --note ci --root /tmp/remake_gate
+          done
+          python tools/runtime_test_gate.py promote --root /tmp/remake_gate
+          python - <<'PY'
+          import json
+          p='/tmp/remake_gate/RUNTIME_TEST_RESULTS.json'
+          s=json.load(open(p, encoding='utf-8'))
+          assert s['runtime_status']=='RUNTIME_GREEN'
+          assert all(v['result']=='PASS' for v in s['tests'].values())
+          assert not s['hard_fail_events']
+          print('RUNTIME GATE PASS')
           PY
       - name: Policy guard
         run: |
