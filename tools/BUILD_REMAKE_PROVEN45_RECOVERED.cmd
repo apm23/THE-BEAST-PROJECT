@@ -11,7 +11,12 @@ python tools\build_remake_proven45_recovered_candidate.py
 set ERR=%ERRORLEVEL%
 if not "%ERR%"=="0" (
   echo.
-  echo BUILD STOPPED SAFELY. No game files were changed.
+  echo BUILD STOPPED SAFELY. Running exact transplant diagnostic...
+  python tools\diagnose_recovered_transplant.py
+  echo.
+  echo Diagnostic appended to:
+  echo local_build\PORT_1.71PE_PLAN\PORT_PLAN.txt
+  echo No game files were changed.
   exit /b %ERR%
 )
 echo.
