@@ -1,38 +1,38 @@
 # THE BEAST PROJECT
 
-Development repository for a **Dying Light: The Beast** weapon-rarity, loot-gacha, and Legendary Ascension mod.
+Development repository for **Dying Light: The Beast** gameplay-mod research and reproducible patch tooling.
 
-## Baseline
+## Active branch state — `remake-proven45`
 
-- Target game build: **VER. 1.71E**
-- Initial state: fresh install, no mods installed
-- Clean test save captured before mod development
-- Repository stores only project-authored patches, configuration, tooling, and test records. Do **not** commit extracted proprietary game archives or user save files.
+- Current runtime target: **VER. 1.71PE**.
+- Global loot foundation: canonical **USER HIGH LOOT SPECIAL45 / PROVEN45**.
+- Current scope: **single-player core first**.
+- Sense and one-sided CO-OP: **DEFERRED**.
+- Legendary Core / Ascension: **CANCELLED for this remake**.
+- Repository stores project-authored patches/specs/tooling only; extracted proprietary game archives and user saves stay local.
 
-## Authority
+## Authority for this branch
 
-Before changing the project, read these files in order:
+Read in this order:
 
-1. `MASTER_STATE.md`
-2. `PROJECT_CONTRACT.md`
-3. `FEATURE_SPEC.md`
-4. `TEST_MATRIX.md`
+1. `REMAKE_MASTER_STATE.md` — current authority for `remake-proven45`.
+2. `PROJECT_CONTRACT.md`.
+3. `FEATURE_SPEC.md`.
+4. `config/remake_singleplayer_test_matrix.json`.
+5. Historical `MASTER_STATE.md` only for proven lineage/history that does not conflict with `REMAKE_MASTER_STATE.md`.
 
-GitHub HEAD + `MASTER_STATE.md` are the authoritative project state.
+## One-command local pipeline
 
-## Workflow
+On the Windows PC containing the user's owned current DLTB install:
 
 ```text
-clean game baseline
-    -> inspect only required vanilla definitions locally
-    -> project patch/config
-    -> validate
-    -> build mod package
-    -> in-game test
-    -> persistence/uninstall test
-    -> update MASTER_STATE
+tools\RUN_REMAKE_SINGLEPLAYER_CORE.cmd
 ```
 
-## Safety / cleanliness
+It performs 1.71PE extraction/compatibility checks, reconstructs SPECIAL45 byte-exact, applies fail-closed recovered G1 transplants, builds the single-player candidate, and packages safe install/status/rollback launchers.
 
-Keep original game archives, extracted vanilla files, saves, and local install paths outside the public repository. See `.gitignore`.
+The resulting candidate remains **CANDIDATE_NOT_RUNTIME_GREEN** until the committed T01–T15 in-game matrix passes.
+
+## Safety
+
+Do not commit full extracted vanilla files, game PAKs from the installation, saves, or local install paths. Do not revive blacklisted aggressive LootedObject or item-registry experiments. See `REMAKE_MASTER_STATE.md` and `.gitignore`.
