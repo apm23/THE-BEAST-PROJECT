@@ -58,6 +58,7 @@ def main() -> int:
     shutil.copy2(pak, outdir / 'data2_payload.pak')
     shutil.copy2(repo / 'config' / 'remake_singleplayer_test_matrix.json', outdir / 'TEST_MATRIX.json')
     shutil.copy2(repo / 'tools' / 'runtime_test_gate.py', outdir / 'runtime_test_gate.py')
+    shutil.copy2(repo / 'tools' / 'finalize_runtime_green.py', outdir / 'finalize_runtime_green.py')
 
     ps = r'''param(
   [ValidateSet('Install','Status','Rollback')][string]$Action='Status',
@@ -137,11 +138,12 @@ if($Action -eq 'Rollback'){
         '2_CHECK_STATUS.cmd': '@echo off\r\ncd /d "%~dp0"\r\npowershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0REMAKE_INSTALLER.ps1" -Action Status %*\r\npause\r\n',
         '3_ROLLBACK_CANDIDATE.cmd': '@echo off\r\ncd /d "%~dp0"\r\npowershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0REMAKE_INSTALLER.ps1" -Action Rollback %*\r\npause\r\n',
         '4_TEST_GATE.cmd': '@echo off\r\ncd /d "%~dp0"\r\nif "%~1"=="" goto help\r\npython "%~dp0runtime_test_gate.py" %* --root "%~dp0"\r\npause\r\nexit /b %ERRORLEVEL%\r\n:help\r\necho Examples:\r\necho   4_TEST_GATE.cmd init\r\necho   4_TEST_GATE.cmd pass T01 --note "boot normal"\r\necho   4_TEST_GATE.cmd fail T03 --note "corpse F missing"\r\necho   4_TEST_GATE.cmd status\r\necho   4_TEST_GATE.cmd promote\r\npause\r\n',
+        '5_FINALIZE_RUNTIME_GREEN.cmd': '@echo off\r\ncd /d "%~dp0"\r\npython "%~dp0finalize_runtime_green.py"\r\nset ERR=%ERRORLEVEL%\r\necho.\r\nif "%ERR%"=="0" (echo RUNTIME GREEN CERTIFICATE CREATED) else (echo FINALIZE BLOCKED - TEST GATE/HASH NOT VALID)\r\npause\r\nexit /b %ERR%\r\n',
     }
     for name, text in launchers.items():
         (outdir / name).write_text(text, encoding='utf-8')
 
-    readme = f'''DLTB REMAKE PROVEN45 - 1.71PE SINGLEPLAYER CORE\n\nSTATUS: {status}\nDATA2 SHA256: {payload_hash}\n\nIncluded:\n- canonical SPECIAL45 loot foundation\n- native rarity route through Exotic\n- human corpse project loot route inherited from SPECIAL45/G1 lineage\n- special infected high-tier/Exotic route\n- Night Sovereign powerful outfit\n- inventory 34 / 34 / 68 / 42\n- material/consumable/throwable stack target 99,999\n- proven weapon drop/share/dismantle definition normalization\n\nDeferred: Sense and CO-OP.\n\nRun 1_INSTALL_CANDIDATE.cmd with the game closed.\nUse 4_TEST_GATE.cmd to record T01-T15.\nRUNTIME_GREEN promotion is blocked until all T01-T15 PASS and there are zero hard-fail events.\nUse 3_ROLLBACK_CANDIDATE.cmd if any hard gate fails.\n'''
+    readme = f'''DLTB REMAKE PROVEN45 - 1.71PE SINGLEPLAYER CORE\n\nSTATUS: {status}\nDATA2 SHA256: {payload_hash}\n\nIncluded:\n- canonical SPECIAL45 loot foundation\n- native rarity route through Exotic\n- human corpse project loot route inherited from SPECIAL45/G1 lineage\n- special infected high-tier/Exotic route\n- Night Sovereign powerful outfit\n- inventory 34 / 34 / 68 / 42\n- material/consumable/throwable stack target 99,999\n- proven weapon drop/share/dismantle definition normalization\n\nDeferred: Sense and CO-OP.\n\nRun 1_INSTALL_CANDIDATE.cmd with the game closed.\nUse 4_TEST_GATE.cmd to record T01-T15 and then run: 4_TEST_GATE.cmd promote\nOnly after promote succeeds, run 5_FINALIZE_RUNTIME_GREEN.cmd.\nThe finalizer rechecks all T01-T15, hard-fail history, SPECIAL45 declaration and exact data2 hash before creating RUNTIME_GREEN_CERTIFICATE.json.\nUse 3_ROLLBACK_CANDIDATE.cmd if any hard gate fails.\n'''
     (outdir / 'README_FIRST.txt').write_text(readme, encoding='utf-8')
 
     zip_path = repo / 'local_build' / 'DLTB_REMAKE_PROVEN45_1.71PE_CANDIDATE.zip'
