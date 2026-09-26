@@ -30,7 +30,10 @@ jobs:
             tools/remake_status.py \
             tools/package_remake_candidate.py \
             tools/runtime_test_gate.py \
-            tools/finalize_runtime_green.py
+            tools/finalize_runtime_green.py \
+            tools/validate_special45_patch_assets.py
+      - name: Validate canonical SPECIAL45 patch assets
+        run: python tools/validate_special45_patch_assets.py
       - name: Validate remake JSON configs
         run: |
           python - <<'PY'
