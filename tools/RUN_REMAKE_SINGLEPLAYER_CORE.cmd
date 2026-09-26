@@ -13,39 +13,50 @@ if %PREP%==2 goto :port
 if not %PREP%==0 goto :fail
 
 call tools\BUILD_REMAKE_PROVEN45_R1_R2.cmd
-if errorlevel 1 goto :authoring
+if errorlevel 1 goto :r1authoring
 
-python tools\remake_status.py
+call tools\BUILD_REMAKE_PROVEN45_FINAL.cmd
+if errorlevel 1 goto :finalauthoring
+
+call tools\PACKAGE_REMAKE_CANDIDATE.cmd
 if errorlevel 1 goto :fail
 
-if exist "local_build\REMAKE_PROVEN45_SINGLEPLAYER_CORE\data2_payload.pak" (
-  call tools\PACKAGE_REMAKE_CANDIDATE.cmd
-  exit /b %ERRORLEVEL%
-)
+python tools\remake_status.py
 
 echo.
 echo ==============================================================
-echo  PARTIAL BUILD COMPLETE
-echo  R1/R2 candidate exists, but combined R3/R4/final candidate is not ready.
-echo  See local_build\REMAKE_STATUS\status.txt
+echo  PIPELINE COMPLETE TO RUNTIME-TEST PACKAGE
+echo  ZIP: local_build\DLTB_REMAKE_PROVEN45_1.71PE_CANDIDATE.zip
+echo  STATUS: CANDIDATE_NOT_RUNTIME_GREEN until in-game tests pass.
 echo ==============================================================
-exit /b 3
+exit /b 0
 
-:authoring
+:r1authoring
 echo.
 echo ==============================================================
-echo  SAFE STOP: R1/R2 OPERATIONS NEED CURRENT-RUNTIME AUTHORING
+echo  SAFE STOP: R1/R2 OPS NEED 1.71PE CURRENT-RUNTIME AUTHORING
+echo  Mapping: local_build\REMAKE_PROVEN45\mapping\R1_R2_MAPPING.*
 echo  No guessed gameplay PAK was installed or packaged.
-echo  Mapping files are under local_build\REMAKE_PROVEN45\mapping
 echo ==============================================================
 python tools\remake_status.py
 exit /b 4
 
+:finalauthoring
+echo.
+echo ==============================================================
+echo  SAFE STOP: FINAL OPS NEED CURRENT-RUNTIME AUTHORING
+echo  Review SPECIAL_INFECTED_EXOTIC_MAPPING and R3_R4_MAPPING.
+echo  Then author config\remake_proven45_final_ops.json.
+echo ==============================================================
+python tools\remake_status.py
+exit /b 5
+
 :port
 echo.
 echo ==============================================================
-echo  SAFE STOP: DEDICATED 1.71PE PORT REQUIRED
-echo  Review generated port plan before gameplay build.
+echo  SAFE STOP: DEDICATED 1.71PE SPECIAL45 PORT REQUIRED
+echo  Review local_build\PORT_1.71PE_PLAN\PORT_PLAN.txt
+echo  No gameplay candidate was installed or packaged.
 echo ==============================================================
 python tools\remake_status.py
 exit /b 2
