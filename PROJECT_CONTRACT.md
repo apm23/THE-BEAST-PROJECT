@@ -2,58 +2,104 @@
 
 ## Purpose
 
-Build a mod for **Dying Light: The Beast VER. 1.71E** centered on universal Legendary weapon eligibility, faster but still random weapon farming, and per-weapon Legendary Ascension.
+Build and maintain a mod for **Dying Light: The Beast VER. 1.71E** using the runtime-proven **USER HIGH LOOT SPECIAL45 / PROVEN45** loot lineage as the immutable foundation.
+
+The current remake focuses on:
+
+- preserving PROVEN45 global loot behavior;
+- native weapon rarity rolls up to Exotic where supported;
+- human corpse loot using zombie-style extra lootpool logic rather than held-weapon drops;
+- special/high-tier infected loot;
+- the project custom powerful outfit;
+- expanded inventory and high stack limits through safe paths;
+- Sense wallhack/QoL through isolated narrow overrides;
+- one-sided CO-OP where the modded user can play with a vanilla sibling.
 
 ## Non-negotiable behavior
 
-### Native rarity, not cosmetics
+### PROVEN45 is the loot foundation
 
-A weapon that is normally capped below Legendary should be able to exist as a genuine Legendary item instance when technically possible. A solution that only changes display color/name is not acceptable.
+Do not replace the proven global loot root with a new override architecture.
 
-### Global rarity gacha
+Preserve the proven `LootedObject` / corpse-routing topology and corpse `F` interaction. Prefer numeric weight, quantity, and existing sub-pool edits over structural rewrites.
 
-When a weapon instance is generated from eligible sources, it should participate in the same rarity roll regardless of whether it came from a common infected, a human, a container, or another supported loot source. Initial target: ~30% Legendary per generated weapon.
+### Native rarity up to Exotic
 
-### Human held weapons
+Generated supported weapons may participate in a native rarity roll up to **Exotic** where DLTB 1.71E supports that quality/state.
 
-The actual weapon carried by a human can drop and must participate in the rarity roll. The feature must not be limited to an unrelated extra corpse-loot weapon.
+Rarity must be real item state, not cosmetic text/color. Preserve weapon identity/model/class and keep RNG/farming.
 
-### Slightly faster farming
+### Human corpse loot, not held-weapon drops
 
-Increase weapon availability from low-value/common sources moderately, not to guaranteed drops. Preserve farming/RNG rather than flooding inventory.
+The project does **not** target dropping the exact weapon visibly held by a human.
 
-### Legendary Core
+Human enemies should instead receive an extra searchable/corpse lootpool following the same design principle as infected loot while preserving the frozen PROVEN45 corpse route.
 
-Provide an item/progression mechanism with two roles:
+### Powerful outfit
 
-- Rare/Epic weapon + Core -> Legendary.
-- Legendary weapon + Core -> further per-item Ascension.
+Preserve/rebuild the project custom powerful outfit without introducing unsafe save/versioning rewrites.
 
-The initial Core availability target is roughly 10% from common sources, with modest bonuses for higher-tier encounters/chests.
+### Inventory targets
 
-### Per-item Ascension
+Target capacities:
 
-Legendary Ascension is individual to the weapon instance:
+- Equipment `34`
+- Consumable `34`
+- Weapon `68`
+- Ammo `42`
 
-`Legendary -> L+1 -> L+2 -> L+3 -> L+4 -> L+5`
+Target supported stack size: `99,999`.
 
-Damage and durability are the primary scaling axes. Secondary stats may increase. Attack speed must remain conservative and safe for animation/hit registration.
+Inventory changes must avoid previously unsafe inventory-versioning, stash-DLC, quickslot-topology, and save-versioning paths.
 
-### Persistence-first design
+### Sense isolation
 
-Prefer values that are stored on the item/save over runtime-only global multipliers. Persistence claims require an explicit test:
+Sense/wallhack work must remain isolated from global loot, `LootedObject`, inventory versioning, save/versioning, controls/F, CP1, and item registry paths.
 
-`obtain/upgrade -> save -> exit -> remove mod -> reload -> inspect item`
+### One-sided CO-OP
 
-If an effect cannot persist without the mod because the engine stores it only in a global definition, document that limitation rather than presenting it as permanent.
+Primary multiplayer target:
+
+- modded user uses the gameplay mod;
+- sibling remains vanilla and does not need to install the gameplay mod.
+
+Use the runtime-proven data2-only / MultiMod lineage as the compatibility reference. The CO-OP-safe loader path may also stay active during single-player.
+
+### Save and scene safety
+
+Ordinary save reload, save-data swap, and scene transition must not silently restore vanilla behavior or break mod features.
+
+New Game and NG+ remain separate validation targets until runtime-proven.
+
+## Explicitly cancelled old goals
+
+Do not reintroduce unless the user explicitly requests them again:
+
+- Legendary Core;
+- Rare/Epic -> Legendary Core conversion;
+- Legendary Ascension;
+- L+1..L+5 progression;
+- Core drops/costs;
+- human held-weapon drop feature;
+- Manual Save Anywhere as part of this remake.
+
+## Hard runtime gates
+
+A candidate build is rejected if it breaks any of these:
+
+1. save / DLC safety;
+2. corpse loot interaction (`F`);
+3. attack / ordinary controls;
+4. runtime-proven PROVEN45 loot structure;
+5. one-sided CO-OP compatibility after the feature reaches that test stage.
 
 ## Scope discipline
 
-- Preserve weapon model, identity, animation class, and core gameplay behavior unless a specific feature requires otherwise.
-- Do not make all weapons Legendary by default.
-- Do not use a blanket global damage cheat as a substitute for per-weapon progression.
+- Preserve runtime-proven structures.
+- Make the smallest justified patch for each feature.
+- Keep experimental features isolated so they can be rolled back independently.
+- Distinguish STATIC-PROVEN, RUNTIME-PROVEN, UNTESTED, and REJECTED states.
 - Do not silently alter unrelated game systems.
-- Use the smallest patch that proves each technical assumption before expanding globally.
 
 ## Repository rules
 
@@ -81,8 +127,9 @@ Before any new work:
 
 1. Inspect actual GitHub HEAD.
 2. Read `MASTER_STATE.md` completely.
-3. Read this contract.
-4. Inspect only the files/tests relevant to `next_safe_action`.
-5. Preserve frozen-green systems and documented failed hypotheses.
-6. Perform the smallest justified next action.
-7. Update `MASTER_STATE.md` after meaningful state changes.
+3. Read this contract and `FEATURE_SPEC.md`.
+4. Treat current user corrections as newer authority than stale historical goals in `MASTER_STATE.md`.
+5. Inspect only the files/tests relevant to the next safe action.
+6. Preserve frozen-green systems and documented failed hypotheses.
+7. Perform the smallest justified next action.
+8. Record meaningful state changes before expanding scope.
