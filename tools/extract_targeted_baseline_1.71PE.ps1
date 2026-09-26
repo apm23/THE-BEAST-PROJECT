@@ -64,10 +64,51 @@ function Select-GameFolder {
     return $dialog.SelectedPath
 }
 
+function Extract-One {
+    param(
+        [string]$Target,
+        [string]$ArchiveName,
+        [bool]$Required,
+        [string]$Kind
+    )
+    if (-not $archives.ContainsKey($ArchiveName) -or -not (Test-Path $archives[$ArchiveName])) {
+        $ArchiveName = 'data0.pak'
+    }
+    $archivePath = $archives[$ArchiveName]
+    Write-Host "Extract [$ArchiveName][$Kind]: $Target"
+    if ($sevenZip) {
+        & $sevenZip x -y $archivePath $Target "-o$outRoot" | Out-Null
+    } else {
+        & $tar.Source -xf $archivePath -C $outRoot $Target 2>$null
+    }
+
+    $local = Join-Path $outRoot ($Target -replace '/', '\')
+    $status = 'MISSING'
+    $actualHash = $null
+    $actualSize = 0
+    if (Test-Path $local) {
+        $actualSize = (Get-Item $local).Length
+        $actualHash = (Get-FileHash $local -Algorithm SHA256).Hash.ToLowerInvariant()
+        $status = 'EXTRACTED'
+    }
+    return [PSCustomObject]@{
+        path = $Target
+        archive = $ArchiveName
+        kind = $Kind
+        required = $Required
+        status = $status
+        sha256 = $actualHash
+        size = $actualSize
+    }
+}
+
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $manifestPath = Join-Path $repoRoot 'config\baseline_1.71E_manifest.json'
+$extraPath = Join-Path $repoRoot 'config\remake_1.71PE_extra_targets.json'
 if (-not (Test-Path $manifestPath)) { throw "Manifest target-list tidak ditemukan: $manifestPath" }
+if (-not (Test-Path $extraPath)) { throw "Extra target-list tidak ditemukan: $extraPath" }
 $manifest = Get-Content -Raw $manifestPath | ConvertFrom-Json
+$extras = Get-Content -Raw $extraPath | ConvertFrom-Json
 
 if (-not $GameDir) { $GameDir = Auto-FindGame }
 if (-not $GameDir -and -not $NoGui) { $GameDir = Select-GameFolder }
@@ -89,46 +130,41 @@ if (Test-Path $outRoot) { Remove-Item -Recurse -Force $outRoot }
 New-Item -ItemType Directory -Force -Path $outRoot | Out-Null
 
 $results = @()
+$seen = @{}
 foreach ($f in $manifest.files) {
     $target = [string]$f.path
-    $archiveName = [string]$f.archive
-    if (-not $archives.ContainsKey($archiveName) -or -not (Test-Path $archives[$archiveName])) {
-        $archiveName = 'data0.pak'
-    }
-    $archivePath = $archives[$archiveName]
-    Write-Host "Extract [$archiveName]: $target"
-    if ($sevenZip) {
-        & $sevenZip x -y $archivePath $target "-o$outRoot" | Out-Null
-    } else {
-        & $tar.Source -xf $archivePath -C $outRoot $target 2>$null
-    }
-
-    $local = Join-Path $outRoot ($target -replace '/', '\')
-    $status = 'MISSING'
-    $actualHash = $null
-    $actualSize = 0
-    if (Test-Path $local) {
-        $actualSize = (Get-Item $local).Length
-        $actualHash = (Get-FileHash $local -Algorithm SHA256).Hash.ToLowerInvariant()
-        $status = 'EXTRACTED'
-    }
-    $results += [PSCustomObject]@{
-        path = $target
-        archive = $archiveName
-        status = $status
-        sha256 = $actualHash
-        size = $actualSize
-    }
+    $key = $target.ToLowerInvariant()
+    if ($seen.ContainsKey($key)) { continue }
+    $seen[$key] = $true
+    $results += Extract-One -Target $target -ArchiveName ([string]$f.archive) -Required $true -Kind 'compat58'
+}
+foreach ($f in $extras.required) {
+    $target = [string]$f.path
+    $key = $target.ToLowerInvariant()
+    if ($seen.ContainsKey($key)) { continue }
+    $seen[$key] = $true
+    $results += Extract-One -Target $target -ArchiveName ([string]$f.archive) -Required $true -Kind 'remake_required'
+}
+foreach ($f in $extras.optional) {
+    $target = [string]$f.path
+    $key = $target.ToLowerInvariant()
+    if ($seen.ContainsKey($key)) { continue }
+    $seen[$key] = $true
+    $results += Extract-One -Target $target -ArchiveName ([string]$f.archive) -Required $false -Kind 'remake_optional'
 }
 
-$missing = @($results | Where-Object { $_.status -eq 'MISSING' }).Count
+$requiredMissing = @($results | Where-Object { $_.required -and $_.status -eq 'MISSING' }).Count
+$optionalMissing = @($results | Where-Object { -not $_.required -and $_.status -eq 'MISSING' }).Count
+$compatCount = @($results | Where-Object { $_.kind -eq 'compat58' }).Count
 $report = [ordered]@{
     game = 'Dying Light: The Beast'
     observed_label = '1.71PE'
     game_dir = $GameDir
     generated = (Get-Date -Format o)
-    targets = $results.Count
-    missing = $missing
+    compatibility_targets = $compatCount
+    total_targets = $results.Count
+    required_missing = $requiredMissing
+    optional_missing = $optionalMissing
     results = $results
 }
 $reportPath = Join-Path $outRoot '_EXTRACT_REPORT.json'
@@ -140,8 +176,10 @@ Write-Host ' DLTB CURRENT BUILD TARGET EXTRACTION -> 1.71PE'
 Write-Host '=============================================================='
 Write-Host "GameDir=$GameDir"
 Write-Host "Output=$outRoot"
-Write-Host "Targets=$($results.Count)"
-Write-Host "Missing=$missing"
+Write-Host "CompatibilityTargets=$compatCount"
+Write-Host "TotalTargets=$($results.Count)"
+Write-Host "RequiredMissing=$requiredMissing"
+Write-Host "OptionalMissing=$optionalMissing"
 Write-Host ''
-if ($missing -ne 0) { throw "Ada target yang tidak ter-extract. Lihat $reportPath" }
-Write-Host 'PASS: extraction complete. Run CHECK_1.71PE_COMPATIBILITY.cmd next.'
+if ($requiredMissing -ne 0) { throw "Ada required target yang tidak ter-extract. Lihat $reportPath" }
+Write-Host 'PASS: extraction complete. Optional misses do not block compatibility; run CHECK_1.71PE_COMPATIBILITY.cmd next.'
