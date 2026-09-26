@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import io
 import json
+import re
 import zipfile
 from pathlib import Path
 
@@ -26,7 +27,7 @@ def reconstruct_special45(baseline: Path, patch_dir: Path) -> dict[str, bytes]:
     for path, stem in special45.PATCH_MAP.items():
         base_path = baseline / Path(path)
         if not base_path.exists():
-            raise FileNotFoundError(f"Missing baseline file: {base_path}")
+            raise FileNotFoundError(f"Missing current-runtime baseline file: {base_path}")
         spec = special45.load_patch(patch_dir, stem)
         files[path] = special45.apply_patch(base_path.read_bytes(), spec)
 
@@ -40,7 +41,11 @@ def reconstruct_special45(baseline: Path, patch_dir: Path) -> dict[str, bytes]:
             z.writestr(info, files[path], compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
     got = sha256(bio.getvalue())
     if got != special45.CANONICAL_DATA2_SHA256:
-        raise RuntimeError(f"PROVEN45 guard failed: expected {special45.CANONICAL_DATA2_SHA256}, got {got}")
+        raise RuntimeError(
+            "PROVEN45 guard failed on CURRENT_RUNTIME: "
+            f"expected canonical {special45.CANONICAL_DATA2_SHA256}, got {got}. "
+            "A dedicated 1.71PE port is required before this builder may run."
+        )
     return files
 
 
@@ -77,17 +82,21 @@ def apply_ops(text: str, ops: list[dict], label: str) -> str:
     return out
 
 
+def lootedobject_sequence(text: str) -> list[str]:
+    return re.findall(r'LootedObject\("([^"]+)"\)', text)
+
+
 def verify_mapping(repo: Path, plan: dict) -> None:
     mapping_path = repo / MAPPING_REL
     if not mapping_path.exists():
         raise FileNotFoundError(
-            f"Missing mapping report: {mapping_path}. Run tools/COLLECT_REMAKE_R1_R2_MAPPING.cmd first."
+            f"Missing mapping report: {mapping_path}. Run tools/RUN_1.71PE_CORE_PREP.cmd first."
         )
     mapping = json.loads(mapping_path.read_text(encoding="utf-8"))
     human = mapping.get("human_looted_objects", {})
     for name in plan.get("required_human_looted_objects", []):
         if name not in human:
-            raise RuntimeError(f"Required human LootedObject missing from local mapping: {name}")
+            raise RuntimeError(f"Required human LootedObject missing from current-runtime mapping: {name}")
 
     token_hits = mapping.get("targets", {})
     required_tokens = plan.get("required_mapping_tokens", [])
@@ -96,7 +105,16 @@ def verify_mapping(repo: Path, plan: dict) -> None:
         flattened.update(hits.keys())
     for token in required_tokens:
         if token not in flattened:
-            raise RuntimeError(f"Required native mapping token not proven locally: {token}")
+            raise RuntimeError(f"Required native mapping token not proven on CURRENT_RUNTIME: {token}")
+
+
+def verify_current_runtime_mode(repo: Path) -> None:
+    p = repo / "local_build/CURRENT_RUNTIME_PREP/CURRENT_RUNTIME.json"
+    if not p.exists():
+        raise FileNotFoundError("Missing CURRENT_RUNTIME report. Run RUN_1.71PE_CORE_PREP.cmd first.")
+    report = json.loads(p.read_text(encoding="utf-8"))
+    if report.get("mode") != "SPECIAL45_CORE_BYTE_COMPATIBLE":
+        raise RuntimeError("CURRENT_RUNTIME is not byte-compatible with SPECIAL45 core; dedicated 1.71PE port required.")
 
 
 def write_pak(files: dict[str, bytes], out_path: Path) -> bytes:
@@ -120,22 +138,24 @@ def write_pak(files: dict[str, bytes], out_path: Path) -> bytes:
 
 def main() -> int:
     repo = Path(__file__).resolve().parents[1]
-    ap = argparse.ArgumentParser(description="Build guarded R1/R2 remake candidate on exact PROVEN45.")
-    ap.add_argument("--baseline", type=Path, default=repo / "local_baseline/1.71E")
+    ap = argparse.ArgumentParser(description="Build guarded R1/R2 remake candidate on CURRENT_RUNTIME while preserving canonical PROVEN45.")
+    ap.add_argument("--baseline", type=Path, default=repo / "local_baseline/CURRENT_RUNTIME")
     ap.add_argument("--patch-dir", type=Path, default=repo / "patches/runtime/USER_HIGH_LOOT_SPECIAL45_1.71E")
     ap.add_argument("--plan", type=Path, default=repo / PLAN_REL)
     ap.add_argument("--output", type=Path, default=repo / "local_build/REMAKE_PROVEN45/R1_R2/data2_payload.pak")
     args = ap.parse_args()
 
+    verify_current_runtime_mode(repo)
     if not args.plan.exists():
         raise FileNotFoundError(f"Missing authored operation plan: {args.plan}")
     plan = json.loads(args.plan.read_text(encoding="utf-8"))
-    if plan.get("status") != "AUTHORED_FROM_LOCAL_MAPPING":
-        raise RuntimeError("R1/R2 operation plan is not authorized yet; collect local mapping and author exact ops first.")
+    if plan.get("status") != "AUTHORED_FROM_CURRENT_RUNTIME_MAPPING":
+        raise RuntimeError("R1/R2 operation plan is not authorized; author exact ops from 1.71PE CURRENT_RUNTIME mapping first.")
 
     verify_mapping(repo, plan)
     files = reconstruct_special45(args.baseline, args.patch_dir)
     before = {p: sha256(b) for p, b in files.items()}
+    before_loot_seq = lootedobject_sequence(files[POOL_PATH].decode("latin1"))
 
     allowed = set(plan.get("allowed_changed_files", []))
     for rel, ops in plan.get("file_operations", {}).items():
@@ -150,14 +170,19 @@ def main() -> int:
     if set(changed) != allowed:
         raise RuntimeError(f"Changed-file guard failed: expected {sorted(allowed)}, got {sorted(changed)}")
 
+    after_loot_seq = lootedobject_sequence(files[POOL_PATH].decode("latin1"))
+    if before_loot_seq != after_loot_seq:
+        raise RuntimeError("LootedObject topology/name order changed. Candidate rejected before packaging.")
+
     data = write_pak(files, args.output)
     manifest = {
         "profile": PROFILE,
+        "runtime_target": "1.71PE",
         "runtime_status": "CANDIDATE_NOT_RUNTIME_GREEN",
         "derived_from_data2_sha256": special45.CANONICAL_DATA2_SHA256,
         "candidate_data2_sha256": sha256(data),
         "changed_files": changed,
-        "frozen_outer_lootedobject_topology": True,
+        "lootedobject_sequence_preserved": True,
         "mapping_required": True,
         "plan_sha256": sha256(args.plan.read_bytes()),
     }
