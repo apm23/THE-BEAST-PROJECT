@@ -28,6 +28,7 @@ MAPPING_INPUTS = {
     "scripts/inventory/inventory_charms.scr",
     "scripts/inventory/collectables_ft.scr",
     "scripts/player/player_variables.scr",
+    "scripts/skills/common_skills.xml",
 }
 
 
@@ -41,10 +42,10 @@ def sha256_file(path: Path) -> str:
 
 def main() -> int:
     repo = Path(__file__).resolve().parents[1]
-    compat_path = repo / "local_build" / "COMPAT_1.71PE_VS_1.71E" / "compatibility.json"
-    pe = repo / "local_baseline" / "1.71PE"
-    active = repo / "local_baseline" / "CURRENT_RUNTIME"
-    outdir = repo / "local_build" / "CURRENT_RUNTIME_PREP"
+    compat_path = repo / "local_build/COMPAT_1.71PE_VS_1.71E/compatibility.json"
+    pe = repo / "local_baseline/1.71PE"
+    active = repo / "local_baseline/CURRENT_RUNTIME"
+    outdir = repo / "local_build/CURRENT_RUNTIME_PREP"
     outdir.mkdir(parents=True, exist_ok=True)
 
     if not compat_path.exists():
@@ -54,13 +55,8 @@ def main() -> int:
 
     compat = json.loads(compat_path.read_text(encoding="utf-8"))
     by_path = {r["path"]: r for r in compat["files"]}
-
     core_bad = [p for p in sorted(CORE_SPECIAL45_INPUTS) if by_path.get(p, {}).get("status") != "IDENTICAL"]
-    mapping_changed = [
-        p for p in sorted(MAPPING_INPUTS)
-        if p in by_path and by_path.get(p, {}).get("status") != "IDENTICAL"
-    ]
-
+    mapping_changed = [p for p in sorted(MAPPING_INPUTS) if p in by_path and by_path[p].get("status") != "IDENTICAL"]
     mode = "SPECIAL45_CORE_BYTE_COMPATIBLE" if not core_bad else "PORT_REQUIRED_BEFORE_GAMEPLAY_BUILD"
 
     if active.exists():
@@ -75,14 +71,10 @@ def main() -> int:
         dst = active / rel_path
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, dst)
-        copied.append({
-            "path": rel_path.as_posix(),
-            "sha256": sha256_file(dst),
-            "size": dst.stat().st_size,
-        })
+        copied.append({"path": rel_path.as_posix(), "sha256": sha256_file(dst), "size": dst.stat().st_size})
 
     mapping_present = sorted(p for p in MAPPING_INPUTS if (active / p).exists())
-    mapping_missing_optional = sorted(p for p in MAPPING_INPUTS if not (active / p).exists())
+    mapping_missing = sorted(p for p in MAPPING_INPUTS if not (active / p).exists())
 
     report = {
         "current_runtime": "1.71PE",
@@ -92,13 +84,14 @@ def main() -> int:
         "core_non_identical": core_bad,
         "mapping_inputs_changed_with_historical_comparison": mapping_changed,
         "mapping_inputs_present": mapping_present,
-        "mapping_inputs_missing_optional": mapping_missing_optional,
+        "mapping_inputs_missing": mapping_missing,
         "active_baseline": str(active),
         "copied_files": len(copied),
         "rules": [
-            "Never patch current runtime unless this report says SPECIAL45_CORE_BYTE_COMPATIBLE or a dedicated 1.71PE port has been authored.",
+            "Never build current runtime unless this report says SPECIAL45_CORE_BYTE_COMPATIBLE or a dedicated 1.71PE port has been authored.",
             "Extra current-runtime mapping files are copied locally but do not alter the historical 58-file compatibility contract.",
-            "player_variables/stash_dlc/versioning remain mapping-only or forbidden unless separately proven safe.",
+            "player_variables/common_skills are patchable only through the committed narrow proven inventory/stack allowlist; unrelated values remain untouched.",
+            "inventory versioning and stash_dlc remain forbidden in this phase.",
             "LootedObject topology stays frozen.",
             "Sense and CO-OP remain deferred for the single-player core phase."
         ]
@@ -106,23 +99,18 @@ def main() -> int:
 
     (outdir / "CURRENT_RUNTIME.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     lines = [
-        f"MODE={mode}",
-        "CURRENT_RUNTIME=1.71PE",
-        f"CORE_NON_IDENTICAL={len(core_bad)}",
-        f"COPIED_FILES={len(copied)}",
-        f"MAPPING_PRESENT={len(mapping_present)}",
-        f"MAPPING_OPTIONAL_MISSING={len(mapping_missing_optional)}",
-        "",
+        f"MODE={mode}", "CURRENT_RUNTIME=1.71PE", f"CORE_NON_IDENTICAL={len(core_bad)}",
+        f"COPIED_FILES={len(copied)}", f"MAPPING_PRESENT={len(mapping_present)}",
+        f"MAPPING_MISSING={len(mapping_missing)}", "",
     ]
-    if core_bad:
-        lines += ["CORE FILES REQUIRING PORT:"] + [f"- {x}" for x in core_bad]
-    else:
-        lines += ["SPECIAL45 core inputs are byte-compatible."]
-    if mapping_missing_optional:
-        lines += ["", "OPTIONAL/EXTRA MAPPING FILES NOT PRESENT:"] + [f"- {x}" for x in mapping_missing_optional]
+    lines += (["CORE FILES REQUIRING PORT:"] + [f"- {x}" for x in core_bad]) if core_bad else ["SPECIAL45 core inputs are byte-compatible."]
+    if mapping_missing:
+        lines += ["", "REQUIRED REMAKE MAPPING FILES NOT PRESENT:"] + [f"- {x}" for x in mapping_missing]
     (outdir / "CURRENT_RUNTIME.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     print(json.dumps(report, indent=2))
+    if mapping_missing:
+        return 3
     return 2 if core_bad else 0
 
 
