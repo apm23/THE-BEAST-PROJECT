@@ -1,0 +1,43 @@
+{
+  "status": "WAITING_FOR_CURRENT_RUNTIME_MAPPING",
+  "description": "Final-stage operations layered on the guarded R1/R2 candidate. Promote only to AUTHORED_FROM_CURRENT_RUNTIME_MAPPING after reviewing 1.71PE special-infected and outfit/inventory/stack mappings.",
+  "runtime_target": "1.71PE",
+  "base_profile": "REMAKE_PROVEN45_R1_R2",
+  "allowed_changed_files": [
+    "scripts/inventory/loot/lootpools_ft.loot",
+    "scripts/inventory/loot/lootsets_ft.loot",
+    "scripts/inventory/loot/color_sets.loot",
+    "scripts/inventory/inventory.scr",
+    "scripts/inventory/inventorystuff.scr",
+    "scripts/inventory/inventory_special.scr",
+    "scripts/inventory/inventory_ranged.scr",
+    "scripts/inventory/gameplay_item_sets.scr"
+  ],
+  "expected_changed_files": [],
+  "hard_forbidden_path_fragments": [
+    "scripts/inventory/versioning/",
+    "stash_dlc",
+    "player_variables",
+    "VisibleQuickSlotsCount"
+  ],
+  "hard_guards": {
+    "preserve_lootedobject_outer_topology": true,
+    "preserve_lootedobject_name_order": true,
+    "no_global_root_override": true,
+    "no_held_weapon_feature": true,
+    "no_save_versioning": true,
+    "no_stash_dlc": true,
+    "no_player_variables": true,
+    "no_quickslot_expansion": true,
+    "native_exotic_only": true,
+    "preserve_rng": true,
+    "inventory_targets": {
+      "equipment": 34,
+      "consumable": 34,
+      "weapon": 68,
+      "ammo": 42
+    },
+    "stack_target": 99999
+  },
+  "file_operations": {}
+}
