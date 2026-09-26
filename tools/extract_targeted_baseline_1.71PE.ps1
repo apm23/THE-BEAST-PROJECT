@@ -6,17 +6,11 @@ param(
 $ErrorActionPreference = 'Stop'
 
 function Find-7Zip {
-    # Force an array even when exactly one candidate exists. Without @(...),
-    # PowerShell may collapse the pipeline result to a scalar string and
-    # $candidates[0] becomes the first character (for example 'C') instead
-    # of the full executable path.
-    $candidates = @(
-        @(
-            (Get-Command 7z.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -ErrorAction SilentlyContinue),
-            "$env:ProgramFiles\7-Zip\7z.exe",
-            "${env:ProgramFiles(x86)}\7-Zip\7z.exe"
-        ) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique
-    )
+    $candidates = @(@(
+        (Get-Command 7z.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -ErrorAction SilentlyContinue),
+        "$env:ProgramFiles\7-Zip\7z.exe",
+        "${env:ProgramFiles(x86)}\7-Zip\7z.exe"
+    ) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique)
     if ($candidates.Count -gt 0) { return [string]$candidates[0] }
     return $null
 }
@@ -55,8 +49,8 @@ function Auto-FindGame {
         $g = Join-Path $lib 'steamapps\common\Dying Light The Beast'
         if (Test-Path (Join-Path $g 'ph_ft\source\data0.pak')) { $games += $g }
     }
-    $games = @($games | ForEach-Object { [IO.Path]::GetFullPath($_).TrimEnd('\') } | Sort-Object -Unique)
-    if ($games.Count -eq 1) { return [string]$games[0] }
+    $games = @($games | ForEach-Object { [IO.Path]::GetFullPath($_).TrimEnd('\') } | Select-Object -Unique)
+    if ($games.Count -eq 1) { return $games[0] }
     if ($games.Count -gt 1) { throw "Lebih dari satu instalasi DLTB ditemukan. Gunakan -GameDir." }
     return $null
 }
@@ -83,11 +77,10 @@ function Extract-One {
     $archivePath = $archives[$ArchiveName]
     Write-Host "Extract [$ArchiveName][$Kind]: $Target"
     if ($sevenZip) {
-        & "$sevenZip" x -y "$archivePath" "$Target" "-o$outRoot" | Out-Null
-        if ($LASTEXITCODE -ne 0) { throw "7-Zip extraction failed ($LASTEXITCODE): $Target" }
+        & $sevenZip x -y $archivePath $Target "-o$outRoot" | Out-Null
+        if ($LASTEXITCODE -ne 0) { Write-Host "Extractor exit code: $LASTEXITCODE" -ForegroundColor Yellow }
     } else {
-        & $tar.Source -xf "$archivePath" -C "$outRoot" "$Target" 2>$null
-        if ($LASTEXITCODE -ne 0) { throw "tar extraction failed ($LASTEXITCODE): $Target" }
+        & $tar.Source -xf $archivePath -C $outRoot $Target 2>$null
     }
 
     $local = Join-Path $outRoot ($Target -replace '/', '\')
@@ -149,15 +142,34 @@ foreach ($f in $manifest.files) {
     $results += Extract-One -Target $target -ArchiveName ([string]$f.archive) -Required $true -Kind 'compat58'
 }
 
-foreach ($f in $extras.extra_targets) {
+# Current schema: required[] / optional[]. Keep legacy extra_targets[] support too.
+$extraItems = @()
+if ($extras.required) {
+    foreach ($f in @($extras.required)) {
+        $extraItems += [PSCustomObject]@{ item=$f; required=$true; kind='remake_required' }
+    }
+}
+if ($extras.optional) {
+    foreach ($f in @($extras.optional)) {
+        $extraItems += [PSCustomObject]@{ item=$f; required=$false; kind='remake_optional' }
+    }
+}
+if ($extras.extra_targets) {
+    foreach ($f in @($extras.extra_targets)) {
+        $req = if ($null -ne $f.required) { [bool]$f.required } else { $false }
+        $kind = if ($f.kind) { [string]$f.kind } else { 'remake_extra_legacy' }
+        $extraItems += [PSCustomObject]@{ item=$f; required=$req; kind=$kind }
+    }
+}
+
+foreach ($x in $extraItems) {
+    $f = $x.item
     $target = [string]$f.path
     $key = $target.ToLowerInvariant()
     if ($seen.ContainsKey($key)) { continue }
     $seen[$key] = $true
     $archive = if ($f.archive) { [string]$f.archive } else { 'data0.pak' }
-    $required = if ($null -ne $f.required) { [bool]$f.required } else { $false }
-    $kind = if ($f.kind) { [string]$f.kind } else { 'remake_extra' }
-    $results += Extract-One -Target $target -ArchiveName $archive -Required $required -Kind $kind
+    $results += Extract-One -Target $target -ArchiveName $archive -Required ([bool]$x.required) -Kind ([string]$x.kind)
 }
 
 $missingRequired = @($results | Where-Object { $_.required -and $_.status -ne 'EXTRACTED' })
