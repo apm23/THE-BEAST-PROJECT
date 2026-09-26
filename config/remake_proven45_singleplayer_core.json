@@ -1,0 +1,48 @@
+{
+  "profile": "REMAKE_PROVEN45_SINGLEPLAYER_CORE",
+  "game_build": "1.71E",
+  "baseline": "USER_HIGH_LOOT_SPECIAL45",
+  "baseline_sha256": "190d7cb172fffe09b227f9b2fdb9b596dea5bf1e2d239fe804c377c45e392657",
+  "scope": [
+    "weapon_rarity_up_to_exotic",
+    "human_zombie_style_corpse_lootpool",
+    "special_infected_exotic_drops",
+    "custom_powerful_outfit",
+    "expanded_inventory_34_34_68_42",
+    "stack_size_99999",
+    "dismantle_compatibility",
+    "drop_share_compatibility",
+    "save_scene_persistence",
+    "corpse_F_compatibility",
+    "attack_controls_compatibility"
+  ],
+  "deferred": [
+    "sense_wallhack",
+    "sense_dormant_dead_logic",
+    "one_sided_coop",
+    "coop_data2_only_switching"
+  ],
+  "forbidden_changes": [
+    "replace_proven45_global_loot_root",
+    "rewrite_lootedobject_topology",
+    "inventory_versioning",
+    "save_versioning",
+    "stash_dlc",
+    "player_variables",
+    "quickslot_rewrite",
+    "human_held_weapon_drop_feature",
+    "legendary_core",
+    "legendary_ascension"
+  ],
+  "runtime_gate_order": [
+    "game_boot",
+    "corpse_F",
+    "attack_controls",
+    "loot_behavior",
+    "inventory",
+    "outfit",
+    "scene_transition",
+    "save_reload",
+    "save_swap"
+  ]
+}
