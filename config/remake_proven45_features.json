@@ -1,10 +1,12 @@
 {
   "project": "THE-BEAST-PROJECT",
-  "game_build": "1.71E",
+  "game_build_baseline": "1.71E",
+  "current_runtime_target": "1.71PE",
   "remake_baseline": "USER_HIGH_LOOT_SPECIAL45",
   "continuity": "BEAST-PROVEN-SWITCH45",
   "global_loot_policy": "immutable_proven45_foundation_no_new_global_root_override",
   "current_scope": "single_player_core_only",
+  "runtime_version_policy": "1.71PE must pass compatibility preparation before any gameplay candidate is built; if the three canonical SPECIAL45 core inputs differ, author a dedicated 1.71PE port first.",
   "features": [
     {
       "id": 1,
@@ -15,31 +17,31 @@
     {
       "id": 2,
       "name": "Weapon rarity up to Exotic",
-      "status": "MAPPING_REQUIRED",
+      "status": "MAPPING_REQUIRED_ON_CURRENT_RUNTIME",
       "rule": "Use native item quality/state and native affix mechanisms where supported; no cosmetic-only rarity."
     },
     {
       "id": 3,
       "name": "Human zombie-style corpse lootpool",
-      "status": "MAPPED_NOT_REBUILT",
+      "status": "MAPPING_REQUIRED_ON_CURRENT_RUNTIME",
       "rule": "Use extra corpse/search loot similar to infected; do not implement held-weapon drop as a project feature."
     },
     {
       "id": 4,
       "name": "Exotic special infected drops",
-      "status": "MAPPING_REQUIRED",
+      "status": "MAPPING_REQUIRED_ON_CURRENT_RUNTIME",
       "rule": "Prefer native Exotic quality mechanisms; preserve RNG."
     },
     {
       "id": 5,
       "name": "Custom powerful outfit",
-      "status": "REBUILD_REQUIRED",
+      "status": "MAPPING_REQUIRED_ON_CURRENT_RUNTIME",
       "rule": "Keep independent from frozen loot topology and avoid save/versioning rewrites."
     },
     {
       "id": 6,
       "name": "Expanded inventory",
-      "status": "UNTESTED_REMAKE_TARGET",
+      "status": "MAPPING_REQUIRED_ON_CURRENT_RUNTIME",
       "targets": {
         "equipment": 34,
         "consumable": 34,
@@ -50,7 +52,7 @@
     {
       "id": 7,
       "name": "Huge stack size",
-      "status": "UNTESTED_REMAKE_TARGET",
+      "status": "MAPPING_REQUIRED_ON_CURRENT_RUNTIME",
       "target": 99999
     },
     {
