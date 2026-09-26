@@ -1,0 +1,147 @@
+param(
+    [string]$GameDir,
+    [switch]$NoGui
+)
+
+$ErrorActionPreference = 'Stop'
+
+function Find-7Zip {
+    $candidates = @(
+        (Get-Command 7z.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -ErrorAction SilentlyContinue),
+        "$env:ProgramFiles\7-Zip\7z.exe",
+        "${env:ProgramFiles(x86)}\7-Zip\7z.exe"
+    ) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique
+    if ($candidates.Count -gt 0) { return $candidates[0] }
+    return $null
+}
+
+function Get-SteamRoots {
+    $roots = @()
+    try { $p = (Get-ItemProperty 'HKCU:\Software\Valve\Steam' -ErrorAction Stop).SteamPath; if ($p) { $roots += $p } } catch {}
+    try { $p = (Get-ItemProperty 'HKLM:\SOFTWARE\WOW6432Node\Valve\Steam' -ErrorAction Stop).InstallPath; if ($p) { $roots += $p } } catch {}
+    foreach ($p in @("${env:ProgramFiles(x86)}\Steam", "${env:ProgramFiles}\Steam", 'C:\Steam')) {
+        if ($p -and (Test-Path $p)) { $roots += $p }
+    }
+    return @($roots | Select-Object -Unique)
+}
+
+function Get-SteamLibraries {
+    $libs = @()
+    foreach ($root in Get-SteamRoots) {
+        if (Test-Path $root) { $libs += $root }
+        $vdf = Join-Path $root 'steamapps\libraryfolders.vdf'
+        if (Test-Path $vdf) {
+            try {
+                $txt = Get-Content -Raw $vdf
+                foreach ($m in [regex]::Matches($txt, '"path"\s*"([^"]+)"')) {
+                    $p = $m.Groups[1].Value -replace '\\\\','\'
+                    if (Test-Path $p) { $libs += $p }
+                }
+            } catch {}
+        }
+    }
+    return @($libs | Select-Object -Unique)
+}
+
+function Auto-FindGame {
+    $games = @()
+    foreach ($lib in Get-SteamLibraries) {
+        $g = Join-Path $lib 'steamapps\common\Dying Light The Beast'
+        if (Test-Path (Join-Path $g 'ph_ft\source\data0.pak')) { $games += $g }
+    }
+    $games = @($games | ForEach-Object { [IO.Path]::GetFullPath($_).TrimEnd('\') } | Select-Object -Unique)
+    if ($games.Count -eq 1) { return $games[0] }
+    if ($games.Count -gt 1) { throw "Lebih dari satu instalasi DLTB ditemukan. Gunakan -GameDir." }
+    return $null
+}
+
+function Select-GameFolder {
+    Add-Type -AssemblyName System.Windows.Forms
+    $dialog = New-Object System.Windows.Forms.FolderBrowserDialog
+    $dialog.Description = 'Pilih folder utama Dying Light The Beast (folder yang berisi ph_ft)'
+    $dialog.ShowNewFolderButton = $false
+    if ($dialog.ShowDialog() -ne [System.Windows.Forms.DialogResult]::OK) { return $null }
+    return $dialog.SelectedPath
+}
+
+$repoRoot = Split-Path -Parent $PSScriptRoot
+$manifestPath = Join-Path $repoRoot 'config\baseline_1.71E_manifest.json'
+if (-not (Test-Path $manifestPath)) { throw "Manifest target-list tidak ditemukan: $manifestPath" }
+$manifest = Get-Content -Raw $manifestPath | ConvertFrom-Json
+
+if (-not $GameDir) { $GameDir = Auto-FindGame }
+if (-not $GameDir -and -not $NoGui) { $GameDir = Select-GameFolder }
+if (-not $GameDir) { throw 'GameDir tidak ditemukan. Gunakan -GameDir "C:\...\Dying Light The Beast".' }
+$GameDir = [IO.Path]::GetFullPath($GameDir).TrimEnd('\')
+
+$archives = @{
+    'data0.pak' = Join-Path $GameDir 'ph_ft\source\data0.pak'
+    'data1.pak' = Join-Path $GameDir 'ph_ft\source\data1.pak'
+}
+if (-not (Test-Path $archives['data0.pak'])) { throw "data0.pak tidak ditemukan: $($archives['data0.pak'])" }
+
+$sevenZip = Find-7Zip
+$tar = Get-Command tar.exe -ErrorAction SilentlyContinue
+if (-not $sevenZip -and -not $tar) { throw 'Butuh 7-Zip atau tar.exe yang bisa membaca PAK.' }
+
+$outRoot = Join-Path $repoRoot 'local_baseline\1.71PE'
+if (Test-Path $outRoot) { Remove-Item -Recurse -Force $outRoot }
+New-Item -ItemType Directory -Force -Path $outRoot | Out-Null
+
+$results = @()
+foreach ($f in $manifest.files) {
+    $target = [string]$f.path
+    $archiveName = [string]$f.archive
+    if (-not $archives.ContainsKey($archiveName) -or -not (Test-Path $archives[$archiveName])) {
+        $archiveName = 'data0.pak'
+    }
+    $archivePath = $archives[$archiveName]
+    Write-Host "Extract [$archiveName]: $target"
+    if ($sevenZip) {
+        & $sevenZip x -y $archivePath $target "-o$outRoot" | Out-Null
+    } else {
+        & $tar.Source -xf $archivePath -C $outRoot $target 2>$null
+    }
+
+    $local = Join-Path $outRoot ($target -replace '/', '\')
+    $status = 'MISSING'
+    $actualHash = $null
+    $actualSize = 0
+    if (Test-Path $local) {
+        $actualSize = (Get-Item $local).Length
+        $actualHash = (Get-FileHash $local -Algorithm SHA256).Hash.ToLowerInvariant()
+        $status = 'EXTRACTED'
+    }
+    $results += [PSCustomObject]@{
+        path = $target
+        archive = $archiveName
+        status = $status
+        sha256 = $actualHash
+        size = $actualSize
+    }
+}
+
+$missing = @($results | Where-Object { $_.status -eq 'MISSING' }).Count
+$report = [ordered]@{
+    game = 'Dying Light: The Beast'
+    observed_label = '1.71PE'
+    game_dir = $GameDir
+    generated = (Get-Date -Format o)
+    targets = $results.Count
+    missing = $missing
+    results = $results
+}
+$reportPath = Join-Path $outRoot '_EXTRACT_REPORT.json'
+$report | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 $reportPath
+
+Write-Host ''
+Write-Host '=============================================================='
+Write-Host ' DLTB CURRENT BUILD TARGET EXTRACTION -> 1.71PE'
+Write-Host '=============================================================='
+Write-Host "GameDir=$GameDir"
+Write-Host "Output=$outRoot"
+Write-Host "Targets=$($results.Count)"
+Write-Host "Missing=$missing"
+Write-Host ''
+if ($missing -ne 0) { throw "Ada target yang tidak ter-extract. Lihat $reportPath" }
+Write-Host 'PASS: extraction complete. Run CHECK_1.71PE_COMPATIBILITY.cmd next.'
