@@ -1,137 +1,163 @@
-# FEATURE SPECIFICATION
+# FEATURE SPECIFICATION — REMAKE ON PROVEN45
 
-## 1. Universal Legendary eligibility
+## Authority
 
-All supported weapons may generate as native Legendary even when their vanilla rarity ceiling is Rare or Epic. The implementation must alter the actual generated item quality/state where the engine permits it.
+This file defines the current remake target. The canonical USER HIGH LOOT SPECIAL45 / PROVEN45 loot lineage is the immutable gameplay foundation.
 
-## 2. Global rarity gacha
+Do not redesign or structurally replace the proven global loot root. New features must be layered around the proven topology and must preserve corpse `F`, DLC/save safety, scene/save persistence, and one-sided CO-OP behavior.
 
-Every generated weapon from supported loot sources participates in a rarity roll. Initial Legendary target: **30% per generated weapon**.
+## 1. Global loot foundation — PROVEN45 only
 
-## 3. Common infected weapon availability
+Use the existing runtime-proven USER HIGH LOOT SPECIAL45 implementation as the global loot foundation.
 
-Increase the chance that low-tier infected generate/drop weapons modestly. Initial Biter target: **20–25% weapon availability**, subject to actual vanilla loot semantics.
+Rules:
 
-## 4. Human held-weapon drops
+- preserve the proven `LootedObject` / corpse routing topology;
+- do not introduce a new global-root override architecture;
+- prefer numeric weights, existing sub-pool contents, and safe quantity edits over structural rewrites;
+- preserve the known-good SPECIAL45 resource balance and ammo/blueprint behavior unless explicitly changed later;
+- any file that would alter the frozen corpse route requires separate proof before inclusion.
 
-Humans may drop the weapon they are visibly carrying. That exact weapon participates in the same rarity roll and may become Legendary. Initial held-weapon drop target: **60–75%** if technically compatible with vanilla behavior.
+## 2. Weapon rarity system — up to Exotic
 
-## 5. Extra human corpse loot
-
-A small additional corpse weapon roll may exist, but it must remain separate from the held-weapon feature and must not replace it.
-
-## 6. Containers and searchable loot
-
-Supported containers, bags, chests, and other searchable loot sources get moderately increased weapon availability. Generated weapons use the same rarity-gacha rules.
-
-## 7. Destructible loot props
-
-Destructible objects participate only if their actual 1.71E definitions contain loot-generation behavior. Do not fabricate loot for purely visual/destructible props until mapped and deliberately designed.
-
-## 8. Native Legendary properties
-
-Legendary conversion/generation should use real Legendary-compatible quality, affix count/pool, durability/repair behavior, and other relevant native properties where available. Avoid cosmetic-only rarity.
-
-## 9. Legendary persistence
-
-Obtained Legendary state should survive removal of the mod if the game save format persists that state. This is a required validation target, not an assumption.
-
-## 10. Legendary Upgrade Overhaul
-
-Legendary weapons gain stronger upgrade progression than lower rarities. Primary scaling:
-
-- damage: aggressive
-- durability: aggressive
-- handling/stamina/other supported secondary stats: moderate
-- attack speed: conservative
-
-## 11. Legendary Ascension
-
-Per-instance progression:
-
-`L -> L+1 -> L+2 -> L+3 -> L+4 -> L+5`
-
-Initial cumulative target envelope, subject to engine constraints and balance testing:
-
-| Stage | Damage | Durability | Secondary stats | Attack-speed ceiling target |
-|---|---:|---:|---:|---:|
-| L | native | native | native | native |
-| L+1 | +12% | +15% | small | ~+2% |
-| L+2 | +25% | +32% | moderate | ~+4% |
-| L+3 | +40% | +50% | moderate | ~+6% |
-| L+4 | +60% | +72% | high | ~+8% |
-| L+5 | +85% | +100% | highest | ~+10% |
-
-These numbers are tuning targets, not frozen until in-game testing confirms safe behavior.
-
-## 12. Legendary Core
-
-Add a progression item/mechanism named **Legendary Core** unless 1.71E technical constraints require a safe alternate implementation.
-
-Behavior:
-
-- Rare/Epic + 1 Core -> Legendary
-- Legendary + Core(s) -> next Ascension stage
-
-## 13. Core drop chances
-
-Initial targets:
-
-| Source | Core chance target |
-|---|---:|
-| Common infected | 8–10% |
-| Viral | ~10% |
-| Human | ~10% |
-| Ordinary container | 8–10% |
-| Special infected | 12–15% |
-| Good/locked chest | 12–15% |
-| Boss/Chimera | 20–30% |
-
-## 14. Core costs
-
-| Transition | Cost |
-|---|---:|
-| Rare/Epic -> Legendary | 1 |
-| L -> L+1 | 1 |
-| L+1 -> L+2 | 2 |
-| L+2 -> L+3 | 3 |
-| L+3 -> L+4 | 5 |
-| L+4 -> L+5 | 8 |
-
-## 15. Per-weapon state
-
-Two copies of the same weapon definition may have different progression states. Example:
-
-- Katana A: Legendary L+0
-- Katana B: Legendary L+4
-
-A global definition-only buff does not satisfy this requirement unless the engine provides no persistent per-instance path; any such limitation must be documented.
-
-## 16. Preserve weapon identity
-
-Do not unnecessarily change weapon model, base name, animation class, or category. The mod extends rarity, loot, stats, and progression rather than replacing weapon identity.
-
-## 17. Preserve RNG
-
-The system intentionally makes good weapons easier to obtain but does not guarantee Legendary every time. Farming and random outcomes remain part of the loop.
-
-## 18. Balance is config-driven
-
-All tunable probabilities, Core costs, and Ascension target multipliers should live in project-authored configuration wherever practical so balance changes do not require rewriting patch logic.
-
-## 19. Manual Save Anywhere
-
-Add a user-triggered manual-save action bound to a configurable hotkey/toggle so the player can request a save regardless of world position and without needing to be inside a safe zone.
+Supported generated weapons may roll through the game's native rarity/quality ladder up to **Exotic** where the 1.71E engine and item definition support it.
 
 Requirements:
 
-- position-independent: normal world position must not block the save merely because the player is outside a safe zone;
-- invoke the game's native save pipeline where possible instead of writing save files directly;
-- preserve existing autosave behavior;
-- configurable hotkey, with the exact default key chosen after input-mapping feasibility is confirmed;
-- provide visible/audio feedback when a manual save request succeeds if the engine exposes a safe notification path;
-- avoid forcing a write during engine-unsafe transient states such as active loading, respawn/death transition, or other states proven to make the native save pipeline unavailable. This is a corruption-prevention guard, not a safe-zone restriction;
-- test in ordinary exploration, combat-adjacent situations, interiors, and after inventory/weapon changes;
-- verify that the resulting save reloads normally and does not break quest/checkpoint state.
+- rarity must be the real native item quality/state, not cosmetic text/color;
+- preserve weapon identity/model/class;
+- keep RNG/farming rather than guaranteeing the highest rarity;
+- do not add Legendary Core or Ascension systems;
+- do not add L+1..L+5 progression.
 
-Technical implementation is pending mapping of 1.71E input hooks and the native save-request API.
+Exact rarity weights remain tuning values until runtime testing.
+
+## 3. Human corpse lootpool — zombie-style extra loot, not held-weapon drop
+
+Humans receive a corpse/search lootpool following the same design principle as infected corpse loot.
+
+This feature is explicitly **not** a system that drops the weapon visibly held by the human.
+
+Requirements:
+
+- use a separate corpse-loot roll compatible with the frozen PROVEN45 routing;
+- generated weapon loot uses the same rarity system up to Exotic;
+- resource/material quantities should follow proven balance unless explicitly tuned later;
+- do not replace or depend on held-weapon `LootChance(...)` behavior.
+
+## 4. Exotic / special infected drops
+
+Special infected and supported high-tier enemy sources may have stronger access to high-tier weapon rolls, including Exotic where natively supported.
+
+Do not fabricate new item identities solely to simulate Exotic. Prefer native quality/affix mechanisms.
+
+## 5. Custom powerful outfit
+
+Preserve/rebuild the project custom powerful outfit feature.
+
+Requirements:
+
+- use a safe existing/native item identity where practical for one-sided CO-OP compatibility;
+- avoid save/versioning rewrites;
+- keep the outfit independent from the frozen PROVEN45 corpse topology;
+- verify equip, unequip, save/reload, scene transition, and one-sided CO-OP behavior.
+
+Exact bonuses are a tuning surface and must be documented in the build manifest used for testing.
+
+## 6. Expanded inventory
+
+Target capacities:
+
+- Equipment: `34`
+- Consumable: `34`
+- Weapon: `68`
+- Ammo: `42`
+
+The implementation must avoid inventory-versioning, save-versioning, stash-DLC, quickslot topology, and other previously unsafe paths.
+
+Inventory expansion is not considered runtime-proven until it survives:
+
+1. initial load;
+2. scene transition;
+3. save reload;
+4. save swap;
+5. one-sided CO-OP session.
+
+## 7. Huge stack size
+
+Target stack size for supported materials / consumables / throwables: `99,999` where the underlying item/category safely permits it.
+
+Do not force this onto categories whose native semantics make large stacking unsafe.
+
+## 8. Dismantle compatibility
+
+Supported modded/generated items should retain normal dismantle behavior where the base game provides it.
+
+## 9. Drop / share compatibility
+
+Supported items should remain droppable/shareable where the base game allows it. One-sided CO-OP tests must verify that a vanilla sibling can coexist with the modded player without requiring the sibling to install the gameplay mod.
+
+## 10. Sense wallhack
+
+Target Sense behavior:
+
+- infected + humans visible through walls;
+- effective range around `200 m`;
+- highlight duration around `15 s`;
+- dormant relevant AI detectable;
+- dead AI skipped.
+
+Sense must remain isolated from global loot, `LootedObject`, inventory versioning, save/versioning, controls/F, CP1, and item registry paths.
+
+Previously rejected broad Sense V4/V4.1-style edits remain blacklisted. Prefer the narrow/effective-source approach.
+
+## 11. One-sided CO-OP support
+
+Primary compatibility target:
+
+- modded user: full gameplay mod;
+- sibling/client: vanilla, no gameplay mod required.
+
+The proven architectural reference is the `CP1_COOP_SAFE_DATA2_ONLY` / MultiMod data2-only lineage.
+
+The CO-OP-safe loader path may remain active in single-player; it is a load topology, not a separate gameplay ruleset.
+
+## 12. Save / scene persistence
+
+Features must remain active and correct after:
+
+- ordinary save reload;
+- save-data swap;
+- scene transition;
+- single-player to CO-OP usage through the proven loader path.
+
+New Game / NG+ remain separate validation targets until explicitly runtime-tested.
+
+## 13. Corpse F compatibility
+
+Corpse search interaction using `F` is a hard gate. If `F` disappears or corpse routing breaks, the candidate build is rejected regardless of other improvements.
+
+## 14. Attack / controls compatibility
+
+Attack and ordinary control input must remain normal. Gameplay input regressions reject the candidate build.
+
+## 15. Installer / rollback discipline
+
+Every experimental build must provide:
+
+- explicit clean/install path;
+- status/detection where practical;
+- rollback to the last runtime-proven state;
+- clear distinction between STATIC-PROVEN, RUNTIME-PROVEN, and UNTESTED/HYPOTHESIS.
+
+## Explicitly removed from the project target
+
+The following old goals are cancelled unless the user explicitly reopens them later:
+
+- Legendary Core;
+- Rare/Epic -> Legendary Core upgrade path;
+- Legendary Ascension;
+- L+1..L+5 progression;
+- Core drop chances/costs;
+- human held-weapon drop as a project feature;
+- Manual Save Anywhere as part of this remake.
