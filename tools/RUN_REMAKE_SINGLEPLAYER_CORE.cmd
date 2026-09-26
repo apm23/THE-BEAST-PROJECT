@@ -10,9 +10,19 @@ echo.
 
 call tools\RUN_1.71PE_CORE_PREP.cmd
 set PREP=%ERRORLEVEL%
+
+rem Authoritative gate: trust CURRENT_RUNTIME.json, not an incidental wrapper code.
+set RUNTIME_OK=0
+if exist local_build\CURRENT_RUNTIME_PREP\CURRENT_RUNTIME.json (
+  python -c "import json,sys; p=json.load(open(r'local_build\CURRENT_RUNTIME_PREP\CURRENT_RUNTIME.json',encoding='utf-8')); sys.exit(0 if p.get('mode')=='SPECIAL45_CORE_BYTE_COMPATIBLE' and not p.get('mapping_inputs_missing') else 1)"
+  if not errorlevel 1 set RUNTIME_OK=1
+)
+
+if "%RUNTIME_OK%"=="1" goto :build
 if %PREP%==2 goto :port
 if not %PREP%==0 goto :fail
 
+:build
 call tools\BUILD_REMAKE_PROVEN45_RECOVERED.cmd
 if errorlevel 1 goto :transplant
 
