@@ -58,7 +58,8 @@ Flow:
 6. apply only narrow inventory/stack overrides to `player_variables.scr` and InventoryUpgrade_1/2 neutralization in `common_skills.xml`;
 7. verify LootedObject name/order topology remains identical;
 8. write candidate PAK + manifest;
-9. package fail-safe install/status/rollback launchers.
+9. package fail-safe install/status/rollback launchers;
+10. package the runtime test recorder / promotion gate.
 
 Active builder:
 
@@ -86,10 +87,30 @@ Authority: `config/remake_singleplayer_test_matrix.json`.
 
 Immediate hard failures include broken corpse `F`, broken attack/controls, save corruption/reload failure, DLC regression, or loot reverting after scene/save transition.
 
+Runtime result recorder / promotion authority:
+
+`tools/runtime_test_gate.py`
+
+Convenience launcher:
+
+`tools\RUNTIME_TEST_GATE.cmd`
+
+The candidate package also includes `4_TEST_GATE.cmd` plus `runtime_test_gate.py` and `TEST_MATRIX.json`.
+
+Promotion rule is strict:
+
+- every T01–T15 must be recorded as `PASS`;
+- zero hard-fail events may exist;
+- only then may `promote` set `runtime_status` to `RUNTIME_GREEN`.
+
+A FAIL or hard-fail leaves the package `CANDIDATE_NOT_RUNTIME_GREEN`. The gate does not auto-forgive or infer a pass.
+
 ## Next safe action
 
 On the Windows machine containing the current 1.71PE installation, run:
 
 `tools\RUN_REMAKE_SINGLEPLAYER_CORE.cmd`
 
-If it produces `local_build\DLTB_REMAKE_PROVEN45_1.71PE_CANDIDATE.zip`, install using the package's `1_INSTALL_CANDIDATE.cmd`, then execute T01–T15. Do not mark the remake runtime-green until those tests pass.
+If it produces `local_build\DLTB_REMAKE_PROVEN45_1.71PE_CANDIDATE.zip`, install using the package's `1_INSTALL_CANDIDATE.cmd`, then execute T01–T15 and record each result with `4_TEST_GATE.cmd`.
+
+Do not mark the remake runtime-green until `4_TEST_GATE.cmd promote` succeeds after all T01–T15 pass.
