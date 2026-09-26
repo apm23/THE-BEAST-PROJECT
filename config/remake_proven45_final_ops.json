@@ -11,7 +11,13 @@
     "scripts/inventory/inventorystuff.scr",
     "scripts/inventory/inventory_special.scr",
     "scripts/inventory/inventory_ranged.scr",
-    "scripts/inventory/gameplay_item_sets.scr"
+    "scripts/inventory/gameplay_item_sets.scr",
+    "scripts/inventory/inventory_outfits.scr",
+    "scripts/inventory/inventory_outfits_ft.scr",
+    "scripts/inventory/outfits_visualization.def",
+    "scripts/inventory/outfits_visualization_ft.def",
+    "scripts/inventory/itemaffixes.scr",
+    "scripts/inventory/dismantleparams.scr"
   ],
   "expected_changed_files": [],
   "hard_forbidden_path_fragments": [
@@ -29,6 +35,7 @@
     "no_stash_dlc": true,
     "no_player_variables": true,
     "no_quickslot_expansion": true,
+    "night_sovereign_native_vanguard_carriers": true,
     "native_exotic_only": true,
     "preserve_rng": true,
     "inventory_targets": {
