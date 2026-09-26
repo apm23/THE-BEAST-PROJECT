@@ -4,6 +4,7 @@ cd /d "%~dp0.."
 echo ==============================================================
 echo  THE BEAST PROJECT - REMAKE PROVEN45 SINGLEPLAYER CORE
 echo  Runtime target: 1.71PE
+echo  Sense: DEFERRED   CO-OP: DEFERRED
 echo ==============================================================
 echo.
 
@@ -12,11 +13,8 @@ set PREP=%ERRORLEVEL%
 if %PREP%==2 goto :port
 if not %PREP%==0 goto :fail
 
-call tools\BUILD_REMAKE_PROVEN45_R1_R2.cmd
-if errorlevel 1 goto :r1authoring
-
-call tools\BUILD_REMAKE_PROVEN45_FINAL.cmd
-if errorlevel 1 goto :finalauthoring
+call tools\BUILD_REMAKE_PROVEN45_RECOVERED.cmd
+if errorlevel 1 goto :transplant
 
 call tools\PACKAGE_REMAKE_CANDIDATE.cmd
 if errorlevel 1 goto :fail
@@ -31,25 +29,15 @@ echo  STATUS: CANDIDATE_NOT_RUNTIME_GREEN until in-game tests pass.
 echo ==============================================================
 exit /b 0
 
-:r1authoring
+:transplant
 echo.
 echo ==============================================================
-echo  SAFE STOP: R1/R2 OPS NEED 1.71PE CURRENT-RUNTIME AUTHORING
-echo  Mapping: local_build\REMAKE_PROVEN45\mapping\R1_R2_MAPPING.*
-echo  No guessed gameplay PAK was installed or packaged.
+echo  SAFE STOP: RECOVERED G1 TRANSPLANT DID NOT MATCH 1.71PE
+echo  No guessed patch was produced and no game file was installed.
+echo  Review CURRENT_RUNTIME mapping / context before changing anything.
 echo ==============================================================
 python tools\remake_status.py
 exit /b 4
-
-:finalauthoring
-echo.
-echo ==============================================================
-echo  SAFE STOP: FINAL OPS NEED CURRENT-RUNTIME AUTHORING
-echo  Review SPECIAL_INFECTED_EXOTIC_MAPPING and R3_R4_MAPPING.
-echo  Then author config\remake_proven45_final_ops.json.
-echo ==============================================================
-python tools\remake_status.py
-exit /b 5
 
 :port
 echo.
