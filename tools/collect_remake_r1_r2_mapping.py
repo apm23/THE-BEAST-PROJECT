@@ -79,15 +79,26 @@ def extract_looted_object(text: str, name: str) -> str | None:
 
 def main() -> int:
     repo = Path(__file__).resolve().parents[1]
-    base = repo / "local_baseline" / "1.71E"
+    base = repo / "local_baseline" / "CURRENT_RUNTIME"
+    runtime_report = repo / "local_build" / "CURRENT_RUNTIME_PREP" / "CURRENT_RUNTIME.json"
     outdir = repo / "local_build" / "REMAKE_PROVEN45" / "mapping"
     outdir.mkdir(parents=True, exist_ok=True)
 
-    report = {"targets": {}, "human_looted_objects": {}}
+    if not runtime_report.exists():
+        raise FileNotFoundError("Run PREPARE_CURRENT_RUNTIME.cmd first")
+    runtime = json.loads(runtime_report.read_text(encoding="utf-8"))
+
+    report = {
+        "current_runtime": runtime.get("current_runtime", "unknown"),
+        "behavioral_baseline": "USER_HIGH_LOOT_SPECIAL45",
+        "source_root": str(base),
+        "targets": {},
+        "human_looted_objects": {},
+    }
     for rel in TARGETS:
         path = base / rel
         if not path.exists():
-            raise FileNotFoundError(f"Missing baseline file: {path}")
+            raise FileNotFoundError(f"Missing current-runtime file: {path}")
         text = path.read_text(encoding="latin1")
         hits = {}
         for token in TOKENS:
@@ -109,7 +120,7 @@ def main() -> int:
 
     txt_path = outdir / "R1_R2_MAPPING.txt"
     with txt_path.open("w", encoding="utf-8") as f:
-        f.write("REMAKE PROVEN45 R1/R2 MAPPING\n\n")
+        f.write(f"REMAKE PROVEN45 R1/R2 MAPPING - runtime {report['current_runtime']}\n\n")
         for rel, hits in report["targets"].items():
             f.write(f"===== {rel} =====\n")
             if not hits:
@@ -123,6 +134,7 @@ def main() -> int:
         for name, block in report["human_looted_objects"].items():
             f.write(f"\n--- {name} ---\n{block}\n")
 
+    print(f"RUNTIME={report['current_runtime']}")
     print(f"JSON={json_path}")
     print(f"TEXT={txt_path}")
     print(f"HumanLootedObjects={len(report['human_looted_objects'])}")
