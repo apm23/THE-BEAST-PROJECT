@@ -1,6 +1,7 @@
 {
-  "status": "WAITING_FOR_LOCAL_MAPPING",
-  "description": "Guarded authoring plan for R1 native rarity through Exotic plus R2 human corpse-loot changes. This file must only be promoted to AUTHORED_FROM_LOCAL_MAPPING after exact 1.71E mapping is collected locally.",
+  "status": "WAITING_FOR_CURRENT_RUNTIME_MAPPING",
+  "description": "Guarded authoring plan for R1 native rarity through Exotic plus R2 human corpse-loot changes. Promote only to AUTHORED_FROM_CURRENT_RUNTIME_MAPPING after exact 1.71PE CURRENT_RUNTIME mapping has been collected and reviewed.",
+  "runtime_target": "1.71PE",
   "derived_from": "USER_HIGH_LOOT_SPECIAL45",
   "allowed_changed_files": [
     "scripts/inventory/loot/lootpools_ft.loot",
@@ -18,6 +19,7 @@
   ],
   "hard_guards": {
     "preserve_lootedobject_outer_topology": true,
+    "preserve_lootedobject_name_order": true,
     "no_held_weapon_feature": true,
     "no_inventory_versioning": true,
     "no_stash_dlc": true,
