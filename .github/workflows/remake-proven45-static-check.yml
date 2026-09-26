@@ -39,6 +39,7 @@ jobs:
               'config/remake_proven45_r1_r2_ops.json',
               'config/remake_proven45_final_ops.json',
               'config/remake_singleplayer_test_matrix.json',
+              'config/remake_1.71PE_extra_targets.json',
           ]
           for f in files:
               json.loads(Path(f).read_text(encoding='utf-8'))
@@ -49,11 +50,21 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          f = json.loads(Path('config/remake_proven45_features.json').read_text())
-          assert f['current_runtime_target'] == '1.71PE'
-          assert f['global_loot_policy'] == 'immutable_proven45_foundation_no_new_global_root_override'
-          assert 'Sense wallhack' in f['deferred']
-          assert 'One-sided CO-OP' in f['deferred']
-          assert 'Legendary Core' in f['cancelled']
+          features = json.loads(Path('config/remake_proven45_features.json').read_text())
+          final = json.loads(Path('config/remake_proven45_final_ops.json').read_text())
+          extras = json.loads(Path('config/remake_1.71PE_extra_targets.json').read_text())
+          assert features['current_runtime_target'] == '1.71PE'
+          assert features['global_loot_policy'] == 'immutable_proven45_foundation_no_new_global_root_override'
+          assert 'Sense wallhack' in features['deferred']
+          assert 'One-sided CO-OP' in features['deferred']
+          assert 'Legendary Core' in features['cancelled']
+          assert final['hard_guards']['no_player_variables'] is True
+          assert final['hard_guards']['no_save_versioning'] is True
+          assert final['hard_guards']['night_sovereign_native_vanguard_carriers'] is True
+          assert final['hard_guards']['inventory_targets'] == {
+              'equipment': 34, 'consumable': 34, 'weapon': 68, 'ammo': 42
+          }
+          assert final['hard_guards']['stack_target'] == 99999
+          assert 'scripts/player/player_variables.scr' in extras['forbidden_to_patch_without_explicit_new_proof']
           print('POLICY PASS')
           PY
