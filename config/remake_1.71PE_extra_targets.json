@@ -1,0 +1,21 @@
+{
+  "runtime_target": "1.71PE",
+  "purpose": "Extra local-only extraction targets needed for remake mapping. These do not alter the historical 58-file 1.71E compatibility contract.",
+  "required": [
+    {"archive":"data0.pak","path":"scripts/inventory/inventory_outfits.scr"},
+    {"archive":"data0.pak","path":"scripts/inventory/inventory_outfits_ft.scr"},
+    {"archive":"data0.pak","path":"scripts/inventory/outfits_visualization.def"},
+    {"archive":"data0.pak","path":"scripts/inventory/outfits_visualization_ft.def"},
+    {"archive":"data0.pak","path":"scripts/inventory/dismantleparams.scr"},
+    {"archive":"data0.pak","path":"scripts/inventory/inventory_charms.scr"},
+    {"archive":"data0.pak","path":"scripts/inventory/collectables_ft.scr"}
+  ],
+  "optional": [
+    {"archive":"data0.pak","path":"scripts/player/player_variables.scr"}
+  ],
+  "forbidden_to_patch_without_explicit_new_proof": [
+    "scripts/player/player_variables.scr",
+    "scripts/inventory/stash_dlc.scr",
+    "scripts/inventory/versioning/"
+  ]
+}
