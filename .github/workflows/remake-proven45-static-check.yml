@@ -26,6 +26,7 @@ jobs:
             tools/validate_remake_proven45_stage0.py \
             tools/build_remake_r1_r2_candidate.py \
             tools/build_remake_final_candidate.py \
+            tools/build_remake_proven45_recovered_candidate.py \
             tools/remake_status.py \
             tools/package_remake_candidate.py
       - name: Validate remake JSON configs
@@ -45,26 +46,53 @@ jobs:
               json.loads(Path(f).read_text(encoding='utf-8'))
               print('JSON PASS:', f)
           PY
+      - name: Validate recovered transplant payloads
+        run: |
+          python - <<'PY'
+          import base64, json, zlib
+          from pathlib import Path
+          root = Path('patches/runtime/REMAKE_PROVEN45_G1_LEGACY')
+          groups = {
+              'inventory_ranged': sorted(root.glob('inventory_ranged.part*.b64')),
+              'lootpools_g1': sorted(root.glob('lootpools_g1.part*.b64')),
+              'outfits_ft': [root/'outfits_ft.b64'],
+              'itemaffixes': [root/'itemaffixes.b64'],
+              'charms': [root/'charms.b64'],
+          }
+          for name, parts in groups.items():
+              assert parts and all(p.exists() for p in parts), name
+              enc = ''.join(p.read_text(encoding='ascii').strip() for p in parts)
+              spec = json.loads(zlib.decompress(base64.b64decode(enc)).decode('utf-8'))
+              assert spec['ops'], name
+              assert spec['base_sha256'] and spec['target_sha256'], name
+              print('TRANSPLANT PASS:', name, len(spec['ops']))
+          block = zlib.decompress(base64.b64decode((root/'lootsets_append.b64').read_text().strip())).decode('latin1')
+          assert 'DLTB_G1_Firearm_ExoticNative' in block
+          print('TRANSPLANT PASS: lootsets_append')
+          PY
       - name: Policy guard
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
           features = json.loads(Path('config/remake_proven45_features.json').read_text())
-          final = json.loads(Path('config/remake_proven45_final_ops.json').read_text())
           extras = json.loads(Path('config/remake_1.71PE_extra_targets.json').read_text())
           assert features['current_runtime_target'] == '1.71PE'
           assert features['global_loot_policy'] == 'immutable_proven45_foundation_no_new_global_root_override'
           assert 'Sense wallhack' in features['deferred']
           assert 'One-sided CO-OP' in features['deferred']
           assert 'Legendary Core' in features['cancelled']
-          assert final['hard_guards']['no_player_variables'] is True
-          assert final['hard_guards']['no_save_versioning'] is True
-          assert final['hard_guards']['night_sovereign_native_vanguard_carriers'] is True
-          assert final['hard_guards']['inventory_targets'] == {
-              'equipment': 34, 'consumable': 34, 'weapon': 68, 'ammo': 42
+          allow = extras['narrow_patch_allowlist']
+          assert set(allow['scripts/player/player_variables.scr']) == {
+              'MaxEquipmentSlotsCount','EquipmentSlotsCount',
+              'MaxConsumableSlotsCount','ConsumableSlotsCount',
+              'MaxQuickSlotsCount','QuickSlotsCount',
+              'MaxAmmoSlotsCount','AmmoSlotsCount',
+              'InventoryCraftPartMaxStackCount','InventoryConsumableMaxStackCount',
+              'InventoryThrowableMaxStackCount','InventoryUpgradeEnabled'
           }
-          assert final['hard_guards']['stack_target'] == 99999
-          assert 'scripts/player/player_variables.scr' in extras['forbidden_to_patch_without_explicit_new_proof']
+          assert allow['scripts/skills/common_skills.xml'] == ['InventoryUpgrade_1','InventoryUpgrade_2']
+          assert 'scripts/inventory/stash_dlc.scr' in extras['forbidden_to_patch_without_explicit_new_proof']
+          assert 'scripts/inventory/versioning/' in extras['forbidden_to_patch_without_explicit_new_proof']
           print('POLICY PASS')
           PY
