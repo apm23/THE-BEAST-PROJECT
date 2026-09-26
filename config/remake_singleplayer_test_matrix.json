@@ -1,0 +1,32 @@
+{
+  "profile": "REMAKE_PROVEN45_SINGLEPLAYER_CORE",
+  "runtime_target": "1.71PE",
+  "status": "TEST_SPEC_ONLY_NOT_RUNTIME_GREEN",
+  "hard_fail_on": [
+    "corpse_F_missing_or_broken",
+    "attack_or_controls_broken",
+    "save_corruption_or_failed_reload",
+    "DLC_regression",
+    "loot_reverts_after_scene_change",
+    "loot_reverts_after_save_swap"
+  ],
+  "tests": [
+    {"id":"T01","name":"boot","expect":"game boots normally"},
+    {"id":"T02","name":"controls","expect":"attack and ordinary controls normal"},
+    {"id":"T03","name":"corpse_F","expect":"corpse loot prompt and interaction work"},
+    {"id":"T04","name":"ordinary_infected_loot","expect":"PROVEN45-style loot foundation remains active"},
+    {"id":"T05","name":"human_corpse_loot","expect":"human corpse/search loot uses mapped zombie-style project route without depending on held-weapon feature"},
+    {"id":"T06","name":"special_infected_loot","expect":"mapped special infected can use controlled high-tier/Exotic opportunity"},
+    {"id":"T07","name":"native_rarity","expect":"Rare/Epic/Legendary/Exotic results use native game state where supported, not cosmetic-only recolor"},
+    {"id":"T08","name":"outfit","expect":"custom powerful outfit exists and intended effects work"},
+    {"id":"T09","name":"inventory","expect":"equipment=34 consumable=34 weapon=68 ammo=42"},
+    {"id":"T10","name":"stack","expect":"targeted material/consumable/throwable stacks support 99999 where mapped safe"},
+    {"id":"T11","name":"dismantle","expect":"relevant items dismantle normally"},
+    {"id":"T12","name":"drop_share_compat","expect":"drop/share flags and serialization remain valid"},
+    {"id":"T13","name":"reload","expect":"save exit reload preserves playable state and features"},
+    {"id":"T14","name":"scene_transition","expect":"after scene/level transition F, loot, outfit and inventory remain correct"},
+    {"id":"T15","name":"save_swap","expect":"after replacing/loading another test save project loot behavior does not silently revert to vanilla"}
+  ],
+  "separate_unproven_tests": ["new_game_end_to_end", "ng_plus_end_to_end"],
+  "deferred": ["sense", "one_sided_coop"]
+}
