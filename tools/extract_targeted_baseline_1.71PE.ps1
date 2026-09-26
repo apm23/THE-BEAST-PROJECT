@@ -6,12 +6,18 @@ param(
 $ErrorActionPreference = 'Stop'
 
 function Find-7Zip {
+    # Force an array even when exactly one candidate exists. Without @(...),
+    # PowerShell may collapse the pipeline result to a scalar string and
+    # $candidates[0] becomes the first character (for example 'C') instead
+    # of the full executable path.
     $candidates = @(
-        (Get-Command 7z.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -ErrorAction SilentlyContinue),
-        "$env:ProgramFiles\7-Zip\7z.exe",
-        "${env:ProgramFiles(x86)}\7-Zip\7z.exe"
-    ) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique
-    if ($candidates.Count -gt 0) { return $candidates[0] }
+        @(
+            (Get-Command 7z.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -ErrorAction SilentlyContinue),
+            "$env:ProgramFiles\7-Zip\7z.exe",
+            "${env:ProgramFiles(x86)}\7-Zip\7z.exe"
+        ) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique
+    )
+    if ($candidates.Count -gt 0) { return [string]$candidates[0] }
     return $null
 }
 
@@ -49,8 +55,8 @@ function Auto-FindGame {
         $g = Join-Path $lib 'steamapps\common\Dying Light The Beast'
         if (Test-Path (Join-Path $g 'ph_ft\source\data0.pak')) { $games += $g }
     }
-    $games = @($games | ForEach-Object { [IO.Path]::GetFullPath($_).TrimEnd('\') } | Select-Object -Unique)
-    if ($games.Count -eq 1) { return $games[0] }
+    $games = @($games | ForEach-Object { [IO.Path]::GetFullPath($_).TrimEnd('\') } | Sort-Object -Unique)
+    if ($games.Count -eq 1) { return [string]$games[0] }
     if ($games.Count -gt 1) { throw "Lebih dari satu instalasi DLTB ditemukan. Gunakan -GameDir." }
     return $null
 }
@@ -77,9 +83,11 @@ function Extract-One {
     $archivePath = $archives[$ArchiveName]
     Write-Host "Extract [$ArchiveName][$Kind]: $Target"
     if ($sevenZip) {
-        & $sevenZip x -y $archivePath $Target "-o$outRoot" | Out-Null
+        & "$sevenZip" x -y "$archivePath" "$Target" "-o$outRoot" | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "7-Zip extraction failed ($LASTEXITCODE): $Target" }
     } else {
-        & $tar.Source -xf $archivePath -C $outRoot $Target 2>$null
+        & $tar.Source -xf "$archivePath" -C "$outRoot" "$Target" 2>$null
+        if ($LASTEXITCODE -ne 0) { throw "tar extraction failed ($LASTEXITCODE): $Target" }
     }
 
     $local = Join-Path $outRoot ($Target -replace '/', '\')
@@ -124,6 +132,8 @@ if (-not (Test-Path $archives['data0.pak'])) { throw "data0.pak tidak ditemukan:
 $sevenZip = Find-7Zip
 $tar = Get-Command tar.exe -ErrorAction SilentlyContinue
 if (-not $sevenZip -and -not $tar) { throw 'Butuh 7-Zip atau tar.exe yang bisa membaca PAK.' }
+if ($sevenZip) { Write-Host "Extractor: 7-Zip = $sevenZip" }
+else { Write-Host "Extractor: tar = $($tar.Source)" }
 
 $outRoot = Join-Path $repoRoot 'local_baseline\1.71PE'
 if (Test-Path $outRoot) { Remove-Item -Recurse -Force $outRoot }
@@ -138,48 +148,37 @@ foreach ($f in $manifest.files) {
     $seen[$key] = $true
     $results += Extract-One -Target $target -ArchiveName ([string]$f.archive) -Required $true -Kind 'compat58'
 }
-foreach ($f in $extras.required) {
+
+foreach ($f in $extras.extra_targets) {
     $target = [string]$f.path
     $key = $target.ToLowerInvariant()
     if ($seen.ContainsKey($key)) { continue }
     $seen[$key] = $true
-    $results += Extract-One -Target $target -ArchiveName ([string]$f.archive) -Required $true -Kind 'remake_required'
-}
-foreach ($f in $extras.optional) {
-    $target = [string]$f.path
-    $key = $target.ToLowerInvariant()
-    if ($seen.ContainsKey($key)) { continue }
-    $seen[$key] = $true
-    $results += Extract-One -Target $target -ArchiveName ([string]$f.archive) -Required $false -Kind 'remake_optional'
+    $archive = if ($f.archive) { [string]$f.archive } else { 'data0.pak' }
+    $required = if ($null -ne $f.required) { [bool]$f.required } else { $false }
+    $kind = if ($f.kind) { [string]$f.kind } else { 'remake_extra' }
+    $results += Extract-One -Target $target -ArchiveName $archive -Required $required -Kind $kind
 }
 
-$requiredMissing = @($results | Where-Object { $_.required -and $_.status -eq 'MISSING' }).Count
-$optionalMissing = @($results | Where-Object { -not $_.required -and $_.status -eq 'MISSING' }).Count
-$compatCount = @($results | Where-Object { $_.kind -eq 'compat58' }).Count
+$missingRequired = @($results | Where-Object { $_.required -and $_.status -ne 'EXTRACTED' })
 $report = [ordered]@{
-    game = 'Dying Light: The Beast'
-    observed_label = '1.71PE'
+    runtime = '1.71PE'
     game_dir = $GameDir
-    generated = (Get-Date -Format o)
-    compatibility_targets = $compatCount
-    total_targets = $results.Count
-    required_missing = $requiredMissing
-    optional_missing = $optionalMissing
-    results = $results
+    extractor = if ($sevenZip) { $sevenZip } else { $tar.Source }
+    extracted_at = (Get-Date).ToString('o')
+    total = $results.Count
+    extracted = @($results | Where-Object status -eq 'EXTRACTED').Count
+    missing_required = $missingRequired.Count
+    files = $results
 }
 $reportPath = Join-Path $outRoot '_EXTRACT_REPORT.json'
-$report | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 $reportPath
+$report | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $reportPath -Encoding UTF8
 
 Write-Host ''
-Write-Host '=============================================================='
-Write-Host ' DLTB CURRENT BUILD TARGET EXTRACTION -> 1.71PE'
-Write-Host '=============================================================='
-Write-Host "GameDir=$GameDir"
-Write-Host "Output=$outRoot"
-Write-Host "CompatibilityTargets=$compatCount"
-Write-Host "TotalTargets=$($results.Count)"
-Write-Host "RequiredMissing=$requiredMissing"
-Write-Host "OptionalMissing=$optionalMissing"
-Write-Host ''
-if ($requiredMissing -ne 0) { throw "Ada required target yang tidak ter-extract. Lihat $reportPath" }
-Write-Host 'PASS: extraction complete. Optional misses do not block compatibility; run CHECK_1.71PE_COMPATIBILITY.cmd next.'
+Write-Host "1.71PE extraction complete: $($report.extracted)/$($report.total)"
+Write-Host "Report: $reportPath"
+if ($missingRequired.Count -gt 0) {
+    $missingRequired | ForEach-Object { Write-Host "MISSING REQUIRED: $($_.path)" -ForegroundColor Red }
+    exit 2
+}
+exit 0
