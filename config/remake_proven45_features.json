@@ -4,6 +4,7 @@
   "remake_baseline": "USER_HIGH_LOOT_SPECIAL45",
   "continuity": "BEAST-PROVEN-SWITCH45",
   "global_loot_policy": "immutable_proven45_foundation_no_new_global_root_override",
+  "current_scope": "single_player_core_only",
   "features": [
     {
       "id": 1,
@@ -65,22 +66,13 @@
     {
       "id": 10,
       "name": "Sense wallhack",
-      "status": "NARROW_REMAKE_ONLY",
-      "targets": {
-        "range_m": 200,
-        "duration_s": 15,
-        "infected": true,
-        "humans": true,
-        "dormant_ai": true,
-        "dead_ai": false
-      }
+      "status": "DEFERRED_NOT_IN_CURRENT_BUILD"
     },
     {
       "id": 11,
       "name": "One-sided CO-OP",
-      "status": "RUNTIME_PROVEN_ARCHITECTURE",
-      "reference": "CP1_COOP_SAFE_DATA2_ONLY",
-      "vanilla_sibling_requires_gameplay_mod": false
+      "status": "DEFERRED_NOT_IN_CURRENT_BUILD",
+      "reference": "CP1_COOP_SAFE_DATA2_ONLY"
     },
     {
       "id": 12,
@@ -112,5 +104,11 @@
     "Core drop/cost system",
     "human held-weapon drop feature",
     "Manual Save Anywhere in this remake"
+  ],
+  "deferred": [
+    "Sense wallhack",
+    "Dormant/dead Sense logic",
+    "One-sided CO-OP",
+    "CO-OP data2-only switch work"
   ]
 }
