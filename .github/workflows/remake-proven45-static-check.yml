@@ -1,0 +1,59 @@
+name: remake-proven45-static-check
+
+on:
+  push:
+    branches: [remake-proven45]
+  pull_request:
+    branches: [main]
+
+jobs:
+  static-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile remake Python tooling
+        run: |
+          python -m py_compile \
+            tools/check_1.71PE_compatibility.py \
+            tools/prepare_current_runtime_baseline.py \
+            tools/generate_1.71PE_port_plan.py \
+            tools/collect_remake_r1_r2_mapping.py \
+            tools/collect_remake_special_infected_mapping.py \
+            tools/collect_remake_r3_r4_mapping.py \
+            tools/validate_remake_proven45_stage0.py \
+            tools/build_remake_r1_r2_candidate.py \
+            tools/build_remake_final_candidate.py \
+            tools/remake_status.py \
+            tools/package_remake_candidate.py
+      - name: Validate remake JSON configs
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          files = [
+              'config/remake_proven45_features.json',
+              'config/remake_proven45_patch_plan.json',
+              'config/remake_proven45_r1_r2_ops.json',
+              'config/remake_proven45_final_ops.json',
+              'config/remake_singleplayer_test_matrix.json',
+          ]
+          for f in files:
+              json.loads(Path(f).read_text(encoding='utf-8'))
+              print('JSON PASS:', f)
+          PY
+      - name: Policy guard
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          f = json.loads(Path('config/remake_proven45_features.json').read_text())
+          assert f['current_runtime_target'] == '1.71PE'
+          assert f['global_loot_policy'] == 'immutable_proven45_foundation_no_new_global_root_override'
+          assert 'Sense wallhack' in f['deferred']
+          assert 'One-sided CO-OP' in f['deferred']
+          assert 'Legendary Core' in f['cancelled']
+          print('POLICY PASS')
+          PY
