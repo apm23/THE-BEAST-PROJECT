@@ -123,8 +123,8 @@ function Get-ArchiveInventoryEntries {
 
         $p = $m.Groups[1].Value.Trim()
         if (
-            $p -match '^(?i)scripts[\\/]inventory[\\/].*\.scr$' -or
-            $p -match '^(?i)scripts[\\/]menu[\\/]menumodifyweapon\.scr$'
+            $p -match '(?i)^scripts[\\/]inventory[\\/].*\.scr$' -or
+            $p -match '(?i)^scripts[\\/]menu[\\/]menumodifyweapon\.scr$'
         ) {
             $paths.Add($p)
         }
@@ -440,6 +440,10 @@ foreach ($archive in $archives) {
         Sha256 = $hash
         InventoryScrEntries = $entries.Count
     })
+
+    if (-not (Test-Path -LiteralPath $outExtract)) {
+        continue
+    }
 
     foreach ($file in (Get-ChildItem -LiteralPath $outExtract -Recurse -File -Filter '*.scr')) {
         $rel = $file.FullName.Substring($outExtract.Length).TrimStart('\', '/').Replace('\', '/')
