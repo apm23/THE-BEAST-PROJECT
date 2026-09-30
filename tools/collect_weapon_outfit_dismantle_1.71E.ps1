@@ -32,6 +32,29 @@ function Find-7Zip {
     throw '7-Zip diperlukan untuk collector read-only ini.'
 }
 
+function Get-UniqueNormalizedPaths {
+    param([object[]]$Paths)
+
+    $seen = @{}
+    $result = New-Object System.Collections.Generic.List[string]
+
+    foreach ($p0 in @($Paths)) {
+        if (-not $p0) { continue }
+        try {
+            $p = [IO.Path]::GetFullPath([string]$p0).TrimEnd('\', '/')
+        } catch {
+            continue
+        }
+        $key = $p.ToLowerInvariant()
+        if (-not $seen.ContainsKey($key)) {
+            $seen[$key] = $true
+            $result.Add($p)
+        }
+    }
+
+    return @($result)
+}
+
 function Get-SteamRoots {
     $roots = @()
     try {
@@ -47,7 +70,7 @@ function Get-SteamRoots {
         if ($p -and (Test-Path -LiteralPath $p)) { $roots += $p }
     }
 
-    return @($roots | Select-Object -Unique)
+    return @(Get-UniqueNormalizedPaths -Paths $roots)
 }
 
 function Auto-FindGame {
@@ -64,7 +87,9 @@ function Auto-FindGame {
             }
         }
 
-        foreach ($lib in ($libs | Select-Object -Unique)) {
+        $libs = @(Get-UniqueNormalizedPaths -Paths $libs)
+
+        foreach ($lib in $libs) {
             $g = Join-Path $lib 'steamapps\common\Dying Light The Beast'
             if (Test-Path -LiteralPath (Join-Path $g 'ph_ft\source\data0.pak')) {
                 $games += $g
@@ -72,15 +97,14 @@ function Auto-FindGame {
         }
     }
 
-    $games = @(
-        $games |
-            ForEach-Object { [IO.Path]::GetFullPath($_).TrimEnd('\') } |
-            Select-Object -Unique
-    )
+    # Windows paths are case-insensitive. Previous collector incorrectly treated
+    # C:\... and c:\... as two separate game installs. Normalize + dedupe here.
+    $games = @(Get-UniqueNormalizedPaths -Paths $games)
 
     if ($games.Count -eq 1) { return $games[0] }
     if ($games.Count -gt 1) {
-        throw 'Lebih dari satu instalasi Dying Light The Beast ditemukan; jalankan dengan -GameDir.'
+        $detail = ($games -join "`n  - ")
+        throw "Lebih dari satu instalasi Dying Light The Beast yang benar-benar berbeda ditemukan:`n  - $detail`nJalankan dengan -GameDir untuk memilih salah satu."
     }
     return $null
 }
