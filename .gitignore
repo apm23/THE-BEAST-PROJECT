@@ -5,6 +5,7 @@ private_baseline/
 local_baseline/
 local_game/
 vanilla_dump/
+local_research/
 *.pak
 *.sav
 
