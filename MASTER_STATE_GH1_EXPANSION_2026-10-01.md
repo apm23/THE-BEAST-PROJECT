@@ -54,7 +54,7 @@ A failed feature test must not invalidate or overwrite the GH1 baseline.
 ## 3. NEW GH1 EXPANSION GOALS
 
 ### Phase A — Universal player weapon + outfit drop/dismantle
-Status: **BUILD NOW / NOT PROVEN**
+Status: **TEST-PENDING / POC1 BUILT**
 
 Goal:
 - all normal player-facing weapon classes should be droppable and dismantleable,
@@ -76,7 +76,7 @@ Known native dismantle route families already verified in game data:
 - `Dismantle_T1/T2/T3_Ranged`
 - `Dismantle_Charm_Mod`
 
-For outfit parts there is no dedicated outfit dismantle route confirmed in the current research set. The first controlled test should therefore reuse a conservative existing native scrap-only route instead of inventing a new loot object.
+For outfit parts there is no dedicated outfit dismantle route confirmed in the current research set. POC1 therefore uses native `Dismantle_T1_Blunt` as the conservative outfit fallback because its native result is low-tier Scrap and it requires no new LootedObject topology.
 
 ### Phase B — Any obtained weapon also unlocks/links its weapon blueprint
 Status: PLANNED / NOT PROVEN
@@ -149,6 +149,34 @@ Phase F noclip remains a standalone optional module even after the main consolid
 
 ## 5. CURRENT NEXT SAFE ACTION
 
-**Build Phase A only: Universal player weapon + outfit drop/dismantle test.**
+**Runtime-test Phase A POC1.**
 
-The package must be additive/reversible on the current GH1 install, must not be labeled PROVEN before runtime confirmation, and must preserve the exact pre-test GH1 files so rollback is one action.
+Do not start Phase B and do not mark Phase A GREEN until the user reports runtime results for weapon Drop, weapon Dismantle, outfit Drop and outfit Dismantle.
+
+## 6. PHASE A POC1 BUILD RECORD
+
+Artifact name:
+`GH1_FEATURE_A_UNIVERSAL_DROP_DISMANTLE_POC1_READY.zip`
+
+Artifact SHA256:
+`a7ceb5b19282c03d4a6ccf86ae06e34e4d958fdc87c537d51676ed04bc9093f3`
+
+Build architecture:
+- runtime one-click builder; no final binary PAK stored in repo,
+- exact GH1 hash gate for current `data2.pak`, `data3.pak`, and `data4.pak`,
+- backup exact pre-test `data4.pak`,
+- read effective inventory scripts across `data0 -> data4`,
+- preserve current data4/Sense payload and overlay only changed inventory scripts into test data4,
+- do not modify `data2.pak` or `data3.pak`,
+- exclude inventory versioning, AI-only/invisible/internal items and known quest/tutorial/debug/test placeholders,
+- player-facing melee/firearm/outfit items receive `CanDrop(true)` where needed,
+- empty/missing player-item dismantle routes receive existing native Slash/Blunt/Firearm/Ranged route based on type/tier,
+- current inherited shotgun/bow/crossbow/harpoon definitions with empty dismantle routes are patched to native Firearm/Ranged dismantle routes,
+- outfit fallback is native `Dismantle_T1_Blunt` (low-tier Scrap-only route),
+- uninstall restores exact pre-test data4 only when installed test hash still matches; otherwise STOP SAFE.
+
+Static validation before handoff:
+- Python compile PASS,
+- current GH1 `inventory_outfits_ft.scr`: 108 targeted outfit blocks patched in dry static pass, all 108 empty dismantle routes removed and 102 explicit `CanDrop(false)` removed,
+- current GH1 `inventory_weapondefintions.scr`: all 28 known empty inherited weapon dismantle routes classified/patched in dry static pass,
+- no runtime success claim yet.
