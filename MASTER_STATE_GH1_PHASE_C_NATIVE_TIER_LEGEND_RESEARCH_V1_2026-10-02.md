@@ -1463,3 +1463,47 @@ Expected user output:
 GH1_PHASE_C_ICONIC_BLOCKER_SCAN_V3_<timestamp>.zip
 
 Do not design another Legendary -> Iconic upgrade POC until this V3 result is analyzed.
+
+
+## Legendary -> Iconic blocker collector V3 result + targeted V4 follow-up
+
+User returned:
+GH1_PHASE_C_ICONIC_BLOCKER_SCAN_V3_20261002_165501.zip
+
+V3 key result:
+- effective collectables owner at scan time was data6.pak from POC9;
+- Sunray generated T1 was ItemLevel(1,4) and pointed to T2;
+- T2 was ItemLevel(2,4) and pointed to T3;
+- T3 was still Color_Orange, ItemLevel(3,4), and had NextLevelBlueprintName to the custom T4 Iconic migration blueprint;
+- effective Blueprints_Upgrades registry contained the generated Sunray T2, T3 and custom T4;
+- runtime nevertheless showed no NEXT BLUEPRINT UPGRADE for an already-owned terminal Legendary Sunray.
+
+Therefore:
+the POC9 failure is not explained by a missing collectables link or missing Blueprints_Upgrades registration. A runtime resolver / saved item state / other validation gate remains the primary suspect.
+
+V3 also found GUI-facing symbols including:
+m_HigherLevelBlueprint, m_ItemLevel, m_MaxItemLevel, m_UpgradeItemLevel,
+m_CanAffordAlternatePrice, BlueprintUpgrades, UpgradeBlueprint, CanEnhance and WeaponEnhancement.
+
+Important V3 limitation:
+- generic PAK scanning reached the 10,000 hit global cap;
+- only a small number of early binary hits were collected and no save hits made it into the result;
+- the main DyingLightGame/gamedll/save-state hypothesis was therefore NOT adequately tested by V3.
+
+Targeted V4 collector created:
+GH1_PHASE_C_ICONIC_BLOCKER_TARGETED_COLLECTOR_V4.zip
+SHA256:
+d9fcd9ef8c30335c749499dc11f163d1b5cd7fce312dbdc426f8557ce0b6f137
+
+V4 design:
+1. scan save files FIRST, read-only and streaming;
+2. scan only high-value game binaries SECOND:
+   DyingLightGame_TheBeast_x64_rwdi.exe, gamedll_ph_x64_rwdi.dll,
+   engine_x64_rwdi.dll, engine_core_x64_rwdi.dll, engine_foundation_x64_rwdi.dll,
+   workshop_x64_rwdi.dll and RmluiAdapter_x64_rwdi.dll;
+3. scan only selected workbench/inventory/trading PAK paths THIRD;
+4. no global noisy PAK hit cap that can starve save/binary analysis;
+5. keyword-centered context for one-line GUI JSON;
+6. bounded 2 MB streaming chunks and 20 hits per keyword per file.
+
+Do not design another Legendary->Iconic upgrade POC until V4 evidence is reviewed.
