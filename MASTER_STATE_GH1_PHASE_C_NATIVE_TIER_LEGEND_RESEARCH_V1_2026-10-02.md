@@ -208,3 +208,67 @@ Required observations:
 Until these observations pass:
 - Exotic generated-family support is POC only, not PROVEN;
 - do not mass-expand T4 to all 88 generated families.
+
+
+## Exotic POC1 runtime result — HARD REJECTED
+
+User runtime test produced two independent failures:
+
+1. On game load the UI displayed:
+   DLC ITEMS DISABLED
+   "DLC no longer detected. Some items have been removed from your inventory. Please reinstall or enable DLC for content."
+
+2. Workbench result:
+   - T3 blueprints did not gain a usable upgrade path to Exotic.
+   - user reports all tested T3 blueprints still could not become Exotic.
+
+Therefore POC1 architecture is HARD REJECTED.
+
+Immediate safety action:
+- close the game;
+- run 2_UNINSTALL_EXOTIC_POC1.cmd;
+- relaunch only after the POC marker PAK is gone;
+- if DLC-owned inventory remains missing after DLC detection returns, use a pre-POC save backup if available.
+
+Do not reuse POC1's T1/T2/T3 ItemLevel max-tier rewrite or T3 -> T4 NextLevelBlueprintName approach.
+
+## Important packaging defect discovered after runtime failure
+
+POC1 wrote its dataN.pak with Python zipfile ZIP_STORED and default ZipInfo metadata.
+
+The previously runtime-proven Phase B overlays use a different package writer:
+- ZIP_DEFLATED, compresslevel=9;
+- deterministic ZipInfo timestamp;
+- external_attr=0x01800000;
+- create_system=3.
+
+Because the POC1 PAK format differs from the proven overlay writer, packaging is now a primary suspected contributor to the DLC-disabled failure. This is not yet isolated as the only cause; the T3->T4 semantic mutation also failed independently.
+
+Future PAK-writing POCs MUST reuse the proven Phase B write_overlay packaging pattern byte-structure conventions rather than the ad-hoc ZIP_STORED writer.
+
+## Corrected Exotic model after POC1
+
+The live scanner already showed:
+- 21 native T4 blueprints are Color_Exotic;
+- native Exotic T4 entries have no ItemLevel and no NextLevelBlueprintName;
+- not every T4 is Exotic;
+- official data contains at least one progression reward that grants an r15 weapon together with its T4 blueprint using IncludesBlueprint().
+
+Runtime POC1 now adds the decisive negative result:
+- making T3 point to T4 does not create the desired native Exotic upgrade path.
+
+Current working hypothesis:
+native Exotic T4 is a standalone blueprint/unlock/reward tier, not a normal continuation of the T1->T2->T3 upgrade chain.
+
+## Next safe action
+
+POC2 must be structurally different:
+- do not modify T1/T2/T3 ItemLevel;
+- do not attach T4 through NextLevelBlueprintName;
+- add one standalone generated Color_Exotic T4 blueprint only;
+- acquire/deliver that T4 through a separate native-style blueprint reward/drop mechanism for testing;
+- package the overlay with the exact proven Phase B ZIP_DEFLATED writer;
+- keep Phase B Broad route topology frozen;
+- first test only whether possession of the standalone T4 blueprint can craft the same generated weapon as Exotic and whether that survives save/reload.
+
+Do not mass-expand to 88 generated families until standalone T4 acquisition/crafting is runtime GREEN.
