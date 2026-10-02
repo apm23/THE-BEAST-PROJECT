@@ -312,3 +312,25 @@ Runtime sequence:
 6. if DLC detection is restored but inventory DLC items remain missing, enumerate pre-existing save backups before any manual save restore.
 
 This is now the preferred recovery path for the POC1 DLC-disabled incident.
+
+
+## Project mode change — OFFLINE BUILD MODE
+
+User elected to postpone game/DLC recovery and runtime testing until the mod is otherwise complete.
+
+From this point:
+- Phase B proven stack remains frozen.
+- Do not ask the user to repeatedly install/test intermediate POCs.
+- Continue research, scanners, builders, static validation, packaging, and final integration offline.
+- Any feature not runtime-tested after the DLC incident must be labeled CANDIDATE / UNPROVEN, never PROVEN.
+- Avoid save-sensitive, entitlement-sensitive, DLC-sensitive, inventory-versioning, stash, player_variables, or LootedObject topology changes.
+- No runtime package should be installed on the user's current game until the final clean reinstall/verify cycle.
+- Exotic development continues as standalone-T4 research/build only; do not reuse the rejected T3->T4 chain.
+- Final validation plan:
+  1. clean reinstall / Steam verify;
+  2. confirm DLC detection is healthy;
+  3. install one integrated final candidate;
+  4. run one consolidated runtime test matrix;
+  5. only then promote remaining candidate features to PROVEN.
+
+This mode intentionally trades early runtime feedback for fewer risky install cycles.
