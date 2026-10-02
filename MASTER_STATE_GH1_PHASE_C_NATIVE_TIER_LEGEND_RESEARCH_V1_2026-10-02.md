@@ -650,3 +650,61 @@ Find current-version code/data governing:
 - whether native Exotic T4 blueprints are direct-acquisition craftplans rather than successors.
 
 Only after that gate is identified should another Exotic/upper-tier POC be designed.
+
+
+## New runtime evidence — native Iconic Blueprint exists
+
+User supplied a runtime screenshot of the workbench showing:
+
+- weapon: Mechanical Reconstructor
+- UI label: ICONIC BLUEPRINT
+- visible blueprint level: 30
+- 1920 total/base damage in the shown state
+- 3 affixes
+- 160 durability
+- normal crafting-material requirements are displayed
+- Craft is present but disabled in the screenshot because Inventory Full
+
+This is direct runtime evidence that the game has a native Iconic blueprint state. It invalidates any model that assumes Legendary is the globally highest blueprint rarity/state.
+
+Important limitation:
+the screenshot proves existence/craftability of an Iconic blueprint, but does NOT by itself prove that a normal Legendary blueprint reaches Iconic through NextLevelBlueprintName or that Iconic corresponds to a guessed T5.
+
+## External research signal — Upgrade and Enhance appear distinct
+
+Public Nexus research identified:
+- “Free Blueprints Craft and Upgrade (DLTB)” describes craft, upgrade, and enhance as distinct supported actions.
+- Its changelog explicitly mentions fixing material cost for “enhance exotic weapons.”
+- Another current mod (“Up to Date V2”) states that Iconic weapon blueprints are explicit unlockable blueprint items and notes that some Iconic blueprint unlock behavior changed in later game updates.
+
+Treat this only as research direction, not as canonical game-data proof.
+
+Current hypothesis to test:
+- normal tier progression may end at Legendary;
+- Exotic/Iconic may use a separate Enhance / upper-tier system rather than ordinary NextLevelBlueprintName chaining.
+
+Do NOT assume T5=Exotic or T6=Iconic until current-version data proves it.
+
+## Deep Blueprint Collector V2
+
+Artifact:
+GH1_PHASE_C_DEEP_BLUEPRINT_COLLECTOR_V2.zip
+
+SHA256:
+2b4cf17662af48eebc41d7894999e0c5352fa728893dbf2cb5b7aaa57f4e4786
+
+Status:
+READ-ONLY collector; synthetic self-test PASS.
+
+Purpose:
+- scan all installed dataN.pak with provenance;
+- data0/data1 classified OFFICIAL, data2+ classified OVERLAY;
+- parse every discovered weapon craftplan block;
+- record Color, ItemLevel, NextLevelBlueprintName, ScaleWithPlayerRank, DLC, LinkedDocket, RequiredItem, AlternativePrice and raw block;
+- map exact Craftplan references;
+- search for Mechanical Reconstructor, Iconic, Exotic, Enhance, Upgrade and Blueprint;
+- produce JSON, TXT and blueprint graph CSV;
+- make no assumptions about T5/T6.
+
+Immediate next action:
+wait for the user’s Deep Blueprint Collector V2 output. Use the live current-version result to isolate the exact native Iconic/Enhance architecture before building another runtime POC.
