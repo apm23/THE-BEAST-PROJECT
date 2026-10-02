@@ -272,3 +272,43 @@ POC2 must be structurally different:
 - first test only whether possession of the standalone T4 blueprint can craft the same generated weapon as Exotic and whether that survives save/reload.
 
 Do not mass-expand to 88 generated families until standalone T4 acquisition/crafting is runtime GREEN.
+
+
+## DLC recovery package after POC1 rejection
+
+User uninstalled Exotic POC1 and requested a safe way to re-enable legitimate DLC detection.
+
+Recovery artifact:
+GH1_DLC_RECOVERY_VANILLA_CYCLE_V1.zip
+
+SHA256:
+5e2d201c6fbfa949ac5291d24d170c9f87b420f694625beaa47ebd069d595ce0
+
+Repo source:
+tools/GH1_DLC_RECOVERY.ps1
+
+Repo commit:
+f312b631f9a7aa2cbd9729157ef09df516f9940d
+
+Recovery design:
+- does NOT spoof or modify Steam/DLC entitlement;
+- does NOT edit save data;
+- backs up current Steam save from app 3008130 before mutation;
+- temporarily quarantines exact active source data2+.pak files;
+- temporarily quarantines MultiMod data*.pak files;
+- temporarily quarantines CustomPak.ini;
+- leaves official data0.pak and data1.pak untouched;
+- user boots the game once in clean vanilla state to allow normal DLC detection;
+- restore command returns every quarantined mod file to its exact original path;
+- restore verifies SHA256 before completing;
+- save-backup finder lists prior project backups but never auto-restores one.
+
+Runtime sequence:
+1. close game;
+2. run 1_ENTER_VANILLA_DLC_RECOVERY.cmd;
+3. launch game once clean and check DLC detection;
+4. close game;
+5. run 2_RESTORE_PHASEB_STACK.cmd;
+6. if DLC detection is restored but inventory DLC items remain missing, enumerate pre-existing save backups before any manual save restore.
+
+This is now the preferred recovery path for the POC1 DLC-disabled incident.
