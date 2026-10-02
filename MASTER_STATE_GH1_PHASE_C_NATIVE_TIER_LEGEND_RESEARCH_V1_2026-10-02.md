@@ -1740,3 +1740,75 @@ Purpose:
 
 Do not scale POC11.
 Do not build another GUI-only bypass before runtime resolver logic is understood.
+
+
+## V6 runtime xref analysis — field offsets recovered; string xrefs are reflection registration
+
+User ran:
+GH1_PHASE_C_RUNTIME_XREF_COLLECTOR_V6
+
+gamedll_ph_x64_rwdi.dll SHA256:
+ddb68c8f87ba2afd0e561b2d1adb9235467c29069fb1cd1619db81e1056378eb
+
+V6 extracted 17 relevant gamedll functions and showed that direct xrefs to names such as
+m_HigherLevelBlueprint / m_HasABlueprintUpgrade / m_DisableUpgrade are primarily generated
+reflection-registration code, not the resolver logic itself.
+
+However, the generated registration calls reveal exact field offsets:
+
+GuiInventoryItemData:
+- +0x130 m_MaxItemLevel
+- +0x193 m_CanAffordAlternatePrice
+- +0x3F0 m_UpgradeItemLevel
+- +0x400 m_HigherLevelBlueprint
+- +0x418 m_CanAffordCraft
+- +0x419 m_ShowupgradeInfo
+- +0x41A m_IsBlueprint
+- +0x41B m_IsBlueprintAvailable
+- +0x420 m_HasABlueprintUpgrade
+
+Additional nearby exact reflection fields:
+- +0x41D m_IsBlueprintPinned
+- +0x41E m_CanPinBlueprint
+- +0x41F m_CanUnPinBlueprint
+- +0x421 m_IMDataWeaponCraftingCantCraft
+- +0x422 m_IMDataWeaponEnhantingCantEnhant
+
+GuiShopItemData:
+- +0x5F1 m_CanCraft
+- +0x5F2 m_CanEnhance
+- +0x5F3 m_ShowEnhance
+- +0x5F4 m_CanUpgrade
+- +0x5F5 m_ShowCraft
+- +0x5F6 m_ShowUpgrade
+- +0x5F7 m_IsBlueprintUpgrade
+- +0x600 m_LowerLevelBlueprint
+
+GuiItemTooltip:
+- +0x150 m_DisableUpgrade
+- +0x151 m_WeaponBlueprintUpgradeMode
+
+V6 also captured a real code candidate at RVA 0x00E5BC5D containing
+MenuShopController::UpgradeCurrentBlueprint.
+
+Interpretation:
+The next useful reverse-engineering step is no longer string searching.
+Search executable code for reads/writes to the exact field offsets above, recover the surrounding
+functions using .pdata, and inspect those functions and their one-hop callees.
+
+### V7 collector
+
+Built:
+GH1_PHASE_C_RUNTIME_FIELD_ACCESS_COLLECTOR_V7.zip
+
+Purpose:
+- one DLL only: gamedll_ph_x64_rwdi.dll;
+- scan x64 [base + disp32] operands for exact recovered field offsets;
+- classify likely read/write accesses;
+- rank functions touching multiple upgrade-related fields;
+- extract top functions with .pdata boundaries;
+- extract one-hop callees;
+- when DLL hash matches V6, seed known UpgradeCurrentBlueprint RVA 0x00E5BC5D and capture callers/callees;
+- no PAK/save scan; read-only; bounded output.
+
+Do not build another Iconic runtime POC until V7 identifies the actual resolver/field-population logic.
