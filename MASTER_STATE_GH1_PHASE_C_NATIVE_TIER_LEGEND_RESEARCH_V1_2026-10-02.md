@@ -1122,3 +1122,61 @@ Consequences:
 Status:
 STANDALONE ICONIC ARCHITECTURE = FUNCTIONALLY GREEN on current broken-DLC environment.
 Clean reinstall/save-persistence/DLC health still pending final validation.
+
+
+## POC7 runtime result — existing T3 conversion breaks upgrade transaction
+
+User tested the existing-blueprint conversion POC7 on the family previously assumed to be .38 Revolver.
+
+Runtime identity correction:
+- the family `dlc_ft_firearm_revolver_c_legendary_r` is observed in UI as Sunray, not .38 Revolver.
+
+Runtime behavior with POC7:
+- after upgrading Sunray from lower tier to Epic, the next upgrade preview skipped Legendary and displayed the converted T3 as Iconic;
+- holding the upgrade input did not complete the transaction;
+- blueprint remained at the prior tier;
+- the Iconic upgrade preview remained visible and could be spammed without progress.
+
+Interpretation:
+POC7 changed the same T3 item ID to standalone Iconic style by removing:
+- ItemLevel
+- AlternativePrice
+- RequiredItemToShowInShop
+- progression metadata
+
+T2 still pointed at that same T3 ID, so UI resolved the target rarity as Iconic, but the target no longer had valid upgrade-transaction metadata. This explains the stuck upgrade behavior.
+
+POC7 = HARD REJECTED.
+
+## POC8 — existing Sunray T3, color-only mutation
+
+Artifact:
+GH1_PHASE_C_SUNRAY_EXISTING_T3_ICONIC_POC8_V1.zip
+
+SHA256:
+4872330491c4963aadc457625225f9f77e76324048579b0c4a2f8306cb13ccfe
+
+Target:
+`Craftplan_GH1_dlc_ft_firearm_revolver_c_legendary_T3_Blueprint`
+
+Observed UI identity:
+Sunray
+
+POC8 changes exactly one semantic field:
+- `Color(Color_Orange)` -> `Color(Color_Exotic)`
+
+Everything else in T3 is preserved byte-for-byte:
+- same blueprint ID
+- same UID
+- same Name/Description
+- same ScaleWithPlayerRank
+- same ItemLevel(3,3)
+- same AlternativePrice entries
+- same RequiredItemToShowInShop
+- same crafting recipe
+- same crafting sounds
+
+Purpose:
+test whether the existing upgrade-valid T3 can remain a valid T2->T3 transaction while presenting/crafting as Iconic purely through Color_Exotic.
+
+Static selftest PASS.
