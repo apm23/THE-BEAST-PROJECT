@@ -2134,3 +2134,124 @@ successor/max-tier resolver rather than generic GUI code.
 Research rule:
 Do not build another Legendary->Iconic runtime patch until V11 maps the source-item
 virtual functions and the actual successor/max-tier decision path.
+
+
+## V11 / V11.1 / V12 / V12.1 / V12.2 runtime probe results — exact Workbench class proven
+
+### V11 result — zero due scan cap, not negative runtime proof
+
+User returned:
+GH1_PHASE_C_LIVE_BLUEPRINT_OBJECT_V11_20261002_221433.zip
+
+Result:
+- RAW_CANDIDATES=0
+- VALIDATED_LATEST=0
+- memory scan stopped exactly at 4 GiB hard cap
+- DLL SHA and module base were correct
+
+Interpretation:
+V11 did not prove absence of GuiInventoryItemData. The address-order 4 GiB cap exhausted
+before reaching the relevant heap.
+
+### V11.1 result — base class live scan GREEN
+
+V11.1 changed scan order to enumerate the full memory map and prioritize writable
+MEM_PRIVATE regions.
+
+Runtime result:
+- 378 live objects using the base GuiInventoryItemData vtable were found
+- approximately 14.2 GiB of prioritized readable heap was scanned
+- live process-memory reading itself is therefore proven operational
+- the objects were base GuiInventoryItemData objects, not the derived Workbench class
+
+Important correction:
+Workbench uses derived GuiShopItemData; scanning only the base vtable cannot identify
+the Workbench upgrade gates reliably.
+
+### GuiShopItemData structure correction
+
+V6 reflection metadata plus V10/V12 disassembly establish:
+- GuiInventoryItemData class size = 0x5E0
+- GuiShopItemData class size = 0x958
+- actual GuiShopItemData constructor RVA = 0x018F4F50
+- base GuiInventoryItemData constructor RVA = 0x018F0EB0
+- primary GuiShopItemData vtable RVA = 0x02B65D50
+
+Constructor proof:
+- ctor+0x0D CALL resolves to base ctor 0x018F0EB0
+- ctor+0x1D LEA resolves to primary vtable 0x02B65D50
+- constructor initializes Workbench-derived fields including +0x5F4 and +0x600
+
+GuiShopItemData Workbench fields:
+- +0x5F1 m_CanCraft
+- +0x5F2 m_CanEnhance
+- +0x5F3 m_ShowEnhance
+- +0x5F4 m_CanUpgrade
+- +0x5F5 m_ShowCraft
+- +0x5F6 m_ShowUpgrade
+- +0x5F7 m_IsBlueprintUpgrade
+- +0x600 m_LowerLevelBlueprint
+
+### V12 / V12.1 — rejected discovery attempts
+
+V12 initially crashed before heap scan because the collector omitted the Python
+defaultdict import. V12.1 fixed that crash but its generic factory heuristic chose
+the wrong constructor candidate 0x005E8680 instead of the real 0x018F4F50.
+The four V12.1 objects with nonsensical field values are false targets and must not
+be used as runtime evidence.
+
+### V12.2 — exact GuiShopItemData live probe GREEN
+
+User returned:
+GH1_PHASE_C_LIVE_GUISHOP_EXACT_V12_2_20261002_225156.zip
+
+Verified:
+- DLL SHA256 ddb68c8f87ba2afd0e561b2d1adb9235467c29069fb1cd1619db81e1056378eb
+- exact ctor RVA 0x018F4F50
+- exact primary vtable RVA 0x02B65D50
+- first 16 vtable entries all point inside gamedll
+- exact-vtable heap candidates: 333
+- latest valid GuiShopItemData objects: 333
+- blueprint flag = 1 on 254 objects
+- HasABlueprintUpgrade = 1 on 90 objects
+- ShowUpgrade = 1 on 1 object
+- CanUpgrade = 1 on 0 objects
+- IsBlueprintUpgrade = 1 on 0 objects
+- source-method rows: 1512
+- approximately 14.3 GiB process memory read
+
+Runtime population split:
+- 90 live blueprint objects have HasABlueprintUpgrade=1 and a non-null
+  m_HigherLevelBlueprint pointer
+- 33 live blueprint objects have MaxItemLevel=3, HasABlueprintUpgrade=0 and
+  m_HigherLevelBlueprint=null
+- those 33 rows collapse to 13 unique source-item objects
+
+This is direct runtime proof that the engine genuinely distinguishes blueprint
+objects with a resolved successor from terminal generated T3/max=3 blueprint
+objects. The legacy blocker is therefore not merely a hidden GUI button.
+
+Do NOT yet claim that a specific one of those 13 terminal source objects is Sunray.
+V12.2 did not map source-item identity/name back to the generated Sunray T3 ID.
+
+### V13 — exact Sunray identity probe
+
+Built:
+GH1_PHASE_C_LIVE_SUNRAY_IDENTITY_PROBE_V13.zip
+
+SHA256:
+c68cbeea55658a244030c267a87bd88aa2c3fc08ed11090525b48abede9eaacd
+
+Purpose:
+- reuse the exact proven GuiShopItemData vtable;
+- collect live m_SourceItem pointers;
+- search process memory for exact Sunray/generated identifiers:
+  Craftplan_GH1_dlc_ft_firearm_revolver_c_legendary_T3_Blueprint,
+  T2, T1, family dlc_ft_firearm_revolver_c_legendary_r, and Sunray;
+- map exact string identity back to source item by inline text / direct pointer /
+  bounded one- and two-hop pointer traversal;
+- report the exact Workbench gates only for the source object(s) tied to Sunray.
+
+Research rule:
+Do not patch DLL/runtime state and do not scale any legacy migration mechanism until
+V13 identifies the exact Sunray source item and confirms its live gate tuple.
