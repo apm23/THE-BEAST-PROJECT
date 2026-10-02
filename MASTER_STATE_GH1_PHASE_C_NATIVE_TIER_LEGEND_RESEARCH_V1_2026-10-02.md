@@ -1603,3 +1603,106 @@ V5 is narrower than V4 and scans:
 
 Safety:
 read-only; no save/game modification; no full PAK crawl; bounded decompression and hit counts.
+
+
+## Runtime gate collector V5 result — m_HigherLevelBlueprint is the decisive visible-upgrade gate
+
+User returned:
+GH1_PHASE_C_ICONIC_RUNTIME_GATE_V5_20261002_171316.zip
+
+V5 completed without collector errors and produced 151 targeted hits.
+
+### Save format
+The current Steam save/profile files are GZIP containers:
+- dltb_settings.dat: GZIP
+- save_ft_0.sav: GZIP
+- save_ft_0_chp000.sbk: GZIP
+
+The main save and checkpoint decompress successfully.
+After decompression there are still no plaintext hits for the exact generated Sunray T1/T2/T3/T4 IDs or family ID.
+Therefore legacy blueprint state is serialized/binary after decompression; lack of plaintext IDs does NOT disprove persisted state.
+
+The decompressed save does contain generic tutorial/progression strings such as FirstWorkbenchBlueprintUpgrade, confirming the decompressed payload is meaningful game state.
+
+### Runtime data structures discovered
+gamedll_ph_x64_rwdi.dll exposes GuiInventoryItemData blueprint fields:
+- m_UpgradeItemLevel
+- m_HigherLevelBlueprint
+- m_CanAffordCraft
+- m_ShowupgradeInfo
+- m_IsBlueprint
+- m_IsBlueprintAvailable
+- m_HasABlueprintUpgrade
+
+GuiShopItemData includes:
+- m_CanUpgrade
+- m_ShowUpgrade
+- m_IsBlueprintUpgrade
+- m_LowerLevelBlueprint
+
+GuiItemTooltip includes:
+- m_DisableUpgrade
+- m_WeaponBlueprintUpgradeMode
+- m_WeaponEnhanceMode
+
+Controller actions include:
+- UpgradeWeaponBlueprint
+- MenuShopController::UpgradeCurrentBlueprint
+- EnhanceWeapon
+- CraftMaster_BlueprintUpgrades
+
+### Exact GUI gate
+gui/common_pc/inv_item_slot_symbol_pc.gui reads:
+- GuiInventoryItemData.m_HigherLevelBlueprint
+- GuiInventoryItemData.m_CanAffordAlternatePrice
+
+It performs an IsNotNull test on m_HigherLevelBlueprint and ANDs that with m_CanAffordAlternatePrice before setting blueprint_upgrade_available visible.
+
+Therefore the missing upgrade indicator for an already-owned legacy Legendary T3 is explained directly by the runtime resolver returning no higher-level blueprint pointer.
+POC9 proved that merely editing ItemLevel/NextLevelBlueprintName/Blueprints_Upgrades does not cause that persisted item instance to receive a non-null m_HigherLevelBlueprint.
+
+Current interpretation:
+- data chain is correct;
+- UI is not the primary blocker;
+- the unresolved blocker is the runtime population of m_HigherLevelBlueprint / m_HasABlueprintUpgrade for the already-owned T3 instance.
+- persisted/cached terminal blueprint state remains the strongest hypothesis, but binary serialization prevents declaring the exact saved field proven.
+
+Do NOT patch GUI visibility alone: forcing the panel visible would not create a valid m_HigherLevelBlueprint object and could leave UpgradeCurrentBlueprint with no valid target.
+
+## POC11 — no-trader Workbench migration path
+
+V5 also confirmed a separate native workbench mode:
+CraftMaster_BlueprintUpgrades
+
+The menu GUI contains the explicit FT comment:
+"...but if it's in BlueprintUpgrades in FT, show it, since it's needed to progress there"
+
+Therefore a safer no-trader bypass is now being tested:
+- do not modify legacy T1/T2/T3;
+- create a standalone Color_Exotic Sunray migration blueprint;
+- gate it with RequiredItemToShowInShop(legacy T3);
+- register it ONLY in ItemSet("Blueprints_Upgrades");
+- do NOT add it to Hub1_Unlocks / Hub2_Unlocks;
+- rely on the Workbench Blueprint Upgrades mode to surface it as a separate progression entry rather than requiring the legacy T3's null m_HigherLevelBlueprint pointer.
+
+Artifact:
+GH1_PHASE_C_SUNRAY_WORKBENCH_MIGRATION_POC11_V1.zip
+
+SHA256:
+6da8bf28724cad236b7968e8d0cce656c41441040917140c95b423ba6644d606
+
+Selftest:
+PASS
+- standalone Iconic migration definition;
+- ownership gate = legacy Sunray T3;
+- present in Blueprints_Upgrades;
+- absent from Hub1_Unlocks and Hub2_Unlocks;
+- T1/T2/T3 untouched.
+
+Runtime test:
+A) Iconic Sunray migration entry appears in Workbench -> Blueprint Upgrades?
+B) Workbench can acquire/upgrade it?
+C) it becomes ICONIC BLUEPRINT?
+D) crafted weapon is true Iconic and player-level-scaled?
+
+If POC11 is GREEN, prefer it over trader migration for already-owned legacy T3 blueprints.
