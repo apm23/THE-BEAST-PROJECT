@@ -1407,3 +1407,59 @@ POC10 runtime gate:
 If POC10 is GREEN, final Phase C should use a hybrid:
 1. POC8-style Color_Orange -> Color_Exotic on generated T3 for blueprints that are still progressing through T1/T2;
 2. companion migration Iconic siblings for users who already have terminal T3 persisted in the save.
+
+
+## Deep blocker scan V3 — requested after legacy-T3 migration failure
+
+User hypothesis to investigate:
+the workbench may visually expose upgrade progression through one gate while a separate gate hard-limits an already-owned Legendary blueprint from progressing to Iconic.
+
+This is explicitly treated as a hypothesis, not a conclusion.
+
+New read-only collector:
+GH1_PHASE_C_LEGEND_TO_ICONIC_BLOCKER_COLLECTOR_V3.zip
+
+Package SHA256:
+b4332353d1405ad9b98360d7f639f2b54a6aa05587c705cbf544c68eed4214cf
+
+Purpose:
+find every reachable data/runtime clue related to Legendary -> Iconic blueprint progression, especially blockers outside collectables_ft.scr and Blueprints_Upgrades.
+
+Collector targets:
+- BlueprintUpgrades / Blueprints_Upgrades
+- NextLevelBlueprintName
+- HigherLevelBlueprint / m_HigherLevelBlueprint
+- ItemLevel / m_ItemLevel
+- MaxItemLevel / m_MaxItemLevel
+- UpgradeItemLevel / m_UpgradeItemLevel
+- CanUpgrade / IsUpgradeable / MaxLevel / IsMaxLevel / terminal-state symbols
+- CanAfford / m_CanAffordAlternatePrice
+- RequiredItemToShowInShop / AlternativePrice
+- CraftMaster / unlock/progression symbols
+- Color_Exotic / Iconic / Legendary / ColorSet
+- Enhance / WeaponEnhancement subsystem symbols
+
+Read-only coverage:
+- relevant entries from every dataN.pak
+- exact effective Sunray T1/T2/T3 definitions
+- exact Blueprints_Upgrades / Hub1_Unlocks / Hub2_Unlocks item sets
+- current upper-tier craftplans
+- game x64 EXE/DLL ASCII + UTF-16 strings, scanned streaming
+- Steam AppID 3008130 save files, scanned streaming for blueprint/tier strings only
+
+Anti-hang design:
+- no whole-PAK extraction
+- max 32 MB per PAK entry
+- EXE/DLL/save streaming in 4 MB chunks
+- max 120 hits per file
+- max 10,000 hits globally
+- bounded context
+- live progress output
+- subprocess timeouts
+- at most 100 latest save files
+- one corrupt/slow entry is logged and skipped instead of stopping the scan
+
+Expected user output:
+GH1_PHASE_C_ICONIC_BLOCKER_SCAN_V3_<timestamp>.zip
+
+Do not design another Legendary -> Iconic upgrade POC until this V3 result is analyzed.
