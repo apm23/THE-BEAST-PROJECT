@@ -1706,3 +1706,37 @@ C) it becomes ICONIC BLUEPRINT?
 D) crafted weapon is true Iconic and player-level-scaled?
 
 If POC11 is GREEN, prefer it over trader migration for already-owned legacy T3 blueprints.
+
+
+## POC11 result + V6 runtime-xref direction
+
+POC11 (Sunray standalone Iconic sibling exposed ONLY through ItemSet("Blueprints_Upgrades"), gated by legacy T3 ownership) was runtime tested.
+
+Observed:
+- Workbench still showed only the existing Sunray LEGENDARY BLUEPRINT.
+- The standalone Iconic migration sibling did NOT appear as a separate workbench entry.
+
+Conclusion:
+- POC11 HARD REJECTED.
+- Blueprints_Upgrades is not a free workbench catalog that independently exposes arbitrary craftplans.
+- It participates only after the internal blueprint resolver/progression state considers an entry valid.
+
+Evidence accumulated from V5:
+- POC9 data graph was present correctly in effective data: T3 ItemLevel(3,4), T3 -> T4, T4 Color_Exotic/ItemLevel(4,4), registry entries present.
+- Runtime still did not show NEXT BLUEPRINT UPGRADE.
+- GUI/runtime fields of interest include m_HigherLevelBlueprint, m_HasABlueprintUpgrade, m_DisableUpgrade, m_WeaponBlueprintUpgradeMode, m_ShowUpgrade, m_MaxItemLevel, m_UpgradeItemLevel, m_CanAffordAlternatePrice.
+- Workbench UI is downstream of runtime-resolved state; forcing presentation without a valid higher blueprint risks the POC7 failure mode (visible target but no transaction).
+
+Next research tool:
+GH1_PHASE_C_RUNTIME_XREF_COLLECTOR_V6.zip
+Purpose:
+- targeted PE64 xref/function extraction from gamedll_ph_x64_rwdi.dll and DyingLightGame_TheBeast_x64_rwdi.exe;
+- locate exact runtime gate strings and reflection metadata;
+- follow direct/indirect metadata pointers;
+- scan executable sections for RIP-relative / immediate xrefs;
+- use .pdata to recover function boundaries;
+- extract only small relevant function snippets and descriptor neighborhoods for offline disassembly;
+- no PAK/save scan and no modification.
+
+Do not scale POC11.
+Do not build another GUI-only bypass before runtime resolver logic is understood.
