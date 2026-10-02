@@ -708,3 +708,111 @@ Purpose:
 
 Immediate next action:
 wait for the user’s Deep Blueprint Collector V2 output. Use the live current-version result to isolate the exact native Iconic/Enhance architecture before building another runtime POC.
+
+
+## Deep Blueprint Collector V2 — decisive upper-tier findings
+
+User ran GH1_PHASE_C_DEEP_BLUEPRINT_COLLECTOR_V2 against the current 1.71-era install.
+
+Official data summary:
+- official weapon blueprint blocks: 169
+- official colors: Orange 56 / Blue 44 / Violet 48 / Exotic 21
+- ItemLevel distribution includes exactly four ItemLevel(3,4) blueprints and four ItemLevel(4,4) blueprints
+- 29 T4 blueprint blocks total
+- GUI contains distinct blueprint-upgrade and weapon-enhance modes
+
+Critical GUI fields found in official files:
+- GuiInventoryItemData.m_HigherLevelBlueprint
+- GuiInventoryItemData.m_CanAffordAlternatePrice
+- GuiInventoryItemData.m_UpgradeItemLevel
+- GuiInventoryItemData.m_MaxItemLevel
+- GuiInventoryItemData.m_ItemLevel
+- GuiItemTooltip.m_WeaponBlueprintUpgradeMode
+- GuiItemTooltip.m_WeaponEnhanceMode
+- GuiShopItemData.m_ShowUpgrade
+- GuiShopItemData.m_ShowEnhance
+- GuiShopItemData.m_CanEnhance
+
+Official inv_item_slot_symbol logic shows blueprint-upgrade availability depends on a non-null m_HigherLevelBlueprint together with m_CanAffordAlternatePrice.
+
+Official T3 -> T4 upgrade examples use:
+T3:
+- ItemLevel(3,4)
+- NextLevelBlueprintName(T4)
+
+T4:
+- AlternativePrice(...)
+- ItemLevel(4,4)
+
+This explains an important defect in rejected POC1: its custom T4 had neither ItemLevel(4,4) nor AlternativePrice, so it did not satisfy the actual native upgrade data shape.
+
+### Exact Mechanical Reconstructor mapping
+
+Legend progression Reward level 40:
+- weapon: dlc_ft_WPN_1HB_STK_X_r15
+- blueprint: Craftplan_dlc_ft_WPN_1HB_STK_X_T4_Blueprint
+- IncludesBlueprint()
+
+Exact official blueprint:
+- Color(Color_Exotic)
+- ScaleWithPlayerRank("dlc_ft_WPN_1HB_STK_X_r")
+- no ItemLevel
+- no NextLevelBlueprintName
+
+User screenshot shows this exact native reward family as:
+MECHANICAL RECONSTRUCTOR — ICONIC BLUEPRINT.
+
+Therefore for this native final blueprint, Color_Exotic maps to the user-visible Iconic blueprint presentation. It is acquired directly rather than through a lower-tier chain.
+
+### New clean-room hypothesis
+
+To make an ordinary generated T1/T2/T3 family actually upgrade to an Iconic final blueprint, combine two separately proven native structures:
+1. upgrade gate structure from official T3->T4 chains:
+   - all chain max tier raised to 4
+   - T3 NextLevelBlueprintName(T4)
+   - target T4 ItemLevel(4,4)
+   - target T4 AlternativePrice(...)
+2. Iconic presentation/final blueprint structure:
+   - Color(Color_Exotic)
+   - same ScaleWithPlayerRank family
+
+This hybrid does not exist as an official block and therefore remains a hypothesis until runtime tested.
+
+## GH1 Phase C Iconic Chain POC3 V1
+
+Artifact:
+GH1_PHASE_C_ICONIC_CHAIN_POC3_V1.zip
+
+Package SHA256:
+84b98107d505125155074a699b3d9162e6ef5fb9aa54674983825c7843948c87
+
+Target:
+dlc_ft_firearm_pistol_b_legendary_r
+
+Mutation:
+- T1 ItemLevel(1,3) -> ItemLevel(1,4)
+- T2 ItemLevel(2,3) -> ItemLevel(2,4)
+- T3 ItemLevel(3,3) -> ItemLevel(3,4)
+- T3 NextLevelBlueprintName -> custom T4
+- custom T4:
+  - Color(Color_Exotic)
+  - ScaleWithPlayerRank(same family)
+  - AlternativePrice("Craft_Scrap",1)
+  - ItemLevel(4,4)
+  - no further Next
+
+Packaging:
+- one-family only
+- dynamic effective collectables source
+- ZIP_DEFLATED proven writer conventions
+- no loot route/LootedObject/save/stash/player_variables/DLC mutation
+- exact marker uninstall
+
+Static selftest: PASS.
+
+Runtime questions:
+A. Does T3 now expose an upgrade button?
+B. Does upgraded T4 show ICONIC BLUEPRINT?
+C. Does crafting from T4 produce an Iconic weapon?
+
+Do not mass-expand until A/B/C are tested.
