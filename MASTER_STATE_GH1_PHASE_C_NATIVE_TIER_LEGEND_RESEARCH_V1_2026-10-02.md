@@ -580,3 +580,32 @@ After final clean reinstall / Steam verify:
 
 Until that consolidated runtime gate passes:
 EXOTIC ALL137 V2 = CANDIDATE / UNPROVEN.
+
+
+## Exotic All137 V2 runtime result — HARD REJECTED
+
+User installed/tested GH1_PHASE_C_EXOTIC_ALL137_OFFLINE_CANDIDATE_V2 on the current broken-DLC environment and reported that V2 also produced no useful Exotic result.
+
+For project purposes this is a functional failure of the blueprint-side architecture:
+- standalone custom Color_Exotic sibling blueprints are not sufficient;
+- appending those siblings to the proven Phase B pair bundles is not sufficient;
+- do not continue by cloning more T4 craftplans or changing T1/T2/T3;
+- keep Phase B weapon+matching-blueprint architecture frozen.
+
+Important interpretation:
+Color(Color_Exotic) on a craftplan is now treated as blueprint/UI/acquisition metadata, not as sufficient proof that the crafted weapon instance itself will be Exotic.
+
+This is consistent with the fact that native loot already has independent ColorSet_ExoticOnly routing and the game tracks Exotic weapon pickup separately from craftplan color.
+
+### New Phase C direction
+
+Stop blueprint-side Exotic mutation.
+
+Next research target is weapon-instance / generation-side Exotic creation:
+1. identify how ColorSet_ExoticOnly affects generated weapon instances;
+2. compare native Exotic loot-generated weapons to the same/similar family generated at lower rarity;
+3. locate rarity/affix roll inputs outside craftplan definitions;
+4. determine whether a crafted weapon can be routed through the same native item-generation path or whether Exotic should remain a loot-only/native-drop property;
+5. do not mass-edit weapon definitions until one-family weapon-side mechanism is statically isolated.
+
+V2 and the earlier 127/137 candidate are now historical rejected experiments, not final-build components.
