@@ -1,4 +1,4 @@
-# GH1 Phase C — Native Tier / Exotic / Iconic / Legend Research V1 — 2026-10-02
+# GH1 Phase C — Exotic Focus / Legend Deferred — 2026-10-02
 
 ## Entry condition
 
@@ -17,72 +17,87 @@ Locked Phase B evidence:
 
 Do not reopen the rejected local loot architecture. Global tbp_* remains frozen baseline.
 
-## Phase C objective
+## User runtime observation — Legend handling
 
-Determine the safest native mechanism for the next progression layer before any gameplay mutation:
-1. native Exotic rarity / blueprint behavior;
-2. whether an actual native weapon rarity named Iconic exists;
-3. the real weapon rank domain (especially whether explicit weapon IDs extend beyond r15);
-4. how Legend level and New Game Plus modify weapon/player damage;
-5. whether post-r15 progression should use native automatic scaling rather than synthetic r16-r300 weapon definitions.
+User reports an old weapon could be upgraded manually at the workbench up to the user's current Legend level 29.
 
-## Existing data evidence
+Interpretation for project planning:
+- treat Legend-level weapon scaling as already handled by the game's native/workbench system unless future evidence contradicts it;
+- DO NOT build synthetic r16-r300 weapon families;
+- DO NOT build a competing custom Legend scaling layer now;
+- Legend progression is DEFERRED/FROZEN while Exotic is solved.
 
-Existing official-data reports already show:
+This runtime observation is not yet a formal data proof of every Legend behavior, but it is strong enough to change project priority.
+
+## Phase C narrowed objective
+
+Focus only on native Exotic progression:
+1. identify exact native T4/workbench blueprint structure;
+2. determine how native T4 relates to Exotic output;
+3. extend generated GH1 weapon blueprint families through the same native-safe path;
+4. create a small one-family POC first;
+5. user manually upgrades the POC at the workbench and verifies rarity/result/persistence;
+6. only after runtime GREEN, expand to all eligible generated families.
+
+## Existing evidence
+
+Official-data reports show:
 - Color_Exotic exists.
-- ColorSet_DefaultExotic and ColorSet_ExoticOnly symbols exist.
-- multiple vanilla loot color sets assign non-zero Color_Exotic weights.
-- no Color_Iconic symbol was found in the current indexed inventory/loot report.
-- textual "iconic" occurrences found so far refer to AI/Volatile attack naming, not a weapon rarity.
-- IsAutomaticLegendLevelDamageScaling exists in official scripts.
-- ApplyLegendLevelOrNewGamePlusModifiers exists in official scripts/damage definitions.
-- LegendPoints rewards and LegendaryWeekly bounty systems exist.
+- ColorSet_DefaultExotic and ColorSet_ExoticOnly exist.
+- current/proven loot already uses ColorSet_ExoticOnly.
+- a native Legend reward gives both:
+  - dlc_ft_WPN_1HB_STK_T_suspect_r15
+  - Craftplan_dlc_ft_WPN_1HB_STK_T_suspect_T4_Blueprint
+  and marks IncludesBlueprint().
+- current Phase B scan classifies dlc_ft_wpn_1hb_stk_t_suspect_r as native and selects the T4 blueprint for that family.
+- no Color_Iconic weapon-rarity symbol has been proven.
 
-This is preliminary evidence only. Do not yet equate Platinum with Iconic and do not invent an Iconic weapon rarity.
+Important inference:
+T4 is now the highest-priority native workbench reference for Exotic research. Do not assume the T4 suffix alone means Exotic until the exact T4 block is extracted from live official collectables.
 
-## New read-only scanner
+## New read-only Exotic scanner
 
 Artifact:
-GH1_PHASE_C_NATIVE_TIER_LEGEND_SCANNER_V1.zip
+GH1_PHASE_C_EXOTIC_WORKBENCH_SCANNER_V1.zip
 
-SHA256:
-b65f1dfad2d2e4f2985812b4531cea77613c6697e92f3160d44ccfcd8b377cd4
+Package SHA256:
+63214b45c645c7027015fa7f1627ef2ee848f3eed0c8c96acebaaa482b162562
 
 Core Python SHA256:
-003d3f4821877ce8702b92db9deafda1807799a55cae27b60c419cc47bf2571b
+bb8690f912d03c7866bd0670b11bedef30d6a8285d24d946c8ed98b5047ad155
 
-The scanner is read-only and:
-- scans official data0/data1 text scripts;
-- compares official vs effective current collectables_ft.scr;
-- counts Exotic / Platinum / Iconic rarity symbols;
-- parses all official Weapon craftplans using ScaleWithPlayerRank + ItemLevel;
-- records blueprint color / tier / NextLevelBlueprintName;
-- scans explicit dlc_ft_* weapon _rN IDs and reports max observed rank;
-- reports every weapon family with any rank >15;
-- counts IsAutomaticLegendLevelDamageScaling and ApplyLegendLevelOrNewGamePlusModifiers;
-- captures Legend-related numeric lines for later progression analysis;
-- outputs:
-  - Documents/GH1_PHASE_C_NATIVE_TIER_LEGEND_SCAN_V1.json
-  - Documents/GH1_PHASE_C_NATIVE_TIER_LEGEND_SCAN_V1.txt
+Purpose:
+- extract all native T4 weapon blueprint blocks from official data0/data1 collectables_ft.scr;
+- report ScaleWithPlayerRank, ItemLevel, Color, requirements, NextLevelBlueprintName, HudIcon and LinkedDocket;
+- compare native T4 families to current generated GH1 blueprint families;
+- identify generated families that currently stop below T4;
+- make the next POC data-driven rather than guessed.
+
+Outputs:
+- Documents/GH1_PHASE_C_EXOTIC_WORKBENCH_SCAN_V1.json
+- Documents/GH1_PHASE_C_EXOTIC_WORKBENCH_SCAN_V1.txt
 
 Synthetic parser self-test:
-PASS — craftplan tiers, Exotic/Iconic symbols, weapon ranks and Legend symbols.
+PASS.
 
-## Safety decision gate
+## Safety locks
 
-Until live scan is returned:
-- DO NOT create r16-r300 weapon families.
-- DO NOT create a Color_Iconic or claim Platinum == Iconic.
-- DO NOT modify Phase B Broad loot.
-- DO NOT reuse the rejected temporary CraftPart Ascension carrier.
-- Prefer a native scaling path if official data proves Legend progression is runtime scaling rather than item-rank expansion.
+- Phase B Broad loot is frozen.
+- Legend custom scaling is deferred.
+- No r16-r300 definitions.
+- No custom Color_Iconic.
+- No temporary CraftPart Ascension carrier.
+- No guessed T4 mutation.
+- First Exotic mutation must be one-family POC based on an actual extracted native T4 structure.
 
 ## Next safe action
 
-Run GH1_PHASE_C_NATIVE_TIER_LEGEND_SCANNER_V1 and inspect the generated JSON/TXT.
+Run GH1_PHASE_C_EXOTIC_WORKBENCH_SCANNER_V1.
 
-Decision after scan:
-- if official max weapon rank is r15 and no weapon ranks >15 exist, freeze explicit weapon rank domain at 1-15;
-- if native Exotic symbols/craftplan patterns are confirmed, prototype Exotic progression using that native structure;
-- if no native weapon Iconic rarity symbol exists, treat "Iconic" as a project label only unless a separate native mechanism is found;
-- map Legend/NG+ automatic scaling before any post-r15 progression mutation.
+After its JSON/TXT are returned:
+- choose one generated family with a proven T1/T2/T3 chain;
+- build a minimal T4/Exotic POC only for that family;
+- do not change its Phase B loot pairing unless required;
+- user upgrades it manually at workbench;
+- verify Exotic rarity/output and save/reload behavior;
+- if GREEN, expand T4/Exotic support to the full generated family set.
