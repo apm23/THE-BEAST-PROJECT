@@ -1254,3 +1254,75 @@ Runtime gate requested:
 
 Status:
 CANDIDATE pending broad runtime test.
+
+
+## ALL88 mass Iconic final-test V1 installer result — STATIC MATCHER REJECTED
+
+User ran GH1_PHASE_C_ALL88_EXISTING_T3_ICONIC_FINALTEST_V1.zip.
+
+Observed installer behavior:
+- installer correctly auto-removed the old POC8 marker PAK;
+- install then stopped before writing the new overlay;
+- error reported many generated melee T3 families as missing;
+- no ALL88 V1 mass overlay was installed.
+
+The missing list pattern started with the WPN melee families while the firearm-generated targets were largely resolved. This exposed a matcher defect in V1 rather than a runtime Iconic failure.
+
+Root cause:
+V1 used ScaleWithPlayerRank family strings as the primary identity key. Current generated melee data contains mixed capitalization conventions across blueprint/family identifiers (for example WPN / 15HB / 1HB variants). Exact family-string matching was therefore too brittle.
+
+Safety outcome:
+GOOD FAIL-SAFE. V1 aborted before generating/writing a partial PAK.
+
+Do not reuse the V1 family-primary matcher.
+
+## ALL88 mass Iconic final-test V2
+
+Artifact:
+GH1_PHASE_C_ALL88_EXISTING_T3_ICONIC_FINALTEST_V2.zip
+
+SHA256:
+f757899cc49a81474615c0bc3b8c12499f85e70da945b74ce2099357424a9818
+
+Scope:
+- 88 generated non-native families
+- 73 melee
+- 15 firearm
+- 49 native families excluded
+
+Critical V2 correction:
+- primary target identity is now the EXACT T3 blueprint ID captured by the live Exotic Workbench Scanner;
+- blueprint IDs are matched case-insensitively;
+- ScaleWithPlayerRank is only a secondary sanity check and is also compared case-insensitively.
+
+Mutation remains identical to runtime-GREEN POC8:
+Color(Color_Orange) -> Color(Color_Exotic) ONLY.
+
+All other T3 data must remain unchanged:
+- blueprint ID
+- UID
+- ItemLevel(3,3)
+- AlternativePrice
+- RequiredItemToShowInShop
+- recipe
+- Name / Description
+- ScaleWithPlayerRank
+- T1/T2
+- Phase B loot/bundle/routes
+
+V2 synthetic validation:
+SELFTEST PASS
+- 88 exact T3 blueprint IDs resolved;
+- family casing differences deliberately injected and tolerated;
+- 88/88 targets changed to Color_Exotic;
+- no mutation outside Color();
+- ZIP integrity PASS.
+
+Runtime expected status after install:
+- EXACT TARGET IDS FOUND: 88 / 88
+- ICONIC/Color_Exotic: 88
+- LEGENDARY/Color_Orange: 0
+- OTHER: 0
+
+Status:
+RUNTIME FINAL-TEST CANDIDATE.
