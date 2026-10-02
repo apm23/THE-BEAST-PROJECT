@@ -966,3 +966,61 @@ Runtime gate:
 1. status must show registry T2/T3/T4 true;
 2. exact .38 Revolver Legendary blueprint must be checked for NEXT BLUEPRINT UPGRADE panel;
 3. if panel appears, upgrade and verify runtime Iconic label / crafted weapon result.
+
+
+## Runtime result — POC5 registry upgrade attempt HARD REJECTED
+
+User tested the exact .38 Revolver generated family after POC5 registered generated T2/T3/T4 in the official Blueprints_Upgrades ItemSet.
+
+Observed:
+- .38 Revolver still displayed only Craft / Pin Blueprint.
+- no NEXT BLUEPRINT UPGRADE panel appeared.
+
+Therefore the Legendary -> Iconic path through the normal blueprint-upgrade panel is now considered HARD REJECTED for this project.
+
+Do not spend more POCs trying to force Iconic as the next normal blueprint tier through:
+- ItemLevel max extension,
+- NextLevelBlueprintName,
+- RequiredItemToShowInShop,
+- AlternativePrice,
+- or Blueprints_Upgrades registry membership.
+
+Current-version native evidence remains:
+- native Color_Exotic/Iconic weapon blueprints are generally standalone;
+- they commonly omit ItemLevel;
+- they commonly omit NextLevelBlueprintName;
+- official T3 -> T4 upgrade chains observed in current data are ordinary Epic/Violet -> Legendary/Orange progression, not Legendary -> Iconic.
+
+## POC6 — standalone Iconic acquisition via vendor unlock
+
+Artifact:
+GH1_PHASE_C_38REVOLVER_STANDALONE_ICONIC_POC6_V1.zip
+
+Package SHA256:
+e97381f12a562c21391cabcc226ad5811130a872a48f1ca1c8c92ff6564e5fb5
+
+Target family:
+dlc_ft_firearm_revolver_c_legendary_r
+
+Custom blueprint:
+Craftplan_GH1_dlc_ft_firearm_revolver_c_legendary_Iconic_Blueprint
+
+Architecture:
+- T1/T2/T3 are untouched;
+- define one standalone weapon craftplan;
+- Color(Color_Exotic);
+- ScaleWithPlayerRank(target family);
+- no ItemLevel;
+- no NextLevelBlueprintName;
+- native-style firearm recipe 35 Scrap / 12 Wiring / 12 Leather / 6 Firearm Scrap;
+- expose the new blueprint in both Hub1_Unlocks and Hub2_Unlocks in current effective shop_item_sets.scr;
+- acquisition therefore follows the same vendor-exposure layer used by the previously audited Nexus 686 blueprint mod, without copying its stale full files.
+
+Runtime test gate:
+1. confirm blueprint appears at a HUB 1 or HUB 2 trader;
+2. buy/acquire it;
+3. confirm workbench title is ICONIC BLUEPRINT;
+4. craft it;
+5. confirm resulting weapon instance is actually Iconic.
+
+If this succeeds, scale standalone Iconic acquisition rather than reopening the rejected normal-upgrade-panel architecture.
