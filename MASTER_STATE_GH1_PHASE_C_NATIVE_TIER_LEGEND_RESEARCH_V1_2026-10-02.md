@@ -334,3 +334,118 @@ From this point:
   5. only then promote remaining candidate features to PROVEN.
 
 This mode intentionally trades early runtime feedback for fewer risky install cycles.
+
+
+## Offline Exotic candidate — 127/137 coverage
+
+Artifact:
+GH1_PHASE_C_EXOTIC_127_OFFLINE_CANDIDATE_V1.zip
+
+Package SHA256:
+4fca53bcbe10a0e485785d24adc61e9a076893ad57cff168cd17578e6e733817
+
+Core Python SHA256:
+c871d2f0b495dd2dea323b689591facfe54579fcd3051fb89ffda59bdd70a7cd
+
+Manifest SHA256:
+fcd87260e81e085dc630fcd00d88d645d6c6a5c0b6503a3a4b188c6303dbb8b5
+
+Status:
+CANDIDATE / UNPROVEN — OFFLINE BUILD MODE. Do not install until final clean reinstall / Steam verify cycle.
+
+### Important refinement from live Phase B + Exotic scan data
+
+The Phase B live coverage report and Exotic scanner were cross-mapped.
+
+137-family Phase B universe splits into:
+- 21 families already using a native Color_Exotic T4 blueprint;
+- 106 families with a normal T1 -> T2 -> T3 chain and no T4;
+- 7 families with a native T4 that is Color_Orange, not Exotic;
+- 3 special firearm families with no normal T1/T2/T3 ScaleWithPlayerRank chain.
+
+The 21 native Exotic families already use their native T4 as the Phase B paired blueprint. They therefore require no mutation.
+
+The safe candidate target is only the 106 normal tier-chain families.
+
+### Candidate behavior
+
+For each of the 106 T1/T2/T3 families:
+- leave T1/T2/T3 definitions byte-identical;
+- create one standalone native-style T4 blueprint;
+- T4 uses Color(Color_Exotic);
+- T4 uses the same ScaleWithPlayerRank family;
+- T4 has no ItemLevel;
+- T4 has no NextLevelBlueprintName;
+- firearm recipe follows native Exotic firearm pattern 35 Scrap / 12 Wiring / 12 Leather / 6 Firearm Scrap;
+- melee recipe follows native Exotic melee pattern 50 Scrap / 20 Wiring / 20 Leather / 12 Weights;
+- add the T4 blueprint as a third item to the same existing Phase B weapon+matching-blueprint ItemBundle.
+
+Exact bundle mutations:
+1576 existing Phase B pair bundles.
+
+This does not change:
+- default.loot
+- tbp_lootpools_global_v1.loot
+- tbp_lootsets_global_v1.loot
+- any LootedObject topology
+- any route weight
+- resource/charm/Night Sovereign routes
+- T1/T2/T3 definitions
+- stash/inventory versioning/player_variables
+- save format
+
+Candidate Exotic coverage if the standalone T4 runtime hypothesis is GREEN:
+127 / 137 families.
+
+### Deliberately deferred edge families
+
+Native Orange T4 — do not rewrite without separate proof:
+- dlc_ft_firearm_revolver_1stanniversary_r
+- dlc_ft_firearm_rifle_1stanniversary_r
+- dlc_ft_firearm_rifle_l_r
+- dlc_ft_firearm_shotgun_1stanniversary_r
+- dlc_ft_wpn_15hs_18_r
+- dlc_ft_wpn_1hb_stk_z_1stanniversary_r
+- dlc_ft_wpn_1hs_mach_27_r
+
+No normal T1/T2/T3 tier chain — do not invent a tier chain:
+- dlc_ft_firearm_flamethrower_r
+- dlc_ft_firearm_grenadelauncher_r
+- dlc_ft_firearm_sawbladelauncher_r
+
+### Static validation
+
+SELFTEST PASS:
+- 137 Phase B family manifest validated
+- 2041 Phase B pair bundle manifest validated
+- 21 native Exotic families reused
+- 106 standalone Exotic T4 definitions generated
+- 1576 exact existing pair bundles enriched
+- 10 edge families untouched
+- T1/T2/T3 byte-identical validation
+- Phase B route topology untouched
+- package ZIP integrity PASS
+
+The runtime package writer uses the proven overlay pattern:
+- ZIP_DEFLATED
+- compresslevel 9
+- deterministic ZipInfo timestamp
+- external_attr 0x01800000
+- create_system 3
+
+This explicitly avoids the ad-hoc ZIP_STORED packaging used by rejected POC1.
+
+### Final runtime gate
+
+After final clean reinstall / Steam verify:
+1. confirm DLC is detected with no warning;
+2. restore/install proven Phase B Broad Final V2;
+3. run candidate self-test;
+4. install Exotic 127 candidate;
+5. verify generated firearm and melee corpse pair bundles grant standalone T4 blueprint;
+6. verify T4 crafts the same family as Exotic;
+7. verify native Legend/workbench level scaling remains normal;
+8. save/reload and confirm Exotic rarity/stats persist;
+9. only then promote Exotic 127 candidate to PROVEN.
+
+Do not call the 106 custom T4 families PROVEN before that runtime gate.
