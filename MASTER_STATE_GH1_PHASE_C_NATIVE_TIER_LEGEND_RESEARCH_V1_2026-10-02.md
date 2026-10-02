@@ -449,3 +449,134 @@ After final clean reinstall / Steam verify:
 9. only then promote Exotic 127 candidate to PROVEN.
 
 Do not call the 106 custom T4 families PROVEN before that runtime gate.
+
+
+## Exotic All137 Offline Candidate V2 — full family coverage candidate
+
+Artifact:
+GH1_PHASE_C_EXOTIC_ALL137_OFFLINE_CANDIDATE_V2.zip
+
+Package SHA256:
+d6e2877128b3c1b292c0ed7f0224603c5810317c99ea05ff4a3cdb105f376d13
+
+Core Python SHA256:
+3c8f4a5e8f04af5a3646a5c686e0cd90c53d39f8a9940fcd3c3d95c0bfd78d51
+
+Manifest SHA256:
+32f53b43604e16408393225ea51f95bcaf31d6cf025a5314cbfbb234316f4530
+
+Status:
+CANDIDATE / UNPROVEN — OFFLINE BUILD MODE. This supersedes the 127/137 candidate as the primary final-test candidate. Keep 127/137 V1 only as a conservative fallback.
+
+### Edge-family audit breakthrough
+
+The three special launcher blueprints that do not use ItemLevel still use native ScaleWithPlayerRank:
+- Craftplan_FlameThrower_FT -> dlc_ft_firearm_flamethrower_r
+- Craftplan_GrenadeLauncher_FT -> dlc_ft_firearm_grenadelauncher_r
+- Craftplan_SawbladeLauncher_FT -> dlc_ft_firearm_sawbladelauncher_r
+
+Therefore they can be treated as standalone scalable weapon blueprint templates rather than requiring an invented T1/T2/T3 chain.
+
+The seven native Orange T4 edge families also do not need their native T4 rewritten. A separate GH1 Exotic sibling blueprint can coexist while the original native Orange T4 remains byte-identical.
+
+### Full 137-family candidate model
+
+137 Phase B weapon families now map as:
+- 21 native Color_Exotic T4 families: reuse exact native Exotic blueprint.
+- 106 ordinary T1/T2/T3 families: create standalone GH1 Exotic sibling from the existing family identity.
+- 7 native Color_Orange T4 families: preserve native Orange T4 and create separate standalone GH1 Exotic sibling.
+- 3 special standalone Orange launcher families: preserve original blueprint and create separate standalone GH1 Exotic sibling.
+
+Custom Exotic siblings created:
+116.
+
+Pair bundles enriched:
+1726.
+
+Native Exotic bundles already correct and reused:
+315 bundles across 21 families.
+
+Total Phase B pair bundle universe remains:
+2041.
+
+Candidate Exotic blueprint coverage:
+137 / 137 families.
+
+### Safety rules implemented
+
+Original/source definitions are never changed:
+- all T1/T2/T3 blocks remain byte-identical;
+- all native Orange T4 blocks remain byte-identical;
+- all native special launcher blueprint blocks remain byte-identical;
+- all native Exotic T4 blocks remain byte-identical.
+
+Custom sibling structure:
+- CategoryType_Collectable
+- ItemType(ItemType_CraftPlan)
+- CraftplanType("Weapon")
+- Color(Color_Exotic)
+- ScaleWithPlayerRank(original family)
+- no ItemLevel
+- no NextLevelBlueprintName
+- deterministic custom blueprint ID / UID
+- native entitlement markers DLC(...) / LinkedDocket(...) are carried over when present rather than intentionally bypassed
+- normal 106-family recipe uses native Exotic firearm/melee recipe pattern
+- 10 edge sibling blueprints preserve source RequiredItem recipe identity
+
+Delivery:
+- use the exact existing Phase B weapon+blueprint ItemBundle.
+- for the 116 custom families, append the matching custom Exotic sibling as another BundleItems entry.
+- no change to bundle identity, lootset identity, route topology or route weights.
+- 21 native Exotic families already carry the native T4 via the proven Phase B pair and are not touched.
+
+Explicitly unchanged:
+- default.loot
+- tbp_lootpools_global_v1.loot
+- tbp_lootsets_global_v1.loot
+- LootedObject topology
+- infected route weights
+- resources
+- charm
+- Night Sovereign
+- stash
+- inventory versioning
+- player_variables
+- save format
+
+Runtime overlay writer:
+- ZIP_DEFLATED
+- compresslevel 9
+- deterministic ZipInfo timestamp
+- external_attr 0x01800000
+- create_system 3
+
+### Static validation
+
+SELFTEST PASS:
+- 137/137 live-manifest family universe represented
+- exact 2041 Phase B pair-bundle manifest retained
+- 21 native Exotic families reused
+- 116 custom standalone Exotic sibling definitions generated
+- 1726 exact non-native-Exotic pair bundles enriched
+- all original/source blueprint blocks byte-identical
+- every 137 family bundle has an Exotic-blueprint candidate after patch
+- custom siblings contain Color_Exotic + correct ScaleWithPlayerRank and no ItemLevel
+- Phase B topology untouched
+- package ZIP integrity PASS
+
+### Runtime gate remains mandatory
+
+After final clean reinstall / Steam verify:
+1. confirm legitimate DLC detection is healthy before any mod;
+2. install/restore proven Phase B Broad Final V2;
+3. run All137 V2 self-test;
+4. install one All137 V2 overlay;
+5. verify several ordinary generated melee/firearm families;
+6. verify at least one native Orange-T4 edge family uses the separate sibling without breaking its native T4;
+7. verify Flamethrower, GrenadeLauncher and SawbladeLauncher sibling blueprint behavior;
+8. verify crafted weapon is actually Exotic rather than merely showing an Exotic blueprint;
+9. verify native Legend/workbench scaling remains normal;
+10. save/reload and confirm rarity/stats/inventory/DLC state remain healthy.
+
+Until that consolidated runtime gate passes:
+EXOTIC ALL137 V2 = CANDIDATE / UNPROVEN.
