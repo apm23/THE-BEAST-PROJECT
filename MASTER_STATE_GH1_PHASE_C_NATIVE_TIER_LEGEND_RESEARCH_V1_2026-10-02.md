@@ -2255,3 +2255,61 @@ Purpose:
 Research rule:
 Do not patch DLL/runtime state and do not scale any legacy migration mechanism until
 V13 identifies the exact Sunray source item and confirms its live gate tuple.
+
+
+## V13 result — exact IDs present; bounded identity walk did not reach m_SourceItem
+
+User returned:
+GH1_PHASE_C_LIVE_SUNRAY_IDENTITY_V13_20261002_230250.zip
+
+Verified runtime:
+- same process PID 33356 as V12.2
+- same gamedll SHA256 ddb68c8f87ba2afd0e561b2d1adb9235467c29069fb1cd1619db81e1056378eb
+- exact GuiShop objects: 333
+- unique m_SourceItem objects: 186
+- identity-matched source objects: 0
+- matched GuiShop objects: 0
+
+This is NOT a missing-identity result. Exact Sunray/generated strings were present live:
+- Craftplan_GH1_dlc_ft_firearm_revolver_c_legendary_T3_Blueprint: 5 ASCII hits
+- T2 ID: 5 ASCII hits
+- T1 ID: 21 ASCII hits
+- family dlc_ft_firearm_revolver_c_legendary_r: 56 ASCII hits
+- Sunray: 5 UTF-16LE hits
+
+Interpretation:
+V13's bounded source-item traversal (inline/direct pointer + one/two pointer hops)
+did not reach those strings. The live identity is therefore likely behind a deeper
+definition/hash/registry topology. Do not interpret this as evidence that Sunray is
+not one of the 13 terminal T3 source objects.
+
+Do not increase arbitrary pointer depth blindly; that would explode the graph and
+reduce evidence quality.
+
+### V14 — A/B/A selection differential identity probe
+
+Built:
+GH1_PHASE_C_SUNRAY_SELECTION_DIFF_PROBE_V14.zip
+
+SHA256:
+e84efb1f05bcc01dbab2572b59042859eaaeb00db1e3586c1fa3df9a55ea8853
+
+Method:
+- derive the 13 terminal generated-T3 source groups fresh from exact GuiShopItemData
+  runtime objects;
+- track qword references to BOTH each terminal m_SourceItem pointer and each
+  GuiShopItemData object pointer belonging to that source;
+- Stage A: existing Legendary Sunray highlighted;
+- Stage B: user highlights a clearly different/non-Sunray blueprint;
+- Stage A2: user returns highlight to the same Legendary Sunray;
+- rank source groups by references present in both Sunray stages, absent in the
+  other-selection stage.
+
+This avoids any assumption about string/hash/definition layout and remains strictly
+read-only (QUERY_INFORMATION + VM_READ; no WriteProcessMemory).
+
+If V14 yields one stable A-only source/object reference signature, use that source
+as the runtime Sunray identity and read its V12.2-proven gate tuple directly.
+If V14 yields no unique signature, selection is likely held through another controller
+object; next step should follow that controller reference rather than deeper blind
+identity-string pointer walking.
