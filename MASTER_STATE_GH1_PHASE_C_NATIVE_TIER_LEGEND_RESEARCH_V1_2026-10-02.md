@@ -101,3 +101,110 @@ After its JSON/TXT are returned:
 - user upgrades it manually at workbench;
 - verify Exotic rarity/output and save/reload behavior;
 - if GREEN, expand T4/Exotic support to the full generated family set.
+
+
+## Actual Exotic Workbench Scanner V1 live result
+
+User returned both scanner outputs from the installed live stack.
+
+Live scan:
+- effective collectables source: data4.pak
+- official weapon blueprints: 150
+- current weapon blueprints: 414
+- native T4 blueprints: 29 across 29 families
+- native T4 blocks using Color_Exotic: 21
+- native T4 blocks using Color_Platinum: 0
+- generated GH1 families without T4: 88
+
+Key structural result:
+- every scanned native Color_Exotic T4 blueprint omits ItemLevel;
+- representative native Exotic firearm T4 recipe pattern:
+  - Craft_Scrap 35
+  - Craft_wiring 12
+  - Craft_Leather 12
+  - Craft_Firearm_Scrap_FT 6
+- representative native Exotic firearm T4 block uses:
+  - ItemType(ItemType_CraftPlan)
+  - CraftplanType("Weapon")
+  - Color(Color_Exotic)
+  - ScaleWithPlayerRank("<family>_r")
+  - HudIcon("blueprint_b")
+  - no NextLevelBlueprintName
+  - no ItemLevel
+  - GameVersion(9)
+- not every T4 is Exotic: 8 of 29 native T4 entries remain Color_Orange. Therefore T4 suffix alone is not a rarity guarantee.
+
+Generated GH1 chains are clean T1/T2/T3:
+- T1: Color_Blue + ItemLevel(1,3) + next T2
+- T2: Color_Violet + ItemLevel(2,3) + next T3
+- T3: Color_Orange + ItemLevel(3,3) + no next
+- 88 generated families currently stop here.
+
+This confirms the correct POC question is whether extending a generated T1/T2/T3 upgrade chain to a native-style standalone Color_Exotic T4 is accepted by the workbench runtime.
+
+## Exotic POC1 V1
+
+Artifact:
+GH1_PHASE_C_EXOTIC_POC1_V1.zip
+
+Package SHA256:
+b5d24de1d504a5f663b9901a4fc7c642af8bbe26accc67844d4a4c9a3879733d
+
+Core Python SHA256:
+b2bb5923914dbc0e05ac137bab6cfc7914015b8f84cdf38123d11e6c1f0a23d7
+
+Repo source:
+tools/tbp_phase_c_exotic_poc1.py
+
+Repo source commit:
+c308d28fe2cbfafb2fa3c7082e84b26e2f494342
+
+POC target:
+dlc_ft_firearm_pistol_b_legendary_r
+
+Why this target:
+- classification is generated;
+- it already belongs to the Phase B 137-family proven pair universe;
+- generated chain is exactly T1/T2/T3 Blue/Violet/Orange;
+- it has no T4 in the live scan;
+- firearm native Exotic T4 recipe structure is well represented in official data.
+
+POC mutation only:
+- T1 ItemLevel(1,3) -> ItemLevel(1,4)
+- T2 ItemLevel(2,3) -> ItemLevel(2,4)
+- T3 ItemLevel(3,3) -> ItemLevel(3,4)
+- T3 gains NextLevelBlueprintName(Craftplan_GH1_dlc_ft_firearm_pistol_b_legendary_T4_Blueprint)
+- new T4 blueprint:
+  - Color(Color_Exotic)
+  - same ScaleWithPlayerRank family
+  - native firearm Exotic recipe 35/12/12/6
+  - no ItemLevel
+  - no further NextLevelBlueprintName
+  - GameVersion(9)
+
+Installer safety:
+- reads the current effective collectables dynamically;
+- writes a new highest dataN.pak;
+- package contains only collectables_ft.scr plus an exact POC marker;
+- does not include or modify loot pools or loot sets;
+- does not touch LootedObject topology;
+- does not touch save/DLC/player_variables/stash/inventory versioning;
+- uninstall removes only the PAK containing the exact POC marker.
+
+Synthetic self-test:
+PASS — generated T1/T2/T3 -> native-style Exotic T4 chain; loot untouched.
+
+## Current next runtime proof
+
+Install Exotic POC1 V1 and test at the workbench.
+
+Required observations:
+1. target T3 blueprint offers another upgrade;
+2. upgraded blueprint becomes T4;
+3. crafted/upgraded target weapon is Exotic;
+4. weapon level still follows current native Legend/workbench scaling;
+5. after save/reload, Exotic rarity and resulting weapon stats persist.
+
+Until these observations pass:
+- Exotic generated-family support is POC only, not PROVEN;
+- do not mass-expand T4 to all 88 generated families.
