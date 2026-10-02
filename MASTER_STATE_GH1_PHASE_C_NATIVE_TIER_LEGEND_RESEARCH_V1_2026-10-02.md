@@ -1180,3 +1180,77 @@ Purpose:
 test whether the existing upgrade-valid T3 can remain a valid T2->T3 transaction while presenting/crafting as Iconic purely through Color_Exotic.
 
 Static selftest PASS.
+
+
+## POC8 runtime result — GREEN
+
+User runtime-tested the existing generated Sunray T3 blueprint with ONLY:
+Color(Color_Orange) -> Color(Color_Exotic)
+
+All upgrade metadata remained intact.
+
+Observed runtime:
+- Epic upgraded directly to Iconic successfully;
+- resulting blueprint state was genuinely Iconic;
+- crafted weapon was genuinely Iconic.
+
+This proves the minimal generated-blueprint architecture:
+- keep the SAME T3 blueprint ID;
+- keep ItemLevel(3,3);
+- keep AlternativePrice;
+- keep RequiredItemToShowInShop;
+- keep recipe / UID / ScaleWithPlayerRank / ownership identity;
+- change ONLY Color_Orange -> Color_Exotic.
+
+Generated progression therefore becomes:
+Blue/Rare -> Violet/Epic -> Exotic/Iconic
+rather than creating a separate Legendary -> Iconic step.
+
+This is now the preferred Phase C architecture for generated non-native weapon families.
+
+## ALL88 mass Iconic final-test candidate V1
+
+Artifact:
+GH1_PHASE_C_ALL88_EXISTING_T3_ICONIC_FINALTEST_V1.zip
+
+SHA256:
+ed756aeb7b3a530ef356315d87c989168afc30019c8cc817d849db791555cf61
+
+Scope locked from actual Phase B final coverage + Exotic scanner:
+- 88 generated non-native families
+- 73 melee
+- 15 firearm
+- 49 native families explicitly excluded
+
+Static source facts:
+- all 88 generated families have T1/T2/T3;
+- all 88 generated T3 blocks were Color_Orange at scan time;
+- all 88 generated T3 blocks use ItemLevel(3,3).
+
+Mass mutation:
+- exactly 88 generated T3 blocks;
+- Color(Color_Orange) -> Color(Color_Exotic) ONLY.
+
+Invariant validation:
+- T1/T2 untouched;
+- T3 ItemLevel(3,3) preserved;
+- T3 AlternativePrice preserved;
+- T3 RequiredItemToShowInShop preserved;
+- blueprint ID / UID / recipe / Name / Description / ScaleWithPlayerRank preserved;
+- native families untouched;
+- Phase B loot / bundle / route topology untouched.
+
+Selftest:
+PASS — 88/88 targets patched, only Color changed, upgrade metadata preserved.
+
+Runtime gate requested:
+- test multiple melee families;
+- test multiple firearm families;
+- verify Epic -> Iconic upgrade completes;
+- verify blueprint displays ICONIC BLUEPRINT;
+- verify crafted weapon is genuinely Iconic;
+- verify ScaleWithPlayerRank output follows player level;
+- verify native blueprint families remain unchanged.
+
+Status:
+CANDIDATE pending broad runtime test.
