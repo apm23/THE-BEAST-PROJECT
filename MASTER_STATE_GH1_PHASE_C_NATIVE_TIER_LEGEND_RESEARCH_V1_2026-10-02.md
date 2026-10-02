@@ -1883,3 +1883,77 @@ V8 is class-anchored and type-aware:
 Do not use V7 rank ordering as resolver evidence.
 Use V8 class-anchored output to identify the real population function for
 m_HigherLevelBlueprint / m_HasABlueprintUpgrade.
+
+
+## V8 correction — actual GuiInventoryItemData anchors
+
+User returned:
+GH1_PHASE_C_GUIINVENTORY_CLASS_XREF_V8_20261002_182739.zip
+
+The V8 collector worked, but disassembly of its output exposed an important correction:
+the initial V8 constructor/vtable seeds inherited from V7 mixed multiple GUI item-data classes.
+Do NOT use RVA 0x00C73050 / 0x00C739A0 / vtable 0x0293C8C0 as the canonical
+GuiInventoryItemData identity.
+
+Stronger class identity recovered from V8 output:
+
+- actual/default GuiInventoryItemData constructor: RVA 0x018F0EB0
+- GuiInventoryItemData copy constructor: RVA 0x01A14D70
+- actual GuiInventoryItemData vtable: RVA 0x02B4F330
+- generated class size: 0x5E0
+
+Evidence:
+- RVA 0x018F0EB0 writes vtable 0x02B4F330 into the object and initializes the complete
+  object layout through the 0x5E0 range;
+- RVA 0x01A14D70 copies the same field layout and remains the useful copy-constructor anchor;
+- V6 generated class registration at RVA 0x007BD3B0 identifies GuiInventoryItemData
+  with class size 0x5E0 and field-registration callback RVA 0x00759460.
+
+Important runtime-field offsets remain valid because they came from generated reflection metadata,
+not from the incorrect V7/V8 class anchor:
+- +0x130 m_MaxItemLevel
+- +0x193 m_CanAffordAlternatePrice
+- +0x3F0 m_UpgradeItemLevel
+- +0x400 m_HigherLevelBlueprint
+- +0x418 m_CanAffordCraft
+- +0x419 m_ShowupgradeInfo
+- +0x41A m_IsBlueprint
+- +0x41B m_IsBlueprintAvailable
+- +0x420 m_HasABlueprintUpgrade
+
+V8 also produced many direct callers of the actual constructor RVA 0x018F0EB0.
+The fact that most callers do not populate +0x400/+0x420 inline indicates that runtime population
+is likely delegated into helper calls after construction.
+
+### V9 corrected resolver-graph collector
+
+Built:
+GH1_PHASE_C_GUIINVENTORY_RESOLVER_GRAPH_COLLECTOR_V9.zip
+
+ZIP SHA256:
+2e0378177b2898bd9493df257b4e99bc100448f2494642ec7d3f6eaecca73e38
+
+Core script SHA256:
+e36b7a33b39b4ad71ccee4d2b9c684a0f361be99c577f039f0534ddb6c628174
+
+V9 starts only from the corrected class identity:
+- constructor 0x018F0EB0
+- copy constructor 0x01A14D70
+- vtable 0x02B4F330
+- size 0x5E0
+
+V9:
+- builds one direct-call index for gamedll;
+- finds all direct callers of the corrected ctor/copy ctor;
+- parses the corrected vtable;
+- follows a bounded 3-hop class-specific call graph;
+- scans type-correct accesses to the reflection-proven blueprint fields;
+- ranks +0x400 / +0x420 writers much higher when they are connected to the corrected class graph;
+- captures caller layers around strong resolver candidates;
+- captures generated field-accessor thunks and their callers for semantics;
+- one DLL only, mmap/read-only, no PAK/save scan.
+
+Research rule:
+Do NOT build a new Legendary->Iconic runtime patch until V9 identifies a credible
+post-construction population/resolver function for m_HigherLevelBlueprint and/or
+m_HasABlueprintUpgrade.
