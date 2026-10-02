@@ -1366,3 +1366,44 @@ If runtime GREEN:
 
 Status:
 POC9 CANDIDATE / UNPROVEN pending runtime test.
+
+
+## Legacy T3 migration result — POC9 HARD REJECTED
+
+User runtime-tested the correct Sunray family with a true T3 Legendary -> T4 Iconic successor graph plus Blueprints_Upgrades registration.
+
+Observed:
+- already-owned/saved Legendary Sunray T3 still did NOT show NEXT BLUEPRINT UPGRADE.
+
+Conclusion:
+- for blueprints already persisted in the save as terminal T3/Legendary, changing the data definition to add a successor does not migrate the saved terminal state;
+- Blueprints_Upgrades registration does not override that persisted terminal state;
+- in-place legacy T3 -> T4 migration through the normal upgrade panel is HARD REJECTED.
+
+Do not spend more time trying to retrofit a successor onto already-owned terminal T3 blueprints.
+
+## Legacy migration fallback — POC10
+
+Artifact:
+GH1_PHASE_C_SUNRAY_LEGACY_MIGRATION_POC10_V1.zip
+
+SHA256:
+728326d79ff948583cf2e80b112451b8c26ff0ffb199f3acb55f557e1b333765
+
+Architecture:
+- preserve the user's old T3 Legendary blueprint;
+- create one separate standalone Color_Exotic/Iconic migration blueprint;
+- gate its vendor visibility with RequiredItemToShowInShop(old T3 ID);
+- expose it through Hub1_Unlocks and Hub2_Unlocks;
+- no save editing;
+- no need to reacquire the old blueprint;
+- POC6 already proved standalone Color_Exotic -> real Iconic craft + player-level scaling.
+
+POC10 runtime gate:
+- existing owner of legacy Sunray T3 should see the migration Iconic blueprint at Hub trader;
+- after purchase it should display as ICONIC BLUEPRINT;
+- crafted result should be Iconic and scale with player level.
+
+If POC10 is GREEN, final Phase C should use a hybrid:
+1. POC8-style Color_Orange -> Color_Exotic on generated T3 for blueprints that are still progressing through T1/T2;
+2. companion migration Iconic siblings for users who already have terminal T3 persisted in the save.
