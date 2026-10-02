@@ -816,3 +816,68 @@ B. Does upgraded T4 show ICONIC BLUEPRINT?
 C. Does crafting from T4 produce an Iconic weapon?
 
 Do not mass-expand until A/B/C are tested.
+
+
+## POC3 screenshot review — target mismatch, result INCONCLUSIVE
+
+User supplied two runtime screenshots:
+- .38 Revolver Legendary Blueprint: no right-side "NEXT BLUEPRINT UPGRADE" panel; only Craft / Pin Blueprint.
+- Predator Epic Blueprint: normal right-side "NEXT BLUEPRINT UPGRADE" panel to Legendary is visible.
+
+Important correction:
+POC3 targeted:
+- family: dlc_ft_firearm_pistol_b_legendary_r
+- chain: Craftplan_GH1_dlc_ft_firearm_pistol_b_legendary_T1/T2/T3_Blueprint
+
+The screenshot test target is .38 Revolver, whose generated Phase B family is:
+- dlc_ft_firearm_revolver_c_legendary_r
+- chain: Craftplan_GH1_dlc_ft_firearm_revolver_c_legendary_T1/T2/T3_Blueprint
+
+Therefore the screenshot does not validate the POC3 target. POC3 is not promoted and not treated as GREEN, but this specific test is INCONCLUSIVE rather than a clean architectural rejection.
+
+Deep collector V2 also shows the generated .38 Revolver T2/T3 chain uses RequiredItemToShowInShop(previous blueprint) in addition to ItemLevel / NextLevelBlueprintName / AlternativePrice.
+
+## Exact .38 Revolver Iconic POC4 V1
+
+Artifact:
+GH1_PHASE_C_38REVOLVER_ICONIC_POC4_V1.zip
+
+Package SHA256:
+0bae4f8699d63f10d9cd17ef914659cbc0882b9644e60326055024aa3094ee20
+
+Status:
+RUNTIME POC / UNPROVEN
+
+Exact target:
+- dlc_ft_firearm_revolver_c_legendary_r
+- expected UI name: .38 Revolver
+
+Patch:
+- T1 ItemLevel(1,3) -> ItemLevel(1,4)
+- T2 ItemLevel(2,3) -> ItemLevel(2,4)
+- T3 ItemLevel(3,3) -> ItemLevel(3,4)
+- T3 NextLevelBlueprintName -> new custom T4
+- T4 cloned from exact generated Legendary T3 block, then:
+  - Color(Color_Exotic)
+  - ItemLevel(4,4)
+  - RequiredItemToShowInShop(T3)
+  - preserves T3 AlternativePrice fields
+  - preserves exact ScaleWithPlayerRank family
+  - new deterministic UID
+  - no further NextLevelBlueprintName
+
+Installer auto-removes only exact old experimental marker PAKs:
+- POC1
+- POC3
+- Exotic All137 V2
+It does not remove the proven Phase B stack.
+
+Runtime gate:
+1. install POC4;
+2. confirm STATUS reports exact .38 Revolver chain T3 max 4 + T3->T4;
+3. select .38 Revolver Legendary Blueprint in workbench;
+4. check whether right-side NEXT BLUEPRINT UPGRADE panel appears;
+5. if yes, upgrade and verify whether T4 UI says ICONIC BLUEPRINT;
+6. craft and verify resulting weapon rarity.
+
+Do not scale beyond one family until the right-side upgrade panel is runtime GREEN.
