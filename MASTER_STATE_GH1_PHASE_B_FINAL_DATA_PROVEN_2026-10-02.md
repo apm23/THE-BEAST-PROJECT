@@ -16,9 +16,9 @@ Therefore:
 
 ## Final live coverage audit
 
-User ran GH1_PHASE_B_FINAL_COVERAGE_PROVER_V1 against the live Broad Final V2 stack.
+User first ran GH1_PHASE_B_FINAL_COVERAGE_PROVER_V1 against the live Broad Final V2 stack.
 
-Live scan facts:
+V1 live scan facts:
 - all paired weapon families: 137
 - native families: 49
 - generated families: 88
@@ -62,8 +62,6 @@ A Broad Final selector is complete when:
 4. old paired source routes remain zeroed;
 5. no defined pair family is missing from the Broad selector.
 
-Under this rule the uploaded live scan is PHASE_B_DATA_PROVEN.
-
 ## Corrected artifact
 
 GH1_PHASE_B_FINAL_COVERAGE_PROVER_V2.zip
@@ -79,19 +77,58 @@ V2 fixes the reachability definition:
 Synthetic self-test:
 PASS — legacy source 126 families -> every Broad selector promotes exact complete 137-family / all-pair universe.
 
+## Actual Prover V2 live rerun — PASS
+
+User reran GH1_PHASE_B_FINAL_COVERAGE_PROVER_V2 on 2026-10-02 against the installed Broad Final V2 stack.
+
+Actual report status:
+PHASE_B_DATA_PROVEN
+
+Verified live:
+- expected family count: 137
+- all pair family count: 137
+- reachable family count: 137
+- native family count: 49
+- generated family count: 88
+- pair bundle count: 2041
+- broad bundle count: 2041
+- infected block count: 16
+- route section count: 32
+- unreachable families: 0
+- issues: 0
+- every one of the 32 Broad route sections contains all 137 families
+- every one of the 32 Broad route sections contains all 2041 recognized pair bundles
+- every route has zero missing all-pair bundles
+- every route has zero unknown Broad bundles
+- every route has a positive Broad weight
+- every route carries the intended 165 promoted source-gap bundles
+
+Rank-domain audit from the V2 CSV:
+- 137 family rows total
+- all 137 rows reachable=true
+- 136 families define ranks 1 through 15
+- dlc_ft_wpn_1hs_knife_p_preorder_r legitimately defines only rank 15
+- therefore the complete valid pair universe is exactly 136*15 + 1 = 2041 bundles
+- there is no missing rank/bundle gap in the defined family universe
+
+This actual V2 rerun supersedes the earlier V1 false-negative interpretation.
+
 ## Locked Phase B status
 
-PROVEN:
+FINAL PROVEN:
 - global tbp_* loot architecture runtime-active
 - generated-blueprint acquisition
 - weapon + matching blueprint pairing
 - broad runtime variety
 - 137/137 paired weapon-family Broad coverage
-- complete 2041 defined pair-bundle Broad coverage
+- complete 2041/2041 valid pair-bundle Broad coverage
 - 32/32 NORMAL/PERMA Broad route coverage
+- zero unreachable families
+- zero unknown Broad bundles
+- zero coverage issues
 
 Do not reopen the rejected local loot architecture.
 
 Future weapon loot additions must reuse the same global tbp_* layer.
 
-Blueprint save/reload persistence remains a separate runtime persistence assertion unless explicitly confirmed by the user; it is not required to reinterpret the V1 coverage false negative.
+Blueprint save/reload persistence remains a separate runtime persistence assertion unless explicitly confirmed by the user; it does not affect the Phase B family/bundle/route coverage proof.
