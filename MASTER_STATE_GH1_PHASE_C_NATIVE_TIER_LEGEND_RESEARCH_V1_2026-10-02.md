@@ -1812,3 +1812,74 @@ Purpose:
 - no PAK/save scan; read-only; bounded output.
 
 Do not build another Iconic runtime POC until V7 identifies the actual resolver/field-population logic.
+
+
+## V7 runtime field-access result — offset-only scan has false positives; class anchors recovered
+
+User returned:
+GH1_PHASE_C_RUNTIME_FIELD_ACCESS_V7_20261002_181616.zip
+
+Current gamedll SHA256 still matches:
+ddb68c8f87ba2afd0e561b2d1adb9235467c29069fb1cd1619db81e1056378eb
+
+V7 produced:
+- 11,005 raw field-offset access candidates
+- 5,591 candidate functions
+- 100 ranked primary functions
+- 263 function snippets
+
+Important correction:
+an offset-only executable scan is still too noisy. Numeric displacements such as 0x400 / 0x420
+occur in unrelated classes and stack/local layouts. Several high-ranked V7 functions were proven
+false positives after disassembly.
+
+Example:
+RVA 0x00E21320 is reflection/metadata construction using RBP locals whose offsets coincidentally
+equal the GuiInventoryItemData field offsets. It is NOT the runtime resolver.
+
+### Verified GuiInventoryItemData class anchors
+
+Offline disassembly of V7 snippets identified a real GuiInventoryItemData constructor:
+
+- constructor RVA: 0x00C73050
+- copy constructor RVA: 0x01A14D70
+- related/secondary initializer RVA: 0x00C739A0
+- constructor installs vtable RVA: 0x0293C8C0
+
+The copy constructor verifies field widths, which is critical for eliminating false positives:
+
+- +0x130 m_MaxItemLevel = 32-bit
+- +0x193 m_CanAffordAlternatePrice = byte
+- +0x3F0 m_UpgradeItemLevel = 32-bit
+- +0x400 m_HigherLevelBlueprint = 64-bit-like/pointer-sized field
+- +0x418 m_CanAffordCraft = byte
+- +0x419 m_ShowupgradeInfo = byte
+- +0x41A m_IsBlueprint = byte
+- +0x41B m_IsBlueprintAvailable = byte
+- +0x41C m_IsBlueprintPinned = byte
+- +0x41D m_CanPinBlueprint = byte
+- +0x41E m_CanUnPinBlueprint = byte
+- +0x420 m_HasABlueprintUpgrade = byte
+
+The copy constructor directly copies these fields from source to destination at the offsets above.
+
+### V8 collector
+
+Built:
+GH1_PHASE_C_GUIINVENTORY_CLASS_XREF_COLLECTOR_V8.zip
+SHA256:
+d028173843781d2b59e2ed59f08375c626600a6461edafbb1ba33ccb14fefb03
+
+V8 is class-anchored and type-aware:
+- exact DLL SHA guard;
+- parses GuiInventoryItemData vtable at RVA 0x0293C8C0 and extracts its code methods;
+- finds all direct callers of constructor/copy constructor/secondary initializer;
+- scans field accesses using verified field widths;
+- strongly ranks functions touching multiple blueprint fields on the same base register;
+- prioritizes functions already anchored to the GuiInventoryItemData class;
+- extracts one caller and one callee layer around strong candidates;
+- read-only; one DLL only; no PAK/save scan.
+
+Do not use V7 rank ordering as resolver evidence.
+Use V8 class-anchored output to identify the real population function for
+m_HigherLevelBlueprint / m_HasABlueprintUpgrade.
