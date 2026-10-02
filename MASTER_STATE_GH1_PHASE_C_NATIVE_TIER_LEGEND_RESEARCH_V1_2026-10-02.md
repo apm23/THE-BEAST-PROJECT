@@ -1024,3 +1024,64 @@ Runtime test gate:
 5. confirm resulting weapon instance is actually Iconic.
 
 If this succeeds, scale standalone Iconic acquisition rather than reopening the rejected normal-upgrade-panel architecture.
+
+
+## POC5 runtime result — HARD REJECTED
+
+The exact .38 Revolver Legendary blueprint was tested after registering its generated T2/T3/T4 entries in the official Blueprints_Upgrades ItemSet.
+
+Runtime result:
+- the workbench still showed only Craft / Pin Blueprint;
+- the right-side NEXT BLUEPRINT UPGRADE panel did not appear.
+
+Therefore:
+- collectables chain + Blueprints_Upgrades registry registration is still insufficient to make this existing Legendary blueprint expose an Iconic successor;
+- do not continue the Legendary -> Iconic upgrade-panel architecture.
+
+## POC7 — convert the already-owned terminal blueprint in place
+
+User requested avoiding any reacquisition because already-owned blueprints may not be obtainable again through the same acquisition route.
+
+POC7 therefore reuses the exact existing owned blueprint ID:
+Craftplan_GH1_dlc_ft_firearm_revolver_c_legendary_T3_Blueprint
+
+No new blueprint ID is created.
+
+POC7 changes only that existing terminal definition:
+- Color(Color_Orange) -> Color(Color_Exotic)
+- remove ItemLevel(...)
+- remove NextLevelBlueprintName(...)
+- remove RequiredItemToShowInShop(...)
+- remove AlternativePrice(...)
+
+Identity and ownership-facing fields remain identical:
+- exact item ID
+- Name
+- Description
+- ScaleWithPlayerRank
+- HudIcon
+- UID
+- crafting recipe
+- crafting sounds
+
+Rationale:
+current native Color_Exotic blueprints displayed by the game as ICONIC BLUEPRINT are standalone and do not carry ItemLevel or NextLevelBlueprintName.
+
+Artifact:
+GH1_PHASE_C_38REVOLVER_EXISTING_BP_ICONIC_POC7_V1.zip
+
+SHA256:
+3b7c2e97bb8617135bf654a571305498af7a4741f6281522407910876f846115
+
+Status:
+CANDIDATE / runtime test pending.
+
+Runtime gate:
+1. install POC7;
+2. status must show same T3 blueprint ID, Color_Exotic, and no ItemLevel/Next/shop-gate/AlternativePrice;
+3. open the already-owned .38 Revolver blueprint in the workbench;
+4. check whether its title now reads ICONIC BLUEPRINT;
+5. check craft availability;
+6. craft and inspect whether the resulting weapon instance is Iconic.
+
+This test specifically avoids any vendor/drop reacquisition requirement.
