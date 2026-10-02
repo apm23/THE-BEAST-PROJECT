@@ -1326,3 +1326,43 @@ Runtime expected status after install:
 
 Status:
 RUNTIME FINAL-TEST CANDIDATE.
+
+
+## Remaining migration edge case after All88/P8 architecture
+
+User reported one final issue before considering Phase C maximally proven:
+- generated blueprints that were already owned/saved in terminal Legendary state before the Iconic conversion do not automatically gain an Iconic upgrade path.
+
+Interpretation:
+- POC8/All88 color-only conversion is runtime GREEN for blueprints still progressing through T1/T2, because the transition into T3 resolves the current T3 definition as Color_Exotic/Iconic.
+- pre-existing terminal T3 ownership appears to retain legacy terminal state and requires an explicit migration path.
+
+### POC9 — correct Sunray legacy T3 -> Iconic T4 migration
+
+Artifact:
+GH1_PHASE_C_SUNRAY_LEGACY_T3_TO_ICONIC_POC9_V1.zip
+
+SHA256:
+4cdd1869e28fb9ca31d750a2ef1491b000248378ce58d446ac1513f80e6256d3
+
+Correct runtime-mapped family:
+dlc_ft_firearm_revolver_c_legendary_r = Sunray in the user's UI.
+
+POC9 deliberately removes All88/P8 experimental overlays before constructing a true four-step chain from the baseline generated chain:
+- T1 Blue: ItemLevel(1,4)
+- T2 Epic/Violet: ItemLevel(2,4)
+- T3 Legendary/Orange: ItemLevel(3,4), NextLevelBlueprintName(T4)
+- T4 Iconic/Color_Exotic: ItemLevel(4,4), RequiredItemToShowInShop(T3)
+
+T2/T3/T4 are also registered in the official Blueprints_Upgrades ItemSet.
+
+Purpose:
+test whether an already-owned/saved Sunray T3 Legendary blueprint can now expose NEXT BLUEPRINT UPGRADE and complete a migration to T4 Iconic.
+
+If runtime GREEN:
+- keep color-only All88 behavior for ordinary T1/T2 progression OR replace with unified four-tier graph if desired;
+- add a migration T4 layer for the 88 generated families so legacy T3 saves can reach Iconic;
+- then re-run broad melee/firearm validation.
+
+Status:
+POC9 CANDIDATE / UNPROVEN pending runtime test.
