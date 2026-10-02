@@ -2037,3 +2037,100 @@ V10 scope:
 Research rule remains:
 Do NOT create a new runtime Legendary->Iconic patch until the targeted V10 workbench path
 shows where the higher-blueprint pointer/flag is populated or rejected.
+
+
+## V10 result — static virtual graph exhausted; V11 live source-item probe
+
+User returned:
+GH1_PHASE_C_WORKBENCH_RESOLVER_SLICE_V10_20261002_195953.zip
+
+Verified DLL:
+- gamedll_ph_x64_rwdi.dll
+- SHA256 ddb68c8f87ba2afd0e561b2d1adb9235467c29069fb1cd1619db81e1056378eb
+
+V10 stats:
+- graph nodes: 674
+- graph edges: 4205
+- targeted field accesses: 10
+- critical +0x400/+0x420 functions: 2
+- critical callers: 143
+- extracted snippets: 766
+
+### Decisive V10 correction
+
+The apparent targeted +0x400 writer at RVA 0x00D33830 is NOT the blueprint
+successor resolver. Disassembly shows it is another large object constructor:
+- it initializes a broad contiguous object layout;
+- it zeros +0x3F0/+0x400/+0x410/+0x418/+0x420 and many unrelated fields together;
+- its +0x400 store is constructor initialization only.
+
+The second +0x400 writer in the targeted result is the already-known
+GuiInventoryItemData default constructor RVA 0x018F0EB0, again initialization only.
+
+Therefore V10 still found no credible post-construction direct writer of
+m_HigherLevelBlueprint / m_HasABlueprintUpgrade.
+
+### What V10 confirms about the real workbench path
+
+Actual GuiInventoryItemData vtable method RVA 0x019434B0:
+- reads the source item pointer at this+0x5B0;
+- calls source-item virtual methods at offsets including 0x330, 0x338, 0x348,
+  0x360 and 0x370;
+- delegates into helpers including 0x0194EE80, 0x01945FB0, 0x01947CC0,
+  0x01947130, 0x0194E360, 0x01937630, 0x019467C0 and 0x01947950.
+
+MenuShopController::UpgradeCurrentBlueprint likewise calls source/item virtual
+methods and controller helpers rather than exposing a simple direct max-tier
+comparison in the extracted static slice.
+
+Conclusion:
+the remaining resolver is behind the runtime source-item class/vtable.
+Another generic static offset/xref collector would add noise rather than proof.
+
+### V11 — read-only live blueprint object probe
+
+Built:
+GH1_PHASE_C_LIVE_BLUEPRINT_OBJECT_PROBE_V11.zip
+
+SHA256:
+780256a3013cd08d156fa451e3016b2025746204b724b79f0bcef924c7bd4eca
+
+Purpose:
+- run while the game is open at Workbench with the existing Legendary Sunray
+  blueprint highlighted;
+- find live GuiInventoryItemData instances by the proven vtable RVA 0x02B4F330;
+- read only the proven fields:
+  +0x130 m_MaxItemLevel
+  +0x193 m_CanAffordAlternatePrice
+  +0x3F0 m_UpgradeItemLevel
+  +0x400 m_HigherLevelBlueprint
+  +0x418 m_CanAffordCraft
+  +0x419 m_ShowupgradeInfo
+  +0x41A m_IsBlueprint
+  +0x41B m_IsBlueprintAvailable
+  +0x420 m_HasABlueprintUpgrade
+  +0x5B0 m_SourceItem
+- obtain the actual source-item vtable used by the selected blueprint;
+- read only selected virtual-function pointers observed in V10:
+  0x2E0, 0x328, 0x330, 0x338, 0x348, 0x360, 0x370,
+  0x970, 0xF08, 0x1298, 0x12F8, 0x1550, 0x1568, 0x1580;
+- convert function VAs to gamedll RVAs;
+- extract only those small on-disk function bodies for offline disassembly.
+
+V11 process access is READ-ONLY:
+- PROCESS_QUERY_INFORMATION
+- PROCESS_VM_READ
+- VirtualQueryEx
+- ReadProcessMemory
+- no WriteProcessMemory
+- no save/PAK/DLL/EXE modification
+- no whole-process memory dump.
+
+This probe is useful even if POC9 is not currently installed because the immediate
+goal is to identify the exact runtime source-item class and virtual methods used by
+the legacy Sunray blueprint. Once those method RVAs are known, inspect the actual
+successor/max-tier resolver rather than generic GUI code.
+
+Research rule:
+Do not build another Legendary->Iconic runtime patch until V11 maps the source-item
+virtual functions and the actual successor/max-tier decision path.
