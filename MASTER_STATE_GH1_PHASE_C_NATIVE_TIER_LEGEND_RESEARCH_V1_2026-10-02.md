@@ -1085,3 +1085,40 @@ Runtime gate:
 6. craft and inspect whether the resulting weapon instance is Iconic.
 
 This test specifically avoids any vendor/drop reacquisition requirement.
+
+
+## Runtime breakthrough — POC6 standalone Iconic path functionally GREEN
+
+User runtime-tested:
+GH1_PHASE_C_38REVOLVER_STANDALONE_ICONIC_POC6_V1.zip
+
+Observed:
+- after installing POC6 and opening trader, the exposed blueprint appeared as Sunray Iconic rather than .38 Revolver;
+- after purchase, the blueprint could be crafted;
+- crafted weapon was genuinely Iconic;
+- crafted weapon level followed current player level.
+
+Therefore the following mechanism is runtime GREEN:
+- standalone weapon craftplan;
+- Color(Color_Exotic);
+- ScaleWithPlayerRank(<weapon family>);
+- no ItemLevel;
+- no NextLevelBlueprintName;
+- direct acquisition/exposure;
+- crafted result can be genuinely Iconic and player-level-scaled.
+
+Important identity correction:
+POC6 targeted family:
+dlc_ft_firearm_revolver_c_legendary_r
+
+Runtime UI showed Sunray.
+Therefore previous assumption that this family corresponds to .38 Revolver is wrong or at least unproven.
+
+Consequences:
+- POC4/POC5 tests aimed at .38 Revolver using this family do not prove anything about the actual .38 family.
+- POC7 uses the SAME family/blueprint identity and should be interpreted as an existing-owned Sunray blueprint conversion test unless runtime proves otherwise.
+- before mass rollout, build a reliable family->localized weapon-name mapper from current game data.
+
+Status:
+STANDALONE ICONIC ARCHITECTURE = FUNCTIONALLY GREEN on current broken-DLC environment.
+Clean reinstall/save-persistence/DLC health still pending final validation.
