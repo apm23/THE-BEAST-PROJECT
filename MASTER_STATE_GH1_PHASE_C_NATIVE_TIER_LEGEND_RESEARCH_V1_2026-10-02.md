@@ -1507,3 +1507,99 @@ V4 design:
 6. bounded 2 MB streaming chunks and 20 hits per keyword per file.
 
 Do not design another Legendary->Iconic upgrade POC until V4 evidence is reviewed.
+
+
+## Targeted blocker scan V4 — runtime gate evidence
+
+User ran:
+GH1_PHASE_C_ICONIC_BLOCKER_TARGETED_V4_20261002_170243.zip
+
+V4 completed cleanly:
+- 3 save/profile files scanned first;
+- 7 target game binaries scanned;
+- 15 high-value PAK paths targeted;
+- 953 total hits;
+- zero collector errors.
+
+### POC9 data state is confirmed correct
+
+Effective source was data6.pak.
+
+Sunray generated chain in effective collectables:
+- T1: Color_Blue, ItemLevel(1,4), Next -> T2
+- T2: Color_Violet, ItemLevel(2,4), Next -> T3
+- T3: Color_Orange, ItemLevel(3,4), Next -> custom T4 Iconic migration blueprint
+- T4: Color_Exotic, ItemLevel(4,4), RequiredItemToShowInShop(T3)
+
+Effective Blueprints_Upgrades ItemSet also contains:
+- generated T2
+- generated T3
+- custom T4
+
+Therefore POC9 runtime failure is NOT caused by the expected collectables chain or missing Blueprints_Upgrades registration.
+
+### New runtime gate symbols found in gamedll
+
+The current gamedll contains blueprint/runtime data fields:
+- m_UpgradeItemLevel
+- m_HigherLevelBlueprint
+- m_CanAffordCraft
+- m_ShowupgradeInfo
+- m_IsBlueprint
+- m_IsBlueprintAvailable
+- m_HasABlueprintUpgrade
+- m_MaxItemLevel
+- m_ItemLevel
+- m_CanAffordAlternatePrice
+
+Tooltip/controller fields also include:
+- m_DisableUpgrade
+- m_WeaponBlueprintUpgradeMode
+- m_WeaponEnhanceMode
+
+Controller/action strings include:
+- UpgradeWeaponBlueprint
+- MenuShopController::UpgradeCurrentBlueprint
+- FirstWorkbenchBlueprintUpgrade
+
+GUI evidence:
+shop_item_tooltip_addon_pc.gui controls blueprint-upgrade panel visibility from GuiShopItemData.m_ShowUpgrade.
+The upgrade button disabled-state separately tracks m_CanAffordAlternatePrice.
+Therefore visible upgrade UI is downstream of a runtime-computed resolver/state gate; editing ItemLevel/NextLevel/registry is not sufficient by itself.
+
+### Save scan limitation / clue
+
+V4 scanned the current settings/save/backup files before other phases and found zero plaintext occurrences of:
+- generated Sunray T1/T2/T3/T4 IDs,
+- family ID,
+- ItemLevel,
+- BlueprintUpgrade.
+
+Do NOT interpret this as proof that save does not cache blueprint tier state. The save format is binary/serialized/compressed enough that plain string search cannot expose that state.
+
+Current leading hypothesis, still unproven:
+an already-owned terminal T3 may retain a serialized/runtime max-item-level / terminal state from the moment it was acquired, causing m_HasABlueprintUpgrade / m_ShowUpgrade / m_HigherLevelBlueprint to remain false/null even after later definition changes.
+
+This hypothesis fits the observed split:
+- POC8: T1/T2 progression creating/upgrading into the modified T3 successfully yields real Iconic.
+- legacy T3 already owned before the patch does not gain a successor under POC9.
+
+### External modding evidence
+
+Current Nexus material also treats Legendary as the end of normal blueprint-upgrade progression in at least some store/blueprint implementations, while Iconic blueprints are commonly exposed/acquired separately. This supports, but does not prove, a separate upper-tier path.
+
+### V5 next collector
+
+Built:
+GH1_PHASE_C_ICONIC_RUNTIME_GATE_COLLECTOR_V5.zip
+SHA256:
+d82b1e3392c03cd3bddf420feb820b7dac176ebfad93c91bd855c8626e15b643
+
+V5 is narrower than V4 and scans:
+- save codec/header/compression signatures first;
+- only four main binaries;
+- only five GUI files;
+- newly discovered gate fields including m_ShowUpgrade, m_HasABlueprintUpgrade, m_DisableUpgrade, m_WeaponBlueprintUpgradeMode, and UpgradeCurrentBlueprint.
+
+Safety:
+read-only; no save/game modification; no full PAK crawl; bounded decompression and hit counts.
