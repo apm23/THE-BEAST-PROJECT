@@ -1957,3 +1957,83 @@ Research rule:
 Do NOT build a new Legendary->Iconic runtime patch until V9 identifies a credible
 post-construction population/resolver function for m_HigherLevelBlueprint and/or
 m_HasABlueprintUpgrade.
+
+
+## V9 result — resolver uses virtual population path; direct 3-hop writer search insufficient
+
+User returned:
+GH1_PHASE_C_GUIINVENTORY_RESOLVER_GRAPH_V9_20261002_193959.zip
+
+Verified DLL:
+- gamedll_ph_x64_rwdi.dll
+- SHA256 ddb68c8f87ba2afd0e561b2d1adb9235467c29069fb1cd1619db81e1056378eb
+
+V9 stats:
+- direct call edges: 312,835
+- real GuiInventoryItemData ctor callers: 91
+- copy-ctor callers: 3
+- forward class graph nodes at depth <=3: 853
+- type-correct field accesses: 1,453
+- critical writer functions detected globally: 99
+- extracted functions: 520
+
+Important finding:
+After excluding constructor/copy-constructor initialization, V9 did NOT identify a credible
+post-construction writer of both m_HigherLevelBlueprint (+0x400) and
+m_HasABlueprintUpgrade (+0x420) inside the first three direct-call hops from the corrected
+GuiInventoryItemData class seeds.
+
+Several high-ranked global candidates are false positives even after type-width filtering.
+For example functions around RVA 0x010BF550 / 0x012F3E00 / 0x012F5F90 initialize unrelated
+large structures with float/vector constants at offsets that merely collide with 0x130/0x3F0/0x400.
+Do not treat raw V9 ranking alone as resolver evidence.
+
+### Concrete virtual-population discovery
+
+The actual GuiInventoryItemData vtable contains high-value population/update methods.
+
+Most important:
+RVA 0x019434B0 (actual vtable slot 106 / byte offset 0x350) is a real GuiInventoryItemData
+population/orchestration method.
+
+Disassembly shows it:
+- reads the source item pointer from GuiInventoryItemData +0x5B0;
+- queries the source item through multiple virtual calls;
+- writes GUI fields through dedicated helper/setter functions;
+- calls additional workbench/inventory helpers such as 0x0194EE80, 0x01945FB0,
+  0x01947CC0, 0x01947130, 0x0194E360, 0x01937630, 0x019467C0 and 0x01947950.
+
+Other relevant actual vtable methods include:
+- 0x01940E00
+- 0x019425D0
+- 0x01942CB0
+- 0x01942D80
+- 0x019434B0
+
+This explains why the direct-call-only V9 graph did not expose the resolver:
+the real path is heavily virtual and also uses split/cold PDATA fragments.
+
+### V10 targeted resolver-slice collector
+
+Built:
+GH1_PHASE_C_WORKBENCH_RESOLVER_SLICE_COLLECTOR_V10.zip
+
+SHA256:
+2417bcd0eb8c72e458677b264242367c1e7412a6248f85d6f6ff876ee7a99420
+
+V10 scope:
+- one DLL only, exact SHA guard;
+- seeds only the real GuiInventoryItemData populate/update method family plus
+  MenuShopController::UpgradeCurrentBlueprint;
+- extracts first 108 actual GuiInventoryItemData vtable slots;
+- follows direct CALL + relative JMP/Jcc/cold-fragment targets to depth 5;
+- extracts a small contiguous code slice 0x01930000..0x01952000 so split PDATA fragments
+  around the workbench GUI path cannot be missed;
+- reports +0x400 m_HigherLevelBlueprint and +0x420 m_HasABlueprintUpgrade accesses only
+  inside this targeted workbench graph;
+- extracts callers of any critical function found;
+- read-only; no PAK/save scan.
+
+Research rule remains:
+Do NOT create a new runtime Legendary->Iconic patch until the targeted V10 workbench path
+shows where the higher-blueprint pointer/flag is populated or rejected.
