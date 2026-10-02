@@ -609,3 +609,44 @@ Next research target is weapon-instance / generation-side Exotic creation:
 5. do not mass-edit weapon definitions until one-family weapon-side mechanism is statically isolated.
 
 V2 and the earlier 127/137 candidate are now historical rejected experiments, not final-build components.
+
+
+## Runtime clarification — workbench upgrade path itself stops at Legendary
+
+User clarified the failure is not merely that the crafted weapon did not display Exotic color.
+
+Observed runtime behavior:
+- once a weapon blueprint reaches its current Legendary terminal tier, the workbench no longer presents any upgrade option;
+- there is no visible Legendary -> Exotic / Iconic upgrade action;
+- therefore blueprint-side Exotic experiments failed at the progression/UI gate before rarity output could even be meaningfully validated.
+
+This changes the Phase C interpretation again.
+
+### Correct current model
+
+The normal blueprint upgrade graph is proven to be finite:
+- ItemLevel + NextLevelBlueprintName drive visible T1/T2/T3 style progression;
+- the user's runtime shows the ordinary Legendary terminal blueprint has no further upgrade option;
+- standalone native Color_Exotic T4 blueprints exist, but their existence does NOT prove they are reached by upgrading a Legendary blueprint;
+- rejected POC1 already showed that manually adding a T3 -> T4 next link was insufficient to make the workbench expose the desired Exotic upgrade.
+
+Therefore:
+- do NOT treat Exotic/Iconic as merely another color on the existing Legendary upgrade chain;
+- do NOT keep cloning T4 blueprints as if the normal workbench graph will consume them;
+- the next investigation target is the workbench/progression eligibility logic that decides whether a craftplan is upgradeable and what tiers are valid.
+
+### Iconic note
+
+No weapon-rarity symbol equivalent to Color_Iconic has been proven in the audited data so far. Do not invent an Iconic craftplan tier or color enum until exact current-version evidence is extracted.
+
+### Next safe research target
+
+Find current-version code/data governing:
+- ItemLevel(min,max) interpretation;
+- NextLevelBlueprintName resolution;
+- workbench recipe/blueprint upgrade eligibility;
+- any hardcoded maximum tier/rank table;
+- any Exotic/Iconic-specific unlock or upgrade category;
+- whether native Exotic T4 blueprints are direct-acquisition craftplans rather than successors.
+
+Only after that gate is identified should another Exotic/upper-tier POC be designed.
