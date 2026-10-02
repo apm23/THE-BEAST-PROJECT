@@ -881,3 +881,88 @@ Runtime gate:
 6. craft and verify resulting weapon rarity.
 
 Do not scale beyond one family until the right-side upgrade panel is runtime GREEN.
+
+
+## POC4 runtime result — HARD REJECTED
+
+The exact .38 Revolver target was tested:
+- family: dlc_ft_firearm_revolver_c_legendary_r
+- runtime UI still showed only Legendary Blueprint
+- no right-side NEXT BLUEPRINT UPGRADE panel
+- therefore the collectables-only chain extension remained insufficient even on the exact target family.
+
+POC4 is HARD REJECTED.
+
+## New evidence from Deep Blueprint Collector V2 — Blueprints_Upgrades registry
+
+Deep Collector V2 exposed the official workbench shop registry:
+
+scripts/trading/shop_item_sets.scr
+
+ItemSet("Blueprints_Upgrades")
+{
+    AllItemsAvailableInStore();
+    ...
+    Item("<weapon T2 blueprint>");
+    Item("<weapon T3 blueprint>");
+    Item("<weapon T4 blueprint>");
+}
+
+The official GUI also contains an internal comment:
+"...but if it's in BlueprintUpgrades in FT, show it, since it's needed to progress there"
+
+and uses EMenuShopMode value:
+CraftMaster_BlueprintUpgrades.
+
+Important consequence:
+GH1 generated blueprint chains were created only in collectables_ft.scr and were not registered in the official Blueprints_Upgrades ItemSet because Phase B overlays do not carry scripts/trading/shop_item_sets.scr.
+
+This is now a concrete missing integration layer that all prior Exotic/Iconic chain POCs lacked.
+
+Official upper-tier data also confirms:
+- only four official T3->T4 weapon chains exist in current audited data;
+- those chains are Color_Violet T3 -> Color_Orange T4 (Epic -> Legendary);
+- official Color_Exotic / runtime Iconic weapon blueprints are standalone and generally have no ItemLevel / NextLevelBlueprintName.
+
+Therefore native Legendary -> Iconic via the normal upgrade panel remains unproven; however the missing Blueprints_Upgrades registration must be tested before declaring the engine incapable of extending the chain.
+
+## POC5 — .38 Revolver + official Blueprints_Upgrades registry
+
+Artifact:
+GH1_PHASE_C_38REVOLVER_ICONIC_POC5_REGISTRY_V1.zip
+
+SHA256:
+4ff48bcd67a4b8e24ff9cf11c64e507fac3b60bcea2b060c350044775c143516
+
+Target:
+dlc_ft_firearm_revolver_c_legendary_r
+
+POC5 patches both:
+1. scripts/inventory/collectables_ft.scr
+2. scripts/trading/shop_item_sets.scr
+
+Collectables:
+- T1 ItemLevel 1/3 -> 1/4
+- T2 2/3 -> 2/4
+- T3 3/3 -> 3/4
+- T3 Next -> custom T4
+- T4 Color_Exotic
+- T4 ItemLevel(4,4)
+- T4 RequiredItemToShowInShop(T3)
+- T4 preserves generated-family pricing / ScaleWithPlayerRank structure
+
+Workbench registry:
+Blueprints_Upgrades receives:
+- generated T2
+- generated T3
+- custom T4
+
+Installer removes only exact rejected experiment marker PAKs before building; proven Phase B stack is preserved.
+
+Static selftest:
+PASS — collectables chain + official Blueprints_Upgrades registry both patched.
+
+Runtime gate:
+1. status must show registry T2/T3/T4 true;
+2. exact .38 Revolver Legendary blueprint must be checked for NEXT BLUEPRINT UPGRADE panel;
+3. if panel appears, upgrade and verify runtime Iconic label / crafted weapon result.
