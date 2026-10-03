@@ -2377,3 +2377,81 @@ V20 fixes V19 evidence scoring and acquisition:
 
 Research rule:
 Do not call any specific Sunray legacy T3 row/source PROVEN until V20 produces action-linked Test 1 evidence and dynamic Test 2 corroboration that converge on the same row/source.
+
+
+## Phase C conditional trader Iconic migration — RUNTIME GREEN — 2026-10-04
+
+User runtime-tested the conditional trader migration design after abandoning further
+legacy Legendary->Iconic resolver/pointer research.
+
+Locked final gameplay rule:
+- generated Blue/Rare -> Epic progression remains Workbench/manual;
+- generated Epic -> Iconic uses the already-proven POC8 color-only terminal upgrade path;
+- if a blueprint is already obtained/saved directly as Legendary, trader migration
+  provides the matching standalone Iconic blueprint only when that exact Legendary
+  blueprint is owned;
+- trader is not a free Iconic catalog: unowned Legendary families remain hidden;
+- native source blueprint definitions/progression remain untouched; trader exposure
+  uses a separate Iconic companion gated by exact ownership of the Legendary blueprint.
+
+Previously-proven Sunray behavior was not re-tested:
+- standalone Color_Exotic blueprint appears at trader;
+- purchase yields an Iconic blueprint;
+- crafting yields a genuine Iconic weapon;
+- ScaleWithPlayerRank follows player level.
+
+### V1 runtime filtering result
+
+Artifact:
+GH1_PHASE_C_ALL88_CONDITIONAL_TRADER_ICONIC_V1.zip
+
+SHA256:
+2ab47a6fe97da969ccff9fb89a1102843fa690e56dddde5b107ffc5a3fb7864f
+
+Runtime:
+- conditional trader filtering worked for generated Legendary T3 blueprints;
+- manually-upgraded Epic->Legendary generated blueprints exposed their matching
+  Iconic companions;
+- some Legendary blueprints that were already obtained as Legendary did not appear,
+  revealing that V1 covered only the 88 generated T3 set.
+
+### V2 all-Legendary coverage result — PROVEN
+
+Artifact:
+GH1_PHASE_C_ALL137_CONDITIONAL_TRADER_ICONIC_V2.zip
+
+SHA256:
+9d85482412dbfa6e2e31876e30b66a998163276b08aed29b3ae21f563e66d1f6
+
+V2 extends the same proven ownership-gate architecture across the effective
+Legendary Orange weapon-blueprint universe:
+- 88 generated Color_Orange sources;
+- 49 native/standalone Color_Orange sources;
+- 137 total Legendary Orange sources.
+
+Mechanism:
+- each source Legendary blueprint has/reuses a standalone Color_Exotic companion;
+- companion uses the same ScaleWithPlayerRank family;
+- companion is exposed through Hub1_Unlocks and Hub2_Unlocks;
+- visibility is gated by:
+  RequiredItemToShowInShop("<exact Legendary blueprint ID>");
+- source Legendary/native definitions are not mutated;
+- loot, LootedObject topology, save, stash, inventory versioning and player_variables
+  are untouched.
+
+User runtime result:
+PROVEN / MATCHES EXPECTED BEHAVIOR.
+
+Observed after V2:
+- previously-missing Legendary-owned families now expose matching Iconic trader entries;
+- conditional behavior matches the intended ownership requirement.
+
+Phase C decision:
+- STOP further V15-V20 pointer/resolver research for this feature;
+- do not reopen direct legacy T3->T4 Workbench resolver work;
+- use POC8 for normal generated Epic->Iconic progression;
+- use exact-Legendary-owned conditional trader companions as the legacy/direct-
+  Legendary migration path;
+- retain hunting/loot as the acquisition gate because Iconic trader entries are
+  conditional on owning the corresponding Legendary blueprint.
+
