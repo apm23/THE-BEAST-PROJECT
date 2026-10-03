@@ -2313,3 +2313,67 @@ as the runtime Sunray identity and read its V12.2-proven gate tuple directly.
 If V14 yields no unique signature, selection is likely held through another controller
 object; next step should follow that controller reference rather than deeper blind
 identity-string pointer walking.
+
+
+## V15/V16/V19 runtime triangulation correction — 2026-10-03
+
+### V19 three-test runtime result
+
+User returned:
+GH1_PHASE_C_SUNRAY_TRIANGULATION_V19_20261003_173715.zip
+
+Runtime/session facts:
+- current exact GuiShopItemData rows: 188/188 valid;
+- V19 Test 1 captured real user actions Blue -> Purple -> Legendary;
+- V19 Test 2 captured Sunray -> Other1 -> Other2 -> Sunray selection sequence;
+- V19 Test 3 captured baseline + three Sunray crafts.
+
+Important V19 corrections:
+- m_UpgradeItemLevel was 0xFFFFFFFF on all 188 rows at T1/T2/T3. Do NOT use this field as the Sunray tier identity signal in this Workbench row context.
+- the V19 chosen row 0x2378416C9A0 was already terminal at all three upgrade stages:
+  - HasABlueprintUpgrade 0/0/0
+  - HigherLevelBlueprint null/null/null
+  - CanUpgrade 0/0/0
+  - ShowUpgrade 0/0/0
+  - same SourceItem 0x23611326400
+  Therefore its high V19 score was a false-positive caused by rewarding static terminal state.
+- Test 2 returned 21 candidate references, but every reported top reference was static A=B=C=A2. V19 incorrectly awarded points merely because A pointed to a candidate source. Static references are NOT selection evidence.
+- Test 3 source/child graph for the V19 chosen row/source was unchanged across baseline + craft1 + craft2 + craft3. This is compatible with a stable blueprint definition and does NOT identify the crafted weapon instance.
+
+Most interesting action-linked V19 row:
+- object 0x237688E2AC0
+- byte changes: 22 bytes T1->T2, 50 bytes T2->T3
+- HasABlueprintUpgrade: 1 -> 0 -> 0
+- HigherLevelBlueprint: non-null (0x2376E58BE70) -> null -> null
+- SourceItem = 0 in the exported summary
+This row is more action-linked than the static terminal candidates and should be treated as a transient/detail/controller candidate rather than ignored.
+
+Correct V19 interpretation:
+- direct runtime terminal-T3 gate remains proven globally from V12.2;
+- V19 does NOT lock a specific Sunray source/row identity;
+- V19 exported MEDIUM confidence was too optimistic for Sunray identity;
+- correct identity status after V19 is LOW / AMBIGUOUS;
+- stable row count (186/188) is not itself evidence of a bad scan; Workbench can retain a fixed row pool while action/controller state changes.
+
+### V20 action-triangulation correction suite
+
+Built:
+GH1_PHASE_C_SUNRAY_ACTION_TRIANGULATION_SUITE_V20.zip
+
+SHA256:
+9b23d4a306600f6d3c3be63044112a13868b8e12d5ed5c5781c69799a5872eb8
+
+V20 fixes V19 evidence scoring and acquisition:
+- one-CMD integrated exact V12.2 scan/cache reuse remains;
+- exact GuiShop rows are locally re-scanned after each real upgrade action;
+- static terminal rows receive ZERO identity score;
+- m_UpgradeItemLevel is explicitly excluded from identity scoring;
+- Test 1 scores only action-linked HasUpgrade/Higher/CanUpgrade/ShowUpgrade/availability/source changes and row lifecycle;
+- Test 2 scans pointers to ALL live GuiShop rows inside the small local row heap;
+- static A=B=C=A2 references are excluded completely;
+- selection evidence requires a real A/A2 vs B/C pointer change;
+- Test 3 tracks references TO the chosen row/source plus row/source child graphs before and after three crafts;
+- no assumption that a blueprint definition itself must mutate when crafting.
+
+Research rule:
+Do not call any specific Sunray legacy T3 row/source PROVEN until V20 produces action-linked Test 1 evidence and dynamic Test 2 corroboration that converge on the same row/source.
