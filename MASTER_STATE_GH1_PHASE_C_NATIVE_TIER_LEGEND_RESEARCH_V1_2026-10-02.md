@@ -2513,3 +2513,89 @@ does moving the ownership gate off the CraftPlan and onto a non-blueprint bundle
 restore an enabled Buy transaction and grant the standalone Iconic blueprint?
 
 Do not scale the bundle-proxy design beyond Sawblade until that purchase test is GREEN.
+
+
+## FINAL CORRECTION — conditional trader purchase root cause isolated — 2026-10-04
+
+This section supersedes the earlier bundle-proxy hypothesis.
+
+### Bundle proxy POC — REJECTED
+
+The Sawblade ItemBundle proxy experiment was runtime-tested and failed at the
+catalog stage:
+- Sawblade disappeared from the trader entirely;
+- there was no entry available to test;
+- therefore the ItemBundle-wrapper acquisition architecture is rejected for this feature.
+
+Do not scale the bundle approach to other families.
+
+### Sawblade direct Iconic + AlternativePrice POC — RUNTIME GREEN / SYSTEM PROVEN
+
+The next focused POC restored the direct Sawblade Iconic CraftPlan exposure and kept:
+- Color(Color_Exotic);
+- ScaleWithPlayerRank("<Sawblade family>");
+- RequiredItemToShowInShop("Craftplan_SawbladeLauncher_FT");
+- direct Hub1_Unlocks / Hub2_Unlocks listing.
+
+The only transaction change was adding:
+AlternativePrice("Craft_Scrap", 1);
+
+Runtime result from user screenshots:
+- trader entry remained conditional and visible;
+- Buy with Items became enabled;
+- displayed requirement was Scraps 9999 / 1;
+- the separate Money 650 Buy control remained disabled;
+- user successfully purchased through Buy with Items;
+- after purchase, the owned Sawblade blueprint/weapon in Workbench displayed as genuine
+  native-style Iconic (orange/red Iconic presentation);
+- therefore the Legendary-looking trader card background is cosmetic/presentation-only
+  and is not an indicator that the purchased blueprint failed to become Iconic.
+
+This isolates the practical purchase requirement:
+the conditional direct Iconic blueprint must carry an affordable AlternativePrice
+for the trader transaction path.
+
+Locked purchase architecture:
+- exact Legendary ownership controls VISIBILITY through RequiredItemToShowInShop;
+- direct standalone Color_Exotic companion remains the item sold;
+- transaction uses AlternativePrice("Craft_Scrap", 1);
+- money Price(...) is unnecessary for this migration path and should be removed to
+  avoid stacked Money + Buy with Items presentation;
+- trader background styling is not a blocker and should not be reverse-engineered further.
+
+### ALL137 Scrap-only final candidate V3 — BUILT, mass runtime check pending
+
+Artifact:
+GH1_PHASE_C_ALL137_CONDITIONAL_TRADER_ICONIC_SCRAP_FINAL_V3.zip
+
+SHA256:
+5976703657136261f4124238e2210f7a58aaaa04f920204b9b71f0208fff9e3e
+
+V3 reuses the exact 137-pair map from ALL137 V2:
+- 88 generated Legendary Orange sources;
+- 49 native/standalone Legendary Orange sources.
+
+For every Iconic companion V3:
+- preserves exact RequiredItemToShowInShop("<Legendary blueprint ID>");
+- preserves Color_Exotic and matching ScaleWithPlayerRank;
+- removes direct Price(...);
+- removes any previous AlternativePrice entries;
+- adds exactly AlternativePrice("Craft_Scrap", 1);
+- keeps direct Hub1_Unlocks and Hub2_Unlocks exposure;
+- does not use ItemBundle wrappers;
+- does not create a new dataN slot;
+- if the proven Sawblade AltPrice POC is installed, installer recovers the embedded
+  clean ALL137 V2 baseline and replaces the same slot in-place.
+
+Safety remains:
+- no loot changes;
+- no LootedObject changes;
+- no save edits;
+- no source Legendary blueprint mutation;
+- no stash/inventory versioning/player_variables changes.
+
+Evidence status:
+- Sawblade transaction architecture = PROVEN;
+- V3 static selftest = PASS;
+- all-137 mass application = candidate until one quick runtime trader check confirms
+  the same Scrap-only presentation across multiple families.
