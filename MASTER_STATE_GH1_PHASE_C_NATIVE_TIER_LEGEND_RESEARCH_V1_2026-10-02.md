@@ -2455,3 +2455,61 @@ Phase C decision:
 - retain hunting/loot as the acquisition gate because Iconic trader entries are
   conditional on owning the corresponding Legendary blueprint.
 
+
+
+## CORRECTION — conditional trader V2 is visibility-GREEN, purchase NOT GREEN — 2026-10-04
+
+This section supersedes the immediately preceding statement that ALL137 V2 was
+fully runtime PROVEN.
+
+New user screenshots show a concrete acquisition failure on the Sawblade Launcher
+conditional Iconic entry:
+- trader displays SAWBLADE LAUNCHER / ICONIC BLUEPRINT;
+- listed money price is 650;
+- player money shown is 18,480;
+- Buy control remains disabled;
+- therefore the failure is not simple insufficient-money affordability.
+
+The screenshots also show a presentation mismatch:
+- the trader entry text resolves as ICONIC BLUEPRINT;
+- its trader header/background does not match the user's known native Iconic
+  Workbench presentation (Mechanical Reconstructor reference screenshot).
+This second issue may be cosmetic/UI-context dependent, but should not be called
+correct until isolated.
+
+Revised evidence:
+- conditional VISIBILITY filtering based on exact Legendary ownership = RUNTIME GREEN;
+- all-137 coverage expansion caused previously missing Legendary-owned entries to
+  appear = RUNTIME GREEN;
+- direct PURCHASE/ACQUISITION of the gated Iconic companion = NOT PROVEN and is
+  currently FAILED for the Sawblade test;
+- do not call ALL137 V2 fully proven.
+
+Working hypothesis:
+placing RequiredItemToShowInShop("<Legendary blueprint>") directly on the standalone
+Iconic CraftPlan may interact with blueprint ownership/progression state such that
+the entry is visible but not directly purchasable.
+
+Focused next POC:
+GH1_PHASE_C_SAWBLADE_TRADER_GATE_BUNDLE_POC_V1.zip
+SHA256:
+4b14d777a84f3fdeb0873bf13c158b6399f0e38be0e1c3deed545a5587de68f9
+
+POC scope:
+- Sawblade only;
+- keep ALL137 V2 underneath;
+- remove RequiredItemToShowInShop from the real Sawblade Iconic CraftPlan, returning
+  it to standalone POC6-style semantics;
+- remove direct Sawblade Iconic CraftPlan listing from Hub1/Hub2;
+- add a non-blueprint CategoryType_ItemBundle proxy to Hub1/Hub2;
+- proxy is Color_Exotic, Price(650), and carries the exact Legendary ownership
+  RequiredItemToShowInShop gate;
+- proxy BundleItems contains exactly one real Sawblade Iconic blueprint;
+- no changes to loot, LootedObject, save, source Legendary blueprint, stash,
+  inventory versioning, or player_variables.
+
+Runtime question:
+does moving the ownership gate off the CraftPlan and onto a non-blueprint bundle
+restore an enabled Buy transaction and grant the standalone Iconic blueprint?
+
+Do not scale the bundle-proxy design beyond Sawblade until that purchase test is GREEN.
